@@ -8,8 +8,8 @@ import { createClient } from '@supabase/supabase-js';
 // ============================================
 
 // ⚠️ CONFIGURACIÓN DE SUPABASE - CAMBIA ESTOS VALORES
-const SUPABASE_URL = 'TU_SUPABASE_URL_AQUI';
-const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY_AQUI';
+const SUPABASE_URL = 'https://gprqwiiyzfanfzstoujz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcnF3aWl5emZhbmZ6c3RvdWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTQzMzcsImV4cCI6MjA4NTk3MDMzN30.tMYqfeTVsLRlwjfvynuaFRsFx6I8SdKz4jYU6gO-ZB0';
 
 // Verificar que las credenciales están configuradas
 const isConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL_AQUI' && SUPABASE_ANON_KEY !== 'TU_SUPABASE_ANON_KEY_AQUI';
