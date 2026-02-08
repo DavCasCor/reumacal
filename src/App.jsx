@@ -228,7 +228,7 @@ const calculateSF36 = (components) => {
   const dimensions = {
     physicalFunctioning: parseFloat(components.physicalFunctioning || 50),
     rolePhysical: parseFloat(components.rolePhysical || 50),
-    bodilyPain: parseFloat(components.bodilyPain || 50),
+    bodily Pain: parseFloat(components.bodilyPain || 50),
     generalHealth: parseFloat(components.generalHealth || 50),
     vitality: parseFloat(components.vitality || 50),
     socialFunctioning: parseFloat(components.socialFunctioning || 50),
@@ -366,38 +366,25 @@ const interpretSSDAI = (score) => {
 };
 
 // ============================================
-// HELPER: Interpret any instrument score
-// ============================================
-const interpretScore = (instrument, score) => {
-  if (instrument === 'BASDAI') return interpretBASDAI(score);
-  if (instrument.startsWith('ASDAS')) return interpretASDAS(score);
-  if (instrument === 'DAPSA') return interpretDAPSA(score);
-  if (instrument.startsWith('DAS28')) return interpretDAS28(score);
-  if (instrument === 'SLEDAI') return interpretSLEDAI(score);
-  if (instrument === 'LupusPRO') return interpretLupusPRO(score);
-  if (instrument === 'FACIT') return interpretFACIT(score);
-  if (instrument === 'SF36') return interpretSF36(score);
-  if (instrument === 'BASFI') return interpretBASFI(score);
-  if (instrument === 'ASASHI') return interpretASASHI(score);
-  if (instrument === 'ASQoL') return interpretASQoL(score);
-  if (instrument === 'PSAQoL') return interpretPSAQoL(score);
-  if (instrument === 'ESSPRI') return interpretESSPRI(score);
-  if (instrument === 'SSDAI') return interpretSSDAI(score);
-  return { text: 'Sin datos', color: '#9ca3af' };
-};
-
-// All instrument keys
-const ALL_INSTRUMENTS = [
-  'BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
-  'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
-  'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI'
-];
-
-// ============================================
 // SUPABASE STORAGE FUNCTIONS
 // ============================================
 
 const Storage = {
+  async getHospitals() {
+    if (!supabase) { console.error('Supabase no configurado'); return []; }
+    try {
+      const { data, error } = await supabase
+        .from('hospitals')
+        .select('*')
+        .order('name');
+      if (error) { console.error('Error getting hospitals:', error); return []; }
+      return data || [];
+    } catch (err) {
+      console.error('Error en getHospitals:', err);
+      return [];
+    }
+  },
+  
   async getUsers() {
     if (!supabase) { console.error('Supabase no configurado'); return []; }
     try {
@@ -484,14 +471,20 @@ const Storage = {
     }
   },
   
-  async getPatientByNhc(nhc) {
+  async getPatientByNhc(nhc, hospitalId = null) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('patients')
         .select('*')
-        .eq('nhc', nhc)
-        .maybeSingle();
+        .eq('nhc', nhc);
+      
+      // Si se proporciona hospital_id, también filtrar por hospital
+      if (hospitalId) {
+        query = query.eq('hospital_id', hospitalId);
+      }
+      
+      const { data, error } = await query.maybeSingle();
       if (error) {
         console.error('Error getPatientByNhc:', error);
         return null;
@@ -1546,33 +1539,6 @@ const SSDAICalculator = ({ onResult }) => {
 };
 
 // ============================================
-// HISTORY FILTER SELECT (reusable)
-// ============================================
-const HistoryFilterSelect = ({ value, onChange }) => (
-  <div className="history-filter">
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="ALL">Todos los instrumentos</option>
-      <option value="BASDAI">BASDAI</option>
-      <option value="ASDAS_CRP">ASDAS-PCR</option>
-      <option value="ASDAS_ESR">ASDAS-VSG</option>
-      <option value="DAPSA">DAPSA</option>
-      <option value="DAS28_CRP">DAS28-PCR</option>
-      <option value="DAS28_ESR">DAS28-VSG</option>
-      <option value="SLEDAI">SLEDAI</option>
-      <option value="LupusPRO">LupusPRO</option>
-      <option value="FACIT">FACIT</option>
-      <option value="SF36">SF-36</option>
-      <option value="BASFI">BASFI</option>
-      <option value="ASASHI">ASAS-HI</option>
-      <option value="ASQoL">ASQoL</option>
-      <option value="PSAQoL">PSAQoL</option>
-      <option value="ESSPRI">ESSPRI</option>
-      <option value="SSDAI">SSDAI</option>
-    </select>
-  </div>
-);
-
-// ============================================
 // PAGE COMPONENTS
 // ============================================
 
@@ -1623,8 +1589,8 @@ const LandingPage = ({ onNavigate }) => (
           <span>SLEDAI</span>
         </div>
         <div className="feature">
-          <span className="feature-icon">💚</span>
-          <span>LupusPRO</span>
+          <span className="feature-icon">💧</span>
+          <span>ESSPRI</span>
         </div>
         <div className="feature">
           <span className="feature-icon">💪</span>
@@ -1634,35 +1600,12 @@ const LandingPage = ({ onNavigate }) => (
           <span className="feature-icon">🏥</span>
           <span>SF-36</span>
         </div>
-        <div className="feature">
-          <span className="feature-icon">🚶</span>
-          <span>BASFI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💡</span>
-          <span>ASAS-HI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">😊</span>
-          <span>ASQoL</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🎯</span>
-          <span>PSAQoL</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💧</span>
-          <span>ESSPRI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🔬</span>
-          <span>SSDAI</span>
-        </div>
       </div>
     </div>
     
     <footer className="landing-footer">
-      <p style={{ fontSize: '0.65rem', color: '#9ca3af' }}>© 2025 David Castro Corredor. Todos los derechos reservados.</p>
+      <Brand size="small" />
+      <p>© 2025 ReumaCal - Herramienta clínica</p>
     </footer>
   </div>
 );
@@ -1673,8 +1616,19 @@ const AuthPage = ({ role, onLogin, onBack }) => {
   const [password, setPassword] = useState('');
   const [nhc, setNhc] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [hospitalId, setHospitalId] = useState('');
+  const [hospitals, setHospitals] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Cargar hospitales al montar el componente
+  useEffect(() => {
+    const loadHospitals = async () => {
+      const hospitalList = await Storage.getHospitals();
+      setHospitals(hospitalList);
+    };
+    loadHospitals();
+  }, []);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1724,6 +1678,13 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           return;
         }
         
+        // Validar hospital
+        if (!hospitalId) {
+          setError('Por favor selecciona un hospital');
+          setLoading(false);
+          return;
+        }
+        
         if (role === 'patient' && !nhc) {
           setError('El NHC es obligatorio');
           setLoading(false);
@@ -1731,9 +1692,9 @@ const AuthPage = ({ role, onLogin, onBack }) => {
         }
         
         if (role === 'patient') {
-          const existingPatient = await Storage.getPatientByNhc(nhc);
+          const existingPatient = await Storage.getPatientByNhc(nhc, hospitalId);
           if (existingPatient) {
-            setError('Este NHC ya está registrado');
+            setError('Este NHC ya está registrado en este hospital');
             setLoading(false);
             return;
           }
@@ -1742,7 +1703,9 @@ const AuthPage = ({ role, onLogin, onBack }) => {
         const newUser = await Storage.createUser({
           email,
           password_hash: hashPassword(password),
-          role: role === 'patient' ? 'PATIENT' : 'DOCTOR'
+          role: role === 'patient' ? 'PATIENT' : 'DOCTOR',
+          display_name: displayName || null,
+          hospital_id: hospitalId
         });
         
         if (!newUser) {
@@ -1756,7 +1719,7 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           newPatient = await Storage.createPatient({
             user_id: newUser.id,
             nhc,
-            display_name: displayName || null
+            hospital_id: hospitalId
           });
         }
         
@@ -1809,6 +1772,54 @@ const AuthPage = ({ role, onLogin, onBack }) => {
             required
             placeholder="••••••••"
           />
+          
+          {!isLogin && (
+            <div className="form-group">
+              <label>Hospital *</label>
+              <select 
+                value={hospitalId} 
+                onChange={(e) => setHospitalId(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontSize: '1rem',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">Selecciona tu hospital</option>
+                {(() => {
+                  // Agrupar hospitales por provincia
+                  const byProvince = hospitals.reduce((acc, h) => {
+                    const prov = h.province || 'Otros';
+                    if (!acc[prov]) acc[prov] = [];
+                    acc[prov].push(h);
+                    return acc;
+                  }, {});
+                  
+                  // Ordenar provincias alfabéticamente
+                  const sortedProvinces = Object.keys(byProvince).sort();
+                  
+                  return sortedProvinces.map(province => (
+                    <optgroup key={province} label={province}>
+                      {byProvince[province]
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map(hospital => (
+                          <option key={hospital.id} value={hospital.id}>
+                            {hospital.name}
+                            {hospital.city && ` (${hospital.city})`}
+                          </option>
+                        ))
+                      }
+                    </optgroup>
+                  ));
+                })()}
+              </select>
+            </div>
+          )}
           
           {!isLogin && role === 'patient' && (
             <>
@@ -1905,7 +1916,10 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   }, [filteredScores, historyFilter]);
   
   const lastScores = useMemo(() => {
-    return ALL_INSTRUMENTS.reduce((acc, inst) => {
+    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
+                        'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
+                        'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI'];
+    return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
       return acc;
@@ -1924,7 +1938,22 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
         ) : (
           <div className="summary-grid">
             {Object.entries(lastScores).map(([inst, score]) => {
-              const interpretation = interpretScore(inst, score.total_score);
+              let interpretation;
+              if (inst === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
+              else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
+              else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+              else if (inst.startsWith('DAS28')) interpretation = interpretDAS28(score.total_score);
+              else if (inst === 'SLEDAI') interpretation = interpretSLEDAI(score.total_score);
+              else if (inst === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
+              else if (inst === 'FACIT') interpretation = interpretFACIT(score.total_score);
+              else if (inst === 'SF36') interpretation = interpretSF36(score.total_score);
+              else if (inst === 'BASFI') interpretation = interpretBASFI(score.total_score);
+              else if (inst === 'ASASHI') interpretation = interpretASASHI(score.total_score);
+              else if (inst === 'ASQoL') interpretation = interpretASQoL(score.total_score);
+              else if (inst === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
+              else if (inst === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
+              else if (inst === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
+              else interpretation = { text: 'Sin datos', color: '#9ca3af' };
               
               return (
                 <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
@@ -2065,7 +2094,27 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
     <div className="history-view">
       <h2>Histórico</h2>
       
-      <HistoryFilterSelect value={historyFilter} onChange={setHistoryFilter} />
+      <div className="history-filter">
+        <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
+          <option value="ALL">Todos los instrumentos</option>
+          <option value="BASDAI">BASDAI</option>
+          <option value="ASDAS_CRP">ASDAS-PCR</option>
+          <option value="ASDAS_ESR">ASDAS-VSG</option>
+          <option value="DAPSA">DAPSA</option>
+          <option value="DAS28_CRP">DAS28-PCR</option>
+          <option value="DAS28_ESR">DAS28-VSG</option>
+          <option value="SLEDAI">SLEDAI</option>
+          <option value="LupusPRO">LupusPRO</option>
+          <option value="FACIT">FACIT</option>
+          <option value="SF36">SF-36</option>
+          <option value="BASFI">BASFI</option>
+          <option value="ASASHI">ASAS-HI</option>
+          <option value="ASQoL">ASQoL</option>
+          <option value="PSAQoL">PSAQoL</option>
+          <option value="ESSPRI">ESSPRI</option>
+          <option value="SSDAI">SSDAI</option>
+        </select>
+      </div>
       
       {historyFilter !== 'ALL' && chartData.length > 1 && (
         <div className="history-chart">
@@ -2097,7 +2146,11 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             </thead>
             <tbody>
               {filteredScores.map((score) => {
-                const interpretation = interpretScore(score.instrument, score.total_score);
+                let interpretation;
+                if (score.instrument === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
+                else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
+                else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+                else interpretation = interpretDAS28(score.total_score);
                 
                 return (
                   <tr key={score.id}>
@@ -2182,23 +2235,47 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userHospital, setUserHospital] = useState(null);
+  const [patientHospital, setPatientHospital] = useState(null);
+  
+  // Cargar información del hospital del usuario
+  useEffect(() => {
+    const loadUserHospital = async () => {
+      if (user.hospital_id) {
+        const hospitals = await Storage.getHospitals();
+        const hospital = hospitals.find(h => h.id === user.hospital_id);
+        setUserHospital(hospital);
+      }
+    };
+    loadUserHospital();
+  }, [user.hospital_id]);
   
   const searchPatient = async () => {
     setError('');
     setLoading(true);
     
-    const patient = await Storage.getPatientByNhc(searchNhc);
+    // Buscar paciente por NHC Y hospital del médico
+    const patient = await Storage.getPatientByNhc(searchNhc, user.hospital_id);
     
     if (!patient) {
-      setError('No se encontró ningún paciente con ese NHC');
+      setError('No se encontró ningún paciente con ese NHC en tu hospital');
       setSelectedPatient(null);
+      setPatientHospital(null);
       setLoading(false);
       return;
+    }
+    
+    // Cargar información del hospital del paciente
+    if (patient.hospital_id) {
+      const hospitals = await Storage.getHospitals();
+      const hospital = hospitals.find(h => h.id === patient.hospital_id);
+      setPatientHospital(hospital);
     }
     
     // Log access
     await Storage.createAccessLog({
       doctor_id: user.id,
+      patient_id: patient.id,
       nhc: searchNhc
     });
     
@@ -2226,7 +2303,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
   }, [filteredScores, historyFilter]);
   
   const lastScores = useMemo(() => {
-    return ALL_INSTRUMENTS.reduce((acc, inst) => {
+    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR'];
+    return instruments.reduce((acc, inst) => {
       const last = patientScores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
       return acc;
@@ -2240,6 +2318,23 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const renderSearch = () => (
     <div className="search-view">
       <h2>Buscar paciente</h2>
+      {userHospital && (
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f0f9ff',
+          borderRadius: '0.5rem',
+          marginBottom: '1.5rem',
+          border: '1px solid #3b82f6'
+        }}>
+          <p style={{ margin: 0, color: '#1e40af', fontSize: '0.95rem' }}>
+            🏥 <strong>{userHospital.name}</strong>
+            {userHospital.city && ` - ${userHospital.city}`}
+          </p>
+          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+            Solo se mostrarán pacientes de tu hospital
+          </p>
+        </div>
+      )}
       <div className="search-box">
         <FormInput
           label="Número de Historia Clínica (NHC)"
@@ -2263,7 +2358,12 @@ const DoctorDashboard = ({ user, onLogout }) => {
       
       <div className="patient-header">
         <h2>Paciente NHC: {selectedPatient.nhc}</h2>
-        {selectedPatient.display_name && <p className="patient-name">{selectedPatient.display_name}</p>}
+        {patientHospital && (
+          <p style={{ margin: '0.5rem 0', color: '#64748b', fontSize: '0.95rem' }}>
+            🏥 {patientHospital.name}
+            {patientHospital.city && ` - ${patientHospital.city}`}
+          </p>
+        )}
         <button className="btn-print" onClick={handlePrint}>🖨️ Imprimir</button>
       </div>
       
@@ -2271,7 +2371,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
         <h3>Resumen última medición</h3>
         <div className="summary-grid">
           {Object.entries(lastScores).map(([inst, score]) => {
-            const interpretation = interpretScore(inst, score.total_score);
+            let interpretation;
+            if (inst === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
+            else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
+            else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+            else interpretation = interpretDAS28(score.total_score);
             
             return (
               <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
@@ -2295,7 +2399,17 @@ const DoctorDashboard = ({ user, onLogout }) => {
       <div className="patient-history">
         <h3>Histórico completo</h3>
         
-        <HistoryFilterSelect value={historyFilter} onChange={setHistoryFilter} />
+        <div className="history-filter">
+          <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
+            <option value="ALL">Todos los instrumentos</option>
+            <option value="BASDAI">BASDAI</option>
+            <option value="ASDAS_CRP">ASDAS-PCR</option>
+            <option value="ASDAS_ESR">ASDAS-VSG</option>
+            <option value="DAPSA">DAPSA</option>
+            <option value="DAS28_CRP">DAS28-PCR</option>
+            <option value="DAS28_ESR">DAS28-VSG</option>
+          </select>
+        </div>
         
         {historyFilter !== 'ALL' && chartData.length > 1 && (
           <div className="history-chart">
@@ -2323,7 +2437,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </thead>
             <tbody>
               {filteredScores.map((score) => {
-                const interpretation = interpretScore(score.instrument, score.total_score);
+                let interpretation;
+                if (score.instrument === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
+                else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
+                else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+                else interpretation = interpretDAS28(score.total_score);
                 
                 return (
                   <tr key={score.id}>
