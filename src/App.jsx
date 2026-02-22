@@ -470,6 +470,69 @@ const interpretSCORE2OP = (score) => {
 };
 
 // ============================================
+// CONFIGURACIÓN DE CALCULADORAS
+// ============================================
+
+// Definir qué calculadoras son colaborativas (requieren datos del médico)
+const COLLABORATIVE_CALCULATORS = {
+  'ASDAS': {
+    collaborative: true,
+    patientFields: ['backPain', 'morningStiffness', 'patientGlobal'],
+    doctorFields: ['crp', 'vsg'],
+    patientLabel: 'ASDAS (Pendiente: Analítica)',
+    doctorLabel: 'ASDAS - Completar con analítica'
+  },
+  'DAPSA': {
+    collaborative: true,
+    patientFields: ['pain', 'patientGlobal'],
+    doctorFields: ['tenderJoints', 'swollenJoints', 'crp'],
+    patientLabel: 'DAPSA (Pendiente: Exploración + Analítica)',
+    doctorLabel: 'DAPSA - Completar con exploración y analítica'
+  },
+  'DAS28_CRP': {
+    collaborative: true,
+    patientFields: ['patientGlobal'],
+    doctorFields: ['tenderJoints', 'swollenJoints', 'crp'],
+    patientLabel: 'DAS28-PCR (Pendiente: Exploración + Analítica)',
+    doctorLabel: 'DAS28-PCR - Completar con exploración y analítica'
+  },
+  'DAS28_ESR': {
+    collaborative: true,
+    patientFields: ['patientGlobal'],
+    doctorFields: ['tenderJoints', 'swollenJoints', 'vsg'],
+    patientLabel: 'DAS28-VSG (Pendiente: Exploración + Analítica)',
+    doctorLabel: 'DAS28-VSG - Completar con exploración y analítica'
+  },
+  'SCORE2': {
+    collaborative: true,
+    patientFields: ['age', 'sex', 'smoking'],
+    doctorFields: ['sbp', 'cholesterol'],
+    patientLabel: 'SCORE2 (Pendiente: PA y Colesterol)',
+    doctorLabel: 'SCORE2 - Completar con PA y colesterol'
+  },
+  'SCORE2-OP': {
+    collaborative: true,
+    patientFields: ['age', 'sex', 'smoking'],
+    doctorFields: ['sbp', 'cholesterol'],
+    patientLabel: 'SCORE2-OP (Pendiente: PA y Colesterol)',
+    doctorLabel: 'SCORE2-OP - Completar con PA y colesterol'
+  }
+};
+
+// Calculadoras que solo puede hacer el médico
+const DOCTOR_ONLY_CALCULATORS = ['SLEDAI', 'SSDAI'];
+
+// Verificar si una calculadora es colaborativa
+const isCollaborative = (instrument) => {
+  return COLLABORATIVE_CALCULATORS.hasOwnProperty(instrument);
+};
+
+// Verificar si una calculadora es solo para médicos
+const isDoctorOnly = (instrument) => {
+  return DOCTOR_ONLY_CALCULATORS.includes(instrument);
+};
+
+// ============================================
 // SUPABASE STORAGE FUNCTIONS
 // ============================================
 
@@ -651,6 +714,75 @@ const Storage = {
     } catch (err) {
       console.error('Exception creating log:', err);
       return null;
+    }
+  },
+
+  async savePendingCalculation(data) {
+    if (!supabase) return null;
+    try {
+      const { data: result, error } = await supabase
+        .from('pending_calculations')
+        .insert(data)
+        .select()
+        .single();
+      if (error) throw error;
+      return result;
+    } catch (err) {
+      console.error('Error saving pending calculation:', err);
+      return null;
+    }
+  },
+  
+  async getPendingCalculations(patientId) {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('pending_calculations')
+        .select('*')
+        .eq('patient_id', patientId)
+        .eq('status', 'PENDING')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.error('Error getting pending calculations:', err);
+      return [];
+    }
+  },
+  
+  async completePendingCalculation(pendingId, doctorId) {
+    if (!supabase) return null;
+    try {
+      const { data, error } = await supabase
+        .from('pending_calculations')
+        .update({
+          status: 'COMPLETED',
+          completed_at: new Date().toISOString(),
+          completed_by: doctorId
+        })
+        .eq('id', pendingId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error completing pending calculation:', err);
+      return null;
+    }
+  },
+  
+  async deletePendingCalculation(pendingId) {
+    if (!supabase) return false;
+    try {
+      const { error } = await supabase
+        .from('pending_calculations')
+        .delete()
+        .eq('id', pendingId);
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('Error deleting pending calculation:', err);
+      return false;
     }
   }
 };
@@ -2902,6 +3034,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [view, setView] = useState('home');
   const [selectedCalc, setSelectedCalc] = useState(null);
   const [result, setResult] = useState(null);
+  const [pendingCalculations, setPendingCalculations] = useState([]);
+  const [showPendingBadge, setShowPendingBadge] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [scores, setScores] = useState([]);
@@ -2911,6 +3045,16 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   useEffect(() => {
     loadScores();
   }, [patient]);
+
+  useEffect(() => {
+    loadPendingCalculations();
+  }, [patient);
+  
+  const loadPendingCalculations = async () => {
+    const pending = await Storage.getPendingCalculations(patient);
+    setPendingCalculations(pending);
+    setShowPendingBadge(pending.length > 0);
+  };
   
   const loadScores = async () => {
     setLoading(true);
@@ -3033,20 +3177,26 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               <span className="calc-name">BASDAI</span>
               <span className="calc-desc">Espondilitis anquilosante</span>
             </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
+            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS_CRP'); setResult(null); }}>
               <span className="calc-icon">📈</span>
               <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Actividad espondiloartritis</span>
+              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600' }}>
+                Pendiente de completar por reumatólogo/a o enfermera en consulta
+              </span>
             </button>
             <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
               <span className="calc-icon">📉</span>
               <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
+              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600' }}>
+                Pendiente de completar por reumatólogo/a o enfermera en consulta
+              </span>
             </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
+            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28_CRP'); setResult(null); }}>
               <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
+              <span className="calc-name">DAS28-PCR</span>
+              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600' }}>
+                Pendiente de completar por reumatólogo/a o enfermera en consulta
+              </span>
             </button>
             <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
               <span className="calc-icon">🦋</span>
@@ -3101,12 +3251,16 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
               <span className="calc-icon">💗</span>
               <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo CV 40-69 años</span>
+              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600' }}>
+                Pendiente de completar por reumatólogo/a o enfermera en consulta
+              </span>
             </button>
             <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
               <span className="calc-icon">❤️</span>
               <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo CV +70 años</span>
+              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600' }}>
+                Pendiente de completar por reumatólogo/a o enfermera en consulta
+              </span>
             </button>
           </div>
         </>
