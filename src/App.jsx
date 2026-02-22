@@ -3044,14 +3044,14 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   
   useEffect(() => {
     loadScores();
-  }, [patient]);
+  }, [patient.id]);
 
   useEffect(() => {
     loadPendingCalculations();
-  }, [patient);
+  }, [patient.id);
   
   const loadPendingCalculations = async () => {
-    const pending = await Storage.getPendingCalculations(patient);
+    const pending = await Storage.getPendingCalculations(patient.id);
     setPendingCalculations(pending);
     setShowPendingBadge(pending.length > 0);
   };
