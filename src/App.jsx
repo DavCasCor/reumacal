@@ -4239,11 +4239,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
           value={searchNhc}
           onChange={setSearchNhc}
           placeholder="Introduzca el NHC"
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              searchPatient();
-            }
-          }}
         />
         <button className="btn-search" onClick={searchPatient} disabled={loading}>
           {loading ? '⏳ Buscando...' : '🔍 Buscar'}
@@ -4970,14 +4965,7 @@ export default function App() {
   useEffect(() => {
     const handlePopState = (event) => {
       if (event.state && event.state.page) {
-        // Restablecer el estado de la aplicación según la página
         setPage(event.state.page);
-        
-        // Si vuelves a landing o auth, limpiar usuario
-        if (event.state.page === 'landing' || event.state.page === 'auth') {
-          setCurrentUser(null);
-          setCurrentPatient(null);
-        }
       } else {
         const hash = window.location.hash.substring(1);
         if (hash && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(hash)) {
