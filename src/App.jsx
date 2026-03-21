@@ -4966,12 +4966,26 @@ export default function App() {
     const handlePopState = (event) => {
       if (event.state && event.state.page) {
         setPage(event.state.page);
+        
+        // Limpiar sesión si vuelves a landing o auth
+        if (event.state.page === 'landing' || event.state.page === 'auth') {
+          setCurrentUser(null);
+          setCurrentPatient(null);
+        }
       } else {
         const hash = window.location.hash.substring(1);
         if (hash && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(hash)) {
           setPage(hash);
+          
+          // Limpiar sesión si vuelves a landing o auth
+          if (hash === 'landing' || hash === 'auth') {
+            setCurrentUser(null);
+            setCurrentPatient(null);
+          }
         } else {
           setPage('landing');
+          setCurrentUser(null);
+          setCurrentPatient(null);
         }
       }
     };
