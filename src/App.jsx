@@ -3494,6 +3494,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
+  const [viewHistory, setViewHistory] = useState(['search']);
   
   useEffect(() => {
     loadScores();
@@ -4077,6 +4078,30 @@ const DoctorDashboard = ({ user, onLogout }) => {
     loadUserHospital();
   }, [user.hospital_id]);
   
+  useEffect(() => {
+    const handleDoctorBack = (event) => {
+      if (event.state && event.state.doctorView) {
+        setView(event.state.doctorView);
+      } else if (viewHistory.length > 1) {
+        // Si no hay estado pero tenemos historial, retroceder
+        const newHistory = [...viewHistory];
+        newHistory.pop(); // Quitar vista actual
+        const previousView = newHistory[newHistory.length - 1] || 'search';
+        setView(previousView);
+        setViewHistory(newHistory);
+      }
+    };
+
+    window.addEventListener('popstate', handleDoctorBack);
+    return () => window.removeEventListener('popstate', handleDoctorBack);
+  }, [viewHistory]);
+
+  const navigateView = (newView) => {
+    setView(newView);
+    setViewHistory(prev => [...prev, newView]);
+    window.history.pushState({ doctorView: newView }, '', window.location.pathname + window.location.search);
+  };
+
   const searchPatient = async () => {
     setError('');
     setLoading(true);
@@ -4112,7 +4137,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
     setSelectedPatient(patient);
     setPatientScores(scores);
     setPendingCalcs(pendings || []);
-    setView('patient');
+    navigateView('patient');
     setLoading(false);
   };
   
@@ -4250,7 +4275,10 @@ const DoctorDashboard = ({ user, onLogout }) => {
   
   const renderPatient = () => (
     <div className="patient-view">
-      <button className="btn-back-calc" onClick={() => { setView('search'); setSelectedPatient(null); }}>
+      <button className="btn-back-calc" onClick={() => { 
+        setSelectedPatient(null); 
+        window.history.back();
+      }}>
         ← Nueva búsqueda
       </button>
       
@@ -4266,7 +4294,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {!selectedCalc && (
             <button 
               className="btn-print" 
-              onClick={() => setView('calculator')}
+              onClick={() => navigateView('calculator')}
               style={{ backgroundColor: '#3b82f6' }}
             >
               ➕ Nueva Calculadora
@@ -4302,7 +4330,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     ? pending.instrument.split('_')[0] 
                     : pending.instrument;
                   setSelectedCalc(baseInstrument);
-                  setView('calculator');
+                  navigateView('calculator');
                 }}
                 style={{
                   padding: '0.5rem 1rem',
@@ -4426,12 +4454,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const renderCalculator = () => (
     <div className="calculator-view">
       <button className="btn-back-calc" onClick={() => { 
-        setView('patient'); 
-        setSelectedCalc(null); 
-        setResult(null); 
-        setSaved(false);
-        setSelectedPending(null);
-      }}>
+  setSelectedCalc(null); 
+  setResult(null); 
+  setSaved(false); 
+  window.history.back();
+}}>
         ← Volver al paciente
       </button>
       
