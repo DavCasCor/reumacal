@@ -4065,6 +4065,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [viewingPatient, setViewingPatient] = useState(null);
+  const [returnToSearch, setReturnToSearch] = useState(false);
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   // Cargar información del hospital del usuario
