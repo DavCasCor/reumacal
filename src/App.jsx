@@ -4669,7 +4669,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </div>
 
           </div>
-          </div>
         </>
       ) : (
         <>
