@@ -1953,93 +1953,87 @@ const LandingPage = ({ onNavigate }) => (
       </div>
       
       <div className="landing-features">
-        {/* Espondiloartritis axial */}
-        <div className="feature">
-          <span className="feature-icon">📈</span>
-          <span>ASDAS</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📊</span>
-          <span>BASDAI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🚶</span>
-          <span>BASFI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">😊</span>
-          <span>ASQoL</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💡</span>
-          <span>ASAS-HI</span>
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>🦴</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Espondiloartritis</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">📈</span><span>ASDAS</span></div>
+            <div className="feature"><span className="feature-icon">📊</span><span>BASDAI</span></div>
+            <div className="feature"><span className="feature-icon">🚶</span><span>BASFI</span></div>
+            <div className="feature"><span className="feature-icon">😊</span><span>ASQoL</span></div>
+            <div className="feature"><span className="feature-icon">💡</span><span>ASAS-HI</span></div>
+          </div>
         </div>
         
-        {/* Artritis psoriásica */}
-        <div className="feature">
-          <span className="feature-icon">📉</span>
-          <span>DAPSA</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🎯</span>
-          <span>PsAQoL</span>
-        </div>
-        
-        {/* Artritis reumatoide */}
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>DAS28</span>
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>🔴</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Artritis psoriásica</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">📉</span><span>DAPSA</span></div>
+            <div className="feature"><span className="feature-icon">🎯</span><span>PsAQoL</span></div>
+          </div>
         </div>
         
-        {/* Lupus */}
-        <div className="feature">
-          <span className="feature-icon">🦋</span>
-          <span>SLEDAI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>SLICC</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💚</span>
-          <span>LupusPRO</span>
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>🔵</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Artritis reumatoide</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">📋</span><span>DAS28</span></div>
+          </div>
         </div>
         
-        {/* Generales */}
-        <div className="feature">
-          <span className="feature-icon">💪</span>
-          <span>FACIT</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🏥</span>
-          <span>SF-36</span>
-        </div>
-        
-        {/* Sjögren */}
-        <div className="feature">
-          <span className="feature-icon">💧</span>
-          <span>ESSPRI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🔬</span>
-          <span>SSDAI</span>
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>🦋</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Lupus eritematoso sistémico</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">🦋</span><span>SLEDAI</span></div>
+            <div className="feature"><span className="feature-icon">📋</span><span>SLICC</span></div>
+          </div>
         </div>
         
-        {/* Cardiovasculares */}
-        <div className="feature">
-          <span className="feature-icon">💗</span>
-          <span>SCORE2</span>
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>💚</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Calidad de vida</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
+            <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
+            <div className="feature"><span className="feature-icon">💚</span><span>LupusPRO</span></div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">❤️</span>
-          <span>SCORE2-OP</span>
+        
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>💧</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Síndrome de Sjögren</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">💧</span><span>ESSPRI</span></div>
+            <div className="feature"><span className="feature-icon">🔬</span><span>SSDAI</span></div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">🫀</span>
-          <span>QRISK3</span>
+        
+        <div style={{width: '100%', marginTop: '2rem', marginBottom: '1.5rem'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)'}}>
+            <span style={{fontSize: '1.5rem'}}>❤️</span>
+            <h3 style={{margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)'}}>Riesgo cardiovascular</h3>
+          </div>
+          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+            <div className="feature"><span className="feature-icon">💗</span><span>SCORE2</span></div>
+            <div className="feature"><span className="feature-icon">❤️</span><span>SCORE2-OP</span></div>
+            <div className="feature"><span className="feature-icon">🫀</span><span>QRISK3</span></div>
+          </div>
         </div>
       </div>
-    </div>
     
     <footer className="landing-footer" style={{ paddingBottom: '40px' }}>
       <Brand size="small" />
@@ -3497,6 +3491,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [scores, setScores] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+const [expandedSections,setExpandedSections]=useState({espondilo:true,aps:false,ar:false,lupus:false,calidad:false,sjogren:false,cardiovascular:false});
+const toggleSection=(s)=>setExpandedSections(p=>({...p,[s]:!p[s]}));
   
   useEffect(() => {
     loadScores();
@@ -3639,132 +3635,203 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       {!selectedCalc ? (
         <>
           <h2>Calculadoras</h2>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus síntomas (el reumatólogo/a añadirá la analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa el dolor (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida APs</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tu evaluación (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Esta calculadora la completará el reumatólogo/a en consulta
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Calidad de vida general</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo cardiovascular 40-69 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo cardiovascular +70 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá datos clínicos)
-              </span>
-            </button>
-          </div>
+<div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('espondilo')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Espondiloartritis</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>5 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.espondilo?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.espondilo&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASDAS');setResult(null);}}>
+<span className="calc-icon">📈</span>
+<span className="calc-name">ASDAS</span>
+<span className="calc-desc">Espondilo axial</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Síntomas (médico: analítica)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASDAI');setResult(null);}}>
+<span className="calc-icon">📊</span>
+<span className="calc-name">BASDAI</span>
+<span className="calc-desc">Espondilo axial</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASFI');setResult(null);}}>
+<span className="calc-icon">🚶</span>
+<span className="calc-name">BASFI</span>
+<span className="calc-desc">Función espon</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASQoL');setResult(null);}}>
+<span className="calc-icon">😊</span>
+<span className="calc-name">ASQoL</span>
+<span className="calc-desc">Calidad vida EA</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASASHI');setResult(null);}}>
+<span className="calc-icon">💡</span>
+<span className="calc-name">ASAS-HI</span>
+<span className="calc-desc">Impacto salud</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('aps')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis psoriásica</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.aps?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.aps&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAPSA');setResult(null);}}>
+<span className="calc-icon">📉</span>
+<span className="calc-name">DAPSA</span>
+<span className="calc-desc">APs</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Dolor (médico: exploración)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('PSAQoL');setResult(null);}}>
+<span className="calc-icon">🎯</span>
+<span className="calc-name">PsAQoL</span>
+<span className="calc-desc">Calidad vida APs</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('ar')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔵</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis reumatoide</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>1 calc</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.ar?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.ar&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAS28');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">DAS28</span>
+<span className="calc-desc">AR</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Evaluación (médico: exploración)</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('lupus')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦋</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Lupus eritematoso</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.lupus?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.lupus&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLEDAI');setResult(null);}}>
+<span className="calc-icon">🦋</span>
+<span className="calc-name">SLEDAI</span>
+<span className="calc-desc">Act. lupus</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLICC');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">SLICC</span>
+<span className="calc-desc">Daño lupus</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Solo reumatólogo/a</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('calidad')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💚</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Calidad de vida</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.calidad?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.calidad&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('FACIT');setResult(null);}}>
+<span className="calc-icon">💪</span>
+<span className="calc-name">FACIT</span>
+<span className="calc-desc">Fatiga</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SF36');setResult(null);}}>
+<span className="calc-icon">🏥</span>
+<span className="calc-name">SF-36</span>
+<span className="calc-desc">Encuesta salud</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('LupusPRO');setResult(null);}}>
+<span className="calc-icon">💚</span>
+<span className="calc-name">LupusPRO</span>
+<span className="calc-desc">Calidad vida lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('sjogren')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💧</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Sjögren</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.sjogren?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.sjogren&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ESSPRI');setResult(null);}}>
+<span className="calc-icon">💧</span>
+<span className="calc-name">ESSPRI</span>
+<span className="calc-desc">Sint. Sjögren</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SSDAI');setResult(null);}}>
+<span className="calc-icon">🔬</span>
+<span className="calc-name">SSDAI</span>
+<span className="calc-desc">Act. Sjögren</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('cardiovascular')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>❤️</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Riesgo cardiovascular</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.cardiovascular?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.cardiovascular&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2');setResult(null);}}>
+<span className="calc-icon">💗</span>
+<span className="calc-name">SCORE2</span>
+<span className="calc-desc">Riesgo CV 40-69a</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: PA/col)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2-OP');setResult(null);}}>
+<span className="calc-icon">❤️</span>
+<span className="calc-name">SCORE2-OP</span>
+<span className="calc-desc">Riesgo CV +70a</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: PA/col)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('QRISK3');setResult(null);}}>
+<span className="calc-icon">🫀</span>
+<span className="calc-name">QRISK3</span>
+<span className="calc-desc">Riesgo CV</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: clínicos)</span>
+</button>
+</div>)}
+</div>
+</div></div>
         </>
       ) : (
         <>
@@ -3970,6 +4037,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+const [expandedSections,setExpandedSections]=useState({espondilo:true,aps:false,ar:false,lupus:false,calidad:false,sjogren:false,cardiovascular:false});
+const toggleSection=(s)=>setExpandedSections(p=>({...p,[s]:!p[s]}));
   
   // Cargar información del hospital del usuario
   useEffect(() => {
@@ -4362,114 +4431,197 @@ const DoctorDashboard = ({ user, onLogout }) => {
       
       {!selectedCalc ? (
         <>
-          <p style={{ marginBottom: '2rem', color: '#64748b' }}>
-            Selecciona una calculadora para realizar una nueva medición:
-          </p>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Actividad espondiloartritis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida AP</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Fatiga</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo CV 40-69 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo CV +70 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-            </button>
-          </div>
+          <p style={{marginBottom:'2rem',color:'#64748b'}}>Selecciona calculadora:</p>
+<div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('espondilo')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Espondiloartritis</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>5 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.espondilo?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.espondilo&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASDAS');setResult(null);}}>
+<span className="calc-icon">📈</span>
+<span className="calc-name">ASDAS</span>
+<span className="calc-desc">Act. espondilo</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASDAI');setResult(null);}}>
+<span className="calc-icon">📊</span>
+<span className="calc-name">BASDAI</span>
+<span className="calc-desc">Espondilo axial</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASFI');setResult(null);}}>
+<span className="calc-icon">🚶</span>
+<span className="calc-name">BASFI</span>
+<span className="calc-desc">Función espon</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASQoL');setResult(null);}}>
+<span className="calc-icon">😊</span>
+<span className="calc-name">ASQoL</span>
+<span className="calc-desc">Calidad vida EA</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASASHI');setResult(null);}}>
+<span className="calc-icon">💡</span>
+<span className="calc-name">ASAS-HI</span>
+<span className="calc-desc">Impacto salud</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('aps')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis psoriásica</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.aps?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.aps&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAPSA');setResult(null);}}>
+<span className="calc-icon">📉</span>
+<span className="calc-name">DAPSA</span>
+<span className="calc-desc">APs</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('PSAQoL');setResult(null);}}>
+<span className="calc-icon">🎯</span>
+<span className="calc-name">PsAQoL</span>
+<span className="calc-desc">Calidad vida AP</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('ar')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔵</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis reumatoide</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>1 calc</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.ar?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.ar&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAS28');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">DAS28</span>
+<span className="calc-desc">AR</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('lupus')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦋</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Lupus eritematoso</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.lupus?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.lupus&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLEDAI');setResult(null);}}>
+<span className="calc-icon">🦋</span>
+<span className="calc-name">SLEDAI</span>
+<span className="calc-desc">Act. lupus</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLICC');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">SLICC</span>
+<span className="calc-desc">Daño lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('calidad')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💚</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Calidad de vida</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.calidad?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.calidad&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('FACIT');setResult(null);}}>
+<span className="calc-icon">💪</span>
+<span className="calc-name">FACIT</span>
+<span className="calc-desc">Fatiga</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SF36');setResult(null);}}>
+<span className="calc-icon">🏥</span>
+<span className="calc-name">SF-36</span>
+<span className="calc-desc">Encuesta salud</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('LupusPRO');setResult(null);}}>
+<span className="calc-icon">💚</span>
+<span className="calc-name">LupusPRO</span>
+<span className="calc-desc">Calidad vida lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('sjogren')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💧</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Sjögren</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.sjogren?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.sjogren&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ESSPRI');setResult(null);}}>
+<span className="calc-icon">💧</span>
+<span className="calc-name">ESSPRI</span>
+<span className="calc-desc">Sint. Sjögren</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SSDAI');setResult(null);}}>
+<span className="calc-icon">🔬</span>
+<span className="calc-name">SSDAI</span>
+<span className="calc-desc">Act. Sjögren</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('cardiovascular')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>❤️</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Riesgo cardiovascular</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.cardiovascular?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.cardiovascular&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2');setResult(null);}}>
+<span className="calc-icon">💗</span>
+<span className="calc-name">SCORE2</span>
+<span className="calc-desc">Riesgo CV 40-69a</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2-OP');setResult(null);}}>
+<span className="calc-icon">❤️</span>
+<span className="calc-name">SCORE2-OP</span>
+<span className="calc-desc">Riesgo CV +70a</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('QRISK3');setResult(null);}}>
+<span className="calc-icon">🫀</span>
+<span className="calc-name">QRISK3</span>
+<span className="calc-desc">Riesgo CV</span>
+</button>
+</div>)}
+</div>
+</div>
         </>
       ) : (
         <>
@@ -4939,9 +5091,11 @@ export default function App() {
         .btn-icon { font-size: 2rem; }
         .landing-features {
           display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+          width: 100%;
+          max-width: 900px;
         }
         .feature {
           display: flex;
