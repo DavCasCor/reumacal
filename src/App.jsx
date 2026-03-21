@@ -4957,19 +4957,49 @@ const PoliticaCookiesPage = ({ onBack }) => (
 
 export default function App() {
   const [page, setPage] = useState('landing');
+  const navigateToPage = (newPage) => {
+    setPage(newPage);
+    window.history.pushState({ page: newPage }, '', `#${newPage}`);
+  };
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.page) {
+        setPage(event.state.page);
+      } else {
+        const hash = window.location.hash.substring(1);
+        if (hash && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(hash)) {
+          setPage(hash);
+        } else {
+          setPage('landing');
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+      window.history.replaceState({ page: initialHash }, '', `#${initialHash}`);
+    } else {
+      window.history.replaceState({ page: 'landing' }, '', '#landing');
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [authRole, setAuthRole] = useState(null);
   const [resetEmail, setResetEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
   
   const handleNavigate = (newPage, role = null) => {
-    setPage(newPage);
+    navigateToPage(newPage);
     if (role) {
       if (role === 'forgot-password') {
-        setPage('forgot-password');
+        navigateToPage('forgot-password');
       } else if (role === 'reset-password') {
         setResetEmail(newPage); // newPage contiene el email
-        setPage('reset-password');
+        navigateToPage('reset-password');
       } else {
         setAuthRole(role);
       }
@@ -4977,15 +5007,17 @@ export default function App() {
   };
   
   const handleLogin = (user, patient) => {
-    setCurrentUser(user);
-    setCurrentPatient(patient);
-    setPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
-  };
+  setCurrentUser(user);
+  setCurrentPatient(patient);
+  setTimeout(() => {
+    navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+  }, 10);
+};
   
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPatient(null);
-    setPage('landing');
+    navigateToPage('landing');
   };
   
   return (
