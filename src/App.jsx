@@ -1,26 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { createClient } from '@supabase/supabase-js';
-
-// ============================================
-// REUMACAL - Calculadoras Reumatológicas
-// @reumacastro
-// ============================================
-
-// ⚠️ CONFIGURACIÓN DE SUPABASE - CAMBIA ESTOS VALORES
-const SUPABASE_URL = 'https://gprqwiiyzfanfzstoujz.supabase.co';
+const SUPABASE_URL = 'https:
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcnF3aWl5emZhbmZ6c3RvdWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTQzMzcsImV4cCI6MjA4NTk3MDMzN30.tMYqfeTVsLRlwjfvynuaFRsFx6I8SdKz4jYU6gO-ZB0';
-
-// Verificar que las credenciales están configuradas
 const isConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL_AQUI' && SUPABASE_ANON_KEY !== 'TU_SUPABASE_ANON_KEY_AQUI';
-
 const supabase = isConfigured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
 if (!isConfigured) {
   console.warn('⚠️ SUPABASE NO CONFIGURADO: Edita App.jsx y pon tus credenciales de Supabase');
 }
-
-// Utility functions
 const hashPassword = (password) => {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {
@@ -30,7 +17,6 @@ const hashPassword = (password) => {
   }
   return hash.toString(16);
 };
-
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('es-ES', {
     day: '2-digit',
@@ -40,30 +26,22 @@ const formatDate = (date) => {
     minute: '2-digit'
   });
 };
-
 const formatShortDate = (date) => {
   return new Date(date).toLocaleDateString('es-ES', {
     day: '2-digit',
     month: '2-digit'
   });
 };
-
-// ============================================
-// CALCULATION FORMULAS
-// ============================================
-
 const calculateBASDAI = (components) => {
   const { q1, q2, q3, q4, q5, q6 } = components;
   const meanQ5Q6 = (parseFloat(q5) + parseFloat(q6)) / 2;
   const total = (parseFloat(q1) + parseFloat(q2) + parseFloat(q3) + parseFloat(q4) + meanQ5Q6) / 5;
   return Math.round(total * 100) / 100;
 };
-
 const interpretBASDAI = (score) => {
   if (score < 4) return { text: 'Actividad baja', color: '#10b981', level: 'low' };
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
-
 const calculateASDASwithCRP = (components) => {
   const { backPain, duration, peripheral, global, crp } = components;
   const bp = parseFloat(backPain);
@@ -71,11 +49,9 @@ const calculateASDASwithCRP = (components) => {
   const per = parseFloat(peripheral);
   const gl = parseFloat(global);
   const c = parseFloat(crp);
-  
   const result = 0.121 * bp + 0.058 * dur + 0.110 * Math.sqrt(per) + 0.073 * gl + 0.579 * Math.log(c + 1);
   return Math.round(result * 100) / 100;
 };
-
 const calculateASDASwithESR = (components) => {
   const { backPain, duration, peripheral, global, esr } = components;
   const bp = parseFloat(backPain);
@@ -83,64 +59,52 @@ const calculateASDASwithESR = (components) => {
   const per = parseFloat(peripheral);
   const gl = parseFloat(global);
   const e = parseFloat(esr);
-  
   const result = 0.113 * bp + 0.053 * dur + 0.123 * Math.sqrt(per) + 0.069 * gl + 0.293 * Math.sqrt(e);
   return Math.round(result * 100) / 100;
 };
-
 const interpretASDAS = (score) => {
   if (score < 1.3) return { text: 'Enfermedad inactiva', color: '#10b981', level: 'inactive' };
   if (score < 2.1) return { text: 'Actividad baja', color: '#84cc16', level: 'low' };
   if (score < 3.5) return { text: 'Actividad alta', color: '#f59e0b', level: 'moderate' };
   return { text: 'Actividad muy alta', color: '#ef4444', level: 'high' };
 };
-
 const calculateDAPSA = (components) => {
   const { pain, global, tjc, sjc, crp } = components;
   const total = parseFloat(pain) + parseFloat(global) + parseFloat(tjc) + parseFloat(sjc) + parseFloat(crp);
   return Math.round(total * 100) / 100;
 };
-
 const interpretDAPSA = (score) => {
   if (score <= 4) return { text: 'Remisión', color: '#10b981', level: 'remission' };
   if (score <= 14) return { text: 'Actividad baja', color: '#84cc16', level: 'low' };
   if (score <= 28) return { text: 'Actividad moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
-
 const calculateDAS28withCRP = (components) => {
   const { tjc28, sjc28, global, crp } = components;
   const t = parseFloat(tjc28);
   const s = parseFloat(sjc28);
   const g = parseFloat(global) / 10;
   const c = parseFloat(crp);
-  
   const result = 0.56 * Math.sqrt(t) + 0.28 * Math.sqrt(s) + 0.36 * Math.log(c + 1) + 0.014 * g + 0.96;
   return Math.round(result * 100) / 100;
 };
-
 const calculateDAS28withESR = (components) => {
   const { tjc28, sjc28, global, esr } = components;
   const t = parseFloat(tjc28);
   const s = parseFloat(sjc28);
   const g = parseFloat(global);
   const e = parseFloat(esr);
-  
   const result = 0.56 * Math.sqrt(t) + 0.28 * Math.sqrt(s) + 0.70 * Math.log(e) + 0.014 * g;
   return Math.round(result * 100) / 100;
 };
-
 const interpretDAS28 = (score) => {
   if (score < 2.6) return { text: 'Remisión', color: '#10b981', level: 'remission' };
   if (score < 3.2) return { text: 'Actividad baja', color: '#84cc16', level: 'low' };
   if (score <= 5.1) return { text: 'Actividad moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
-
-// SLEDAI - Systemic Lupus Erythematosus Disease Activity Index
 const calculateSLEDAI = (components) => {
   let total = 0;
-  // Sistema nervioso central (8 puntos cada uno)
   if (components.seizure) total += 8;
   if (components.psychosis) total += 8;
   if (components.organicBrainSyndrome) total += 8;
@@ -149,31 +113,24 @@ const calculateSLEDAI = (components) => {
   if (components.lupusHeadache) total += 8;
   if (components.cva) total += 8;
   if (components.vasculitis) total += 8;
-  // Muscular (4 puntos)
   if (components.arthritis) total += 4;
   if (components.myositis) total += 4;
-  // Renal (4 puntos cada uno)
   if (components.urinaryCasts) total += 4;
   if (components.hematuria) total += 4;
   if (components.proteinuria) total += 4;
   if (components.pyuria) total += 4;
-  // Respiratorio (4 puntos)
   if (components.pleurisy) total += 4;
-  // Cardiovascular (8 y 4 puntos)
   if (components.pericarditis) total += 4;
   if (components.lowComplement) total += 2;
   if (components.increasedDnaBind) total += 2;
-  // Hematológico (1-2 puntos)
   if (components.fever) total += 1;
   if (components.thrombocytopenia) total += 1;
   if (components.leukopenia) total += 1;
-  // Cutáneo (2 puntos cada uno)
   if (components.rash) total += 2;
   if (components.alopecia) total += 2;
   if (components.mucosalUlcers) total += 2;
   return total;
 };
-
 const interpretSLEDAI = (score) => {
   if (score === 0) return { text: 'Inactiva', color: '#10b981', level: 'inactive' };
   if (score <= 5) return { text: 'Actividad leve', color: '#84cc16', level: 'mild' };
@@ -181,10 +138,7 @@ const interpretSLEDAI = (score) => {
   if (score <= 19) return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
   return { text: 'Actividad muy alta', color: '#dc2626', level: 'very_high' };
 };
-
-// LupusPRO v1.8 - Quality of Life in Lupus
 const calculateLupusPRO = (components) => {
-  // Promedio de todos los dominios (escala 0-4, convertir a 0-100)
   const domains = [
     'lupusSymptoms', 'lupusMedications', 'procreation', 'physicalHealth',
     'painVitality', 'emotionalHealth', 'bodyImage', 'cognition',
@@ -192,39 +146,29 @@ const calculateLupusPRO = (components) => {
   ];
   let sum = 0;
   domains.forEach(d => sum += parseFloat(components[d] || 0));
-  const avgScore = (sum / domains.length) * 25; // Convertir a escala 0-100
+  const avgScore = (sum / domains.length) * 25;
   return Math.round(avgScore * 100) / 100;
 };
-
 const interpretLupusPRO = (score) => {
-  // Menor puntuación = mejor calidad de vida
   if (score <= 25) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score <= 50) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score <= 75) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
-
-// FACIT-General
 const calculateFACIT = (components) => {
-  // 27 items, escala 0-4, rango total 0-108
   let total = 0;
   for (let i = 1; i <= 27; i++) {
     total += parseFloat(components[`q${i}`] || 0);
   }
   return total;
 };
-
 const interpretFACIT = (score) => {
-  // Mayor puntuación = mejor calidad de vida
   if (score >= 80) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score >= 60) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score >= 40) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
-
-// SF-36 - Short Form 36 Health Survey
 const calculateSF36 = (components) => {
-  // Calcular 8 dimensiones (cada una 0-100)
   const dimensions = {
     physicalFunctioning: parseFloat(components.physicalFunctioning || 50),
     rolePhysical: parseFloat(components.rolePhysical || 50),
@@ -235,22 +179,17 @@ const calculateSF36 = (components) => {
     roleEmotional: parseFloat(components.roleEmotional || 50),
     mentalHealth: parseFloat(components.mentalHealth || 50)
   };
-  
-  const total = (dimensions.physicalFunctioning + dimensions.rolePhysical + 
-                dimensions.bodilyPain + dimensions.generalHealth + dimensions.vitality + 
+  const total = (dimensions.physicalFunctioning + dimensions.rolePhysical +
+                dimensions.bodilyPain + dimensions.generalHealth + dimensions.vitality +
                 dimensions.socialFunctioning + dimensions.roleEmotional + dimensions.mentalHealth) / 8;
   return Math.round(total * 100) / 100;
 };
-
 const interpretSF36 = (score) => {
-  // Mayor puntuación = mejor calidad de vida
   if (score >= 75) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score >= 50) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score >= 25) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
-
-// BASFI - Bath Ankylosing Spondylitis Functional Index
 const calculateBASFI = (components) => {
   let sum = 0;
   for (let i = 1; i <= 10; i++) {
@@ -258,15 +197,11 @@ const calculateBASFI = (components) => {
   }
   return Math.round((sum / 10) * 100) / 100;
 };
-
 const interpretBASFI = (score) => {
-  // Mayor puntuación = peor función
   if (score < 4) return { text: 'Buena función', color: '#10b981', level: 'good' };
   if (score < 7) return { text: 'Limitación moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Limitación importante', color: '#ef4444', level: 'severe' };
 };
-
-// ASAS-HI - ASAS Health Index
 const calculateASASHI = (components) => {
   let total = 0;
   for (let i = 1; i <= 17; i++) {
@@ -274,14 +209,11 @@ const calculateASASHI = (components) => {
   }
   return total;
 };
-
 const interpretASASHI = (score) => {
   if (score <= 5) return { text: 'Impacto bajo', color: '#10b981', level: 'low' };
   if (score <= 11) return { text: 'Impacto moderado', color: '#f59e0b', level: 'moderate' };
   return { text: 'Impacto alto', color: '#ef4444', level: 'high' };
 };
-
-// ASQoL - Ankylosing Spondylitis Quality of Life
 const calculateASQoL = (components) => {
   let total = 0;
   for (let i = 1; i <= 18; i++) {
@@ -289,14 +221,11 @@ const calculateASQoL = (components) => {
   }
   return total;
 };
-
 const interpretASQoL = (score) => {
   if (score <= 6) return { text: 'Buena calidad de vida', color: '#10b981', level: 'good' };
   if (score <= 12) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
-
-// PSAQoL - Psoriatic Arthritis Quality of Life (20 items)
 const calculatePSAQoL = (components) => {
   let total = 0;
   for (let i = 1; i <= 20; i++) {
@@ -304,70 +233,47 @@ const calculatePSAQoL = (components) => {
   }
   return total;
 };
-
 const interpretPSAQoL = (score) => {
   if (score <= 7) return { text: 'Buena calidad de vida', color: '#10b981', level: 'good' };
   if (score <= 14) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
-
-// ESSPRI - EULAR Sjögren's Syndrome Patient Reported Index
 const calculateESSPRI = (components) => {
   const { dryness, fatigue, pain } = components;
   const total = (parseFloat(dryness) + parseFloat(fatigue) + parseFloat(pain)) / 3;
   return Math.round(total * 100) / 100;
 };
-
 const interpretESSPRI = (score) => {
   if (score < 5) return { text: 'Síntomas aceptables', color: '#10b981', level: 'acceptable' };
   return { text: 'Síntomas significativos', color: '#ef4444', level: 'significant' };
 };
-
-// SSDAI - Sjögren's Syndrome Disease Activity Index (Vitali 2007)
 const calculateSSDAI = (components) => {
   let total = 0;
-  // Constitucional (máx 7)
   if (components.fever) total += 1;
   if (components.lymphadenopathy) total += 2;
-  // Linfático (máx 3)
   if (components.lymphadenopathyBiopsy) total += 3;
-  // Glandular (máx 2)
   if (components.glandularSwelling) total += 2;
-  // Articular (máx 6)
   if (components.arthralgia) total += 2;
   if (components.arthritis) total += 4;
-  // Cutáneo (máx 9)
   if (components.vasculitis) total += 3;
   if (components.purpura) total += 6;
-  // Pulmonar (máx 9)
   if (components.pulmonary) total += 9;
-  // Renal (máx 9)
   if (components.renal) total += 9;
-  // Muscular (máx 6)
   if (components.myositis) total += 6;
-  // SNC (máx 9)
   if (components.cns) total += 9;
-  // PNS (máx 9)
   if (components.pns) total += 9;
-  // Hematológico (máx 3)
   if (components.leukopenia) total += 1;
   if (components.thrombocytopenia) total += 2;
-  // Biológico (máx 3)
   if (components.hypergammaglobulinemia) total += 1;
   if (components.hypocomplementemia) total += 2;
   return total;
 };
-
 const interpretSSDAI = (score) => {
   if (score === 0) return { text: 'Inactiva', color: '#10b981', level: 'inactive' };
   if (score <= 5) return { text: 'Actividad baja', color: '#84cc16', level: 'low' };
   if (score <= 13) return { text: 'Actividad moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
-
-// ============================================
-// HELPER: Interpret any instrument score
-// ============================================
 const interpretScore = (instrument, score) => {
   if (instrument === 'BASDAI') return interpretBASDAI(score);
   if (instrument.startsWith('ASDAS')) return interpretASDAS(score);
@@ -385,15 +291,11 @@ const interpretScore = (instrument, score) => {
   if (instrument === 'SSDAI') return interpretSSDAI(score);
   return { text: 'Sin datos', color: '#9ca3af' };
 };
-
-// All instrument keys
 const ALL_INSTRUMENTS = [
   'BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
   'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
   'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI'
 ];
-
-// SCORE2 - Cardiovascular Risk Calculator (40-69 years)
 const calculateSCORE2 = (components) => {
   const age = parseInt(components.age || 50);
   const sex = components.sex || 'male';
@@ -401,75 +303,60 @@ const calculateSCORE2 = (components) => {
   const sbp = parseFloat(components.sbp || 120);
   const cholesterol = parseFloat(components.cholesterol || 5);
   const region = components.region || 'moderate';
-  
   let risk = 0;
   risk += (age - 40) * 0.3;
   if (sex === 'male') risk += 3;
   if (smoking === 'yes') risk += 5;
-  
   if (sbp < 120) risk += 0;
   else if (sbp < 140) risk += 2;
   else if (sbp < 160) risk += 4;
   else if (sbp < 180) risk += 7;
   else risk += 10;
-  
   if (cholesterol < 5) risk += 0;
   else if (cholesterol < 6) risk += 1.5;
   else if (cholesterol < 7) risk += 3;
   else risk += 4.5;
-  
   if (region === 'low') risk *= 0.7;
   else if (region === 'moderate') risk *= 1.0;
   else if (region === 'high') risk *= 1.3;
   else if (region === 'very_high') risk *= 1.6;
-  
   risk = Math.min(risk, 40);
   return Math.round(risk * 10) / 10;
 };
-
 const interpretSCORE2 = (score) => {
   if (score < 2.5) return { text: 'Riesgo bajo-moderado (<2.5%)', color: '#10b981', level: 'low' };
   if (score < 7.5) return { text: 'Riesgo moderado (2.5-7.5%)', color: '#f59e0b', level: 'moderate' };
   if (score < 10) return { text: 'Riesgo alto (7.5-10%)', color: '#ef4444', level: 'high' };
   return { text: 'Riesgo muy alto (≥10%)', color: '#dc2626', level: 'very_high' };
 };
-
-// SCORE2-OP - Cardiovascular Risk Calculator (70+ years)
 const calculateSCORE2OP = (components) => {
   const age = parseInt(components.age || 70);
   const sex = components.sex || 'male';
   const smoking = components.smoking || 'no';
   const sbp = parseFloat(components.sbp || 120);
   const cholesterol = parseFloat(components.cholesterol || 5);
-  
   let risk = 0;
   risk += (age - 70) * 0.5;
   if (sex === 'male') risk += 5;
   if (smoking === 'yes') risk += 8;
-  
   if (sbp < 120) risk += 0;
   else if (sbp < 140) risk += 3;
   else if (sbp < 160) risk += 6;
   else if (sbp < 180) risk += 10;
   else risk += 15;
-  
   if (cholesterol < 5) risk += 0;
   else if (cholesterol < 6) risk += 2;
   else if (cholesterol < 7) risk += 4;
   else risk += 6;
-  
   risk = Math.min(risk, 50);
   return Math.round(risk * 10) / 10;
 };
-
 const interpretSCORE2OP = (score) => {
   if (score < 7.5) return { text: 'Riesgo bajo (<7.5%)', color: '#10b981', level: 'low' };
   if (score < 15) return { text: 'Riesgo moderado (7.5-15%)', color: '#f59e0b', level: 'moderate' };
   if (score < 22.5) return { text: 'Riesgo alto (15-22.5%)', color: '#ef4444', level: 'high' };
   return { text: 'Riesgo muy alto (≥22.5%)', color: '#dc2626', level: 'very_high' };
 };
-
-// QRISK3 - Riesgo cardiovascular
 const calculateQRISK3 = (components) => {
   const age = parseInt(components.age || 40);
   const sex = components.sex || 'male';
@@ -479,40 +366,32 @@ const calculateQRISK3 = (components) => {
   const cholesterol = parseFloat(components.cholesterol || 5);
   const hdl = parseFloat(components.hdl || 1.3);
   const bmi = parseFloat(components.bmi || 25);
-  
   let risk = 0;
   risk += (age - 40) * 0.3;
   if (sex === 'male') risk += 4;
   if (smoking === 'yes') risk += 5;
   if (diabetes === 'yes') risk += 8;
-  
   if (sbp < 120) risk += 0;
   else if (sbp < 140) risk += 2;
   else if (sbp < 160) risk += 5;
   else if (sbp < 180) risk += 8;
   else risk += 12;
-  
   const cholHdlRatio = cholesterol / hdl;
   if (cholHdlRatio < 4) risk += 0;
   else if (cholHdlRatio < 5) risk += 2;
   else if (cholHdlRatio < 6) risk += 4;
   else risk += 6;
-  
   if (bmi < 25) risk += 0;
   else if (bmi < 30) risk += 2;
   else risk += 4;
-  
   risk = Math.min(risk, 50);
   return Math.round(risk * 10) / 10;
 };
-
 const interpretQRISK3 = (score) => {
   if (score < 10) return { text: 'Riesgo bajo (<10%)', color: '#10b981', level: 'low' };
   if (score < 20) return { text: 'Riesgo moderado (10-20%)', color: '#f59e0b', level: 'moderate' };
   return { text: 'Riesgo alto (≥20%)', color: '#ef4444', level: 'high' };
 };
-
-// SLICC - Systemic Lupus International Collaborating Clinics Damage Index
 const calculateSLICC = (components) => {
   let total = 0;
   Object.keys(components).forEach(key => {
@@ -522,19 +401,12 @@ const calculateSLICC = (components) => {
   });
   return total;
 };
-
 const interpretSLICC = (score) => {
   if (score === 0) return { text: 'Sin daño', color: '#10b981', level: 'none' };
   if (score <= 2) return { text: 'Daño leve (1-2)', color: '#84cc16', level: 'mild' };
   if (score <= 4) return { text: 'Daño moderado (3-4)', color: '#f59e0b', level: 'moderate' };
   return { text: 'Daño severo (≥5)', color: '#ef4444', level: 'severe' };
 };
-
-// ============================================
-// CONFIGURACIÓN DE CALCULADORAS
-// ============================================
-
-// Definir qué calculadoras son colaborativas (requieren datos del médico)
 const COLLABORATIVE_CALCULATORS = {
   'ASDAS_CRP': {
     collaborative: true,
@@ -609,24 +481,13 @@ const COLLABORATIVE_CALCULATORS = {
     doctorLabel: 'SLICC - Índice de daño en lupus'
   }
 };
-
-// Calculadoras que solo puede hacer el médico
 const DOCTOR_ONLY_CALCULATORS = ['SLEDAI', 'SSDAI', 'SLICC'];
-
-// Verificar si una calculadora es colaborativa
 const isCollaborative = (instrument) => {
   return COLLABORATIVE_CALCULATORS.hasOwnProperty(instrument);
 };
-
-// Verificar si una calculadora es solo para médicos
 const isDoctorOnly = (instrument) => {
   return DOCTOR_ONLY_CALCULATORS.includes(instrument);
 };
-
-// ============================================
-// SUPABASE STORAGE FUNCTIONS
-// ============================================
-
 const Storage = {
   async getHospitals() {
     if (!supabase) { console.error('Supabase no configurado'); return []; }
@@ -642,7 +503,6 @@ const Storage = {
       return [];
     }
   },
-  
   async getUsers() {
     if (!supabase) { console.error('Supabase no configurado'); return []; }
     try {
@@ -654,7 +514,6 @@ const Storage = {
       return [];
     }
   },
-  
   async createUser(user) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -666,7 +525,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getUserByEmailAndPassword(email, passwordHash) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -688,7 +546,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getUserByEmail(email) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -707,7 +564,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getPatientByUserId(userId) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -728,7 +584,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getPatientByNhc(nhc, hospitalId = null) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -736,12 +591,9 @@ const Storage = {
         .from('patients')
         .select('*')
         .eq('nhc', nhc);
-      
-      // Si se proporciona hospital_id, también filtrar por hospital
       if (hospitalId) {
         query = query.eq('hospital_id', hospitalId);
       }
-      
       const { data, error } = await query.maybeSingle();
       if (error) {
         console.error('Error getPatientByNhc:', error);
@@ -753,7 +605,6 @@ const Storage = {
       return null;
     }
   },
-  
   async createPatient(patient) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -767,7 +618,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getScoresByPatientId(patientId) {
     if (!supabase) { console.error('Supabase no configurado'); return []; }
     try {
@@ -783,7 +633,6 @@ const Storage = {
       return [];
     }
   },
-  
   async createScore(score) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -795,7 +644,6 @@ const Storage = {
       return null;
     }
   },
-  
   async createAccessLog(log) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -807,7 +655,6 @@ const Storage = {
       return null;
     }
   },
-  
   async savePendingCalculation(data) {
     if (!supabase) return null;
     try {
@@ -823,7 +670,6 @@ const Storage = {
       return null;
     }
   },
-  
   async getPendingCalculations(patientId) {
     if (!supabase) return [];
     try {
@@ -840,7 +686,6 @@ const Storage = {
       return [];
     }
   },
-  
   async completePendingCalculation(pendingId, doctorId) {
     if (!supabase) return null;
     try {
@@ -861,7 +706,6 @@ const Storage = {
       return null;
     }
   },
-  
   async deletePendingCalculation(pendingId) {
     if (!supabase) return false;
     try {
@@ -877,18 +721,12 @@ const Storage = {
     }
   }
 };
-
-// ============================================
-// COMPONENTS
-// ============================================
-
 const Brand = ({ size = 'normal' }) => (
   <div className={`brand ${size}`}>
     <span className="brand-at">@</span>
     <span className="brand-name">reumacastro</span>
   </div>
 );
-
 const FormInput = ({ label, type = 'text', value, onChange, min, max, step, unit, required = false, placeholder, disabled = false, style = {} }) => (
   <div className="form-group">
     <label>
@@ -911,7 +749,6 @@ const FormInput = ({ label, type = 'text', value, onChange, min, max, step, unit
     />
   </div>
 );
-
 const SliderInput = ({ label, value, onChange, min = 0, max = 10, step = 0.1 }) => (
   <div className="slider-group">
     <label>
@@ -932,7 +769,6 @@ const SliderInput = ({ label, value, onChange, min = 0, max = 10, step = 0.1 }) 
     </div>
   </div>
 );
-
 const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }) => (
   <div className="result-card">
     <div className="result-header">
@@ -956,16 +792,10 @@ const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }
     )}
   </div>
 );
-
-// ============================================
-// CALCULATOR COMPONENTS
-// ============================================
-
 const BASDAICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: 5, q2: 5, q3: 5, q4: 5, q5: 5, q6: 5
   });
-  
   const questions = [
     { key: 'q1', label: '1. Fatiga/cansancio' },
     { key: 'q2', label: '2. Dolor en cuello, espalda o cadera' },
@@ -974,13 +804,11 @@ const BASDAICalculator = ({ onResult }) => {
     { key: 'q5', label: '5. Intensidad de rigidez matutina' },
     { key: 'q6', label: '6. Duración de rigidez matutina (0-10 → 0-2h+)' }
   ];
-  
   const handleCalculate = () => {
     const score = calculateBASDAI(components);
     const interpretation = interpretBASDAI(score);
     onResult({ score, interpretation, components, instrument: 'BASDAI' });
   };
-  
   return (
     <div className="calculator-form">
       <h3>BASDAI</h3>
@@ -988,7 +816,6 @@ const BASDAICalculator = ({ onResult }) => {
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Actividad de la enfermedad en espondiloartritis axial
       </p>
-      
       {questions.map(q => (
         <SliderInput
           key={q.key}
@@ -997,33 +824,29 @@ const BASDAICalculator = ({ onResult }) => {
           onChange={(val) => setComponents(prev => ({ ...prev, [q.key]: val }))}
         />
       ))}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular BASDAI
       </button>
     </div>
   );
 };
-
 const ASDASCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [variant, setVariant] = useState('CRP');
   const [components, setComponents] = useState(
     initialData || { backPain: 5, duration: 5, peripheral: 5, global: 5, crp: 5, esr: 20 }
   );
-  
   const handleCalculate = () => {
-    const score = variant === 'CRP' 
+    const score = variant === 'CRP'
       ? calculateASDASwithCRP(components)
       : calculateASDASwithESR(components);
     const interpretation = interpretASDAS(score);
-    onResult({ 
-      score, 
-      interpretation, 
-      components: { ...components, variant }, 
-      instrument: `ASDAS_${variant}` 
+    onResult({
+      score,
+      interpretation,
+      components: { ...components, variant },
+      instrument: `ASDAS_${variant}`
     });
   };
-  
   return (
     <div className="calculator-form">
       <h3>ASDAS</h3>
@@ -1031,22 +854,20 @@ const ASDASCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Actividad de la enfermedad en espondiloartritis axial
       </p>
-      
       <div className="variant-selector">
-        <button 
-          className={variant === 'CRP' ? 'active' : ''} 
+        <button
+          className={variant === 'CRP' ? 'active' : ''}
           onClick={() => setVariant('CRP')}
         >
           ASDAS-PCR
         </button>
-        <button 
-          className={variant === 'ESR' ? 'active' : ''} 
+        <button
+          className={variant === 'ESR' ? 'active' : ''}
           onClick={() => setVariant('ESR')}
         >
           ASDAS-VSG
         </button>
       </div>
-      
       <SliderInput
         label="Dolor de espalda (0-10)"
         value={components.backPain}
@@ -1067,7 +888,6 @@ const ASDASCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
         value={components.global}
         onChange={(val) => setComponents(prev => ({ ...prev, global: val }))}
       />
-      
       {variant === 'CRP' ? (
         <FormInput
           label={isDoctor ? "PCR" : "PCR (solo puede completarlo el reumatólogo/a)"}
@@ -1095,25 +915,21 @@ const ASDASCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
           style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
         />
       )}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular ASDAS
       </button>
     </div>
   );
 };
-
 const DAPSACalculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [components, setComponents] = useState(
     initialData || { pain: 5, global: 5, tjc: 0, sjc: 0, crp: 1 }
   );
-  
   const handleCalculate = () => {
     const score = calculateDAPSA(components);
     const interpretation = interpretDAPSA(score);
     onResult({ score, interpretation, components, instrument: 'DAPSA' });
   };
-  
   return (
     <div className="calculator-form">
       <h3>DAPSA</h3>
@@ -1121,7 +937,6 @@ const DAPSACalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Actividad de la enfermedad en artritis psoriásica
       </p>
-      
       <SliderInput
         label="Dolor (EVA 0-10)"
         value={components.pain}
@@ -1168,33 +983,29 @@ const DAPSACalculator = ({ onResult, isDoctor = false, initialData = null }) => 
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular DAPSA
       </button>
     </div>
   );
 };
-
 const DAS28Calculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [variant, setVariant] = useState('CRP');
   const [components, setComponents] = useState(
     initialData || { tjc28: 0, sjc28: 0, global: 50, crp: 5, esr: 20 }
   );
-  
   const handleCalculate = () => {
     const score = variant === 'CRP'
       ? calculateDAS28withCRP(components)
       : calculateDAS28withESR(components);
     const interpretation = interpretDAS28(score);
-    onResult({ 
-      score, 
-      interpretation, 
-      components: { ...components, variant }, 
-      instrument: `DAS28_${variant}` 
+    onResult({
+      score,
+      interpretation,
+      components: { ...components, variant },
+      instrument: `DAS28_${variant}`
     });
   };
-  
   return (
     <div className="calculator-form">
       <h3>DAS28</h3>
@@ -1202,22 +1013,20 @@ const DAS28Calculator = ({ onResult, isDoctor = false, initialData = null }) => 
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Actividad de la enfermedad en artritis reumatoide
       </p>
-      
       <div className="variant-selector">
-        <button 
-          className={variant === 'CRP' ? 'active' : ''} 
+        <button
+          className={variant === 'CRP' ? 'active' : ''}
           onClick={() => setVariant('CRP')}
         >
           DAS28-PCR
         </button>
-        <button 
-          className={variant === 'ESR' ? 'active' : ''} 
+        <button
+          className={variant === 'ESR' ? 'active' : ''}
           onClick={() => setVariant('ESR')}
         >
           DAS28-VSG
         </button>
       </div>
-      
       <FormInput
         label={isDoctor ? "Articulaciones dolorosas - TJC28" : "Articulaciones dolorosas - TJC28 (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -1250,7 +1059,6 @@ const DAS28Calculator = ({ onResult, isDoctor = false, initialData = null }) => 
         max={100}
         step={1}
       />
-      
       {variant === 'CRP' ? (
         <FormInput
           label={isDoctor ? "PCR" : "PCR (solo puede completarlo el reumatólogo/a)"}
@@ -1278,16 +1086,12 @@ const DAS28Calculator = ({ onResult, isDoctor = false, initialData = null }) => 
           style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
         />
       )}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular DAS28
       </button>
     </div>
   );
 };
-
-// ===== NUEVAS CALCULADORAS =====
-
 const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
   const [components, setComponents] = useState({
     seizure: false, psychosis: false, organicBrainSyndrome: false, visualDisturbance: false,
@@ -1297,13 +1101,11 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
     lowComplement: false, increasedDnaBind: false, fever: false, thrombocytopenia: false,
     leukopenia: false, rash: false, alopecia: false, mucosalUlcers: false
   });
-
   const handleCalculate = () => {
     const score = calculateSLEDAI(components);
     const interpretation = interpretSLEDAI(score);
     onResult({ score, interpretation, components, instrument: 'SLEDAI' });
   };
-
   const CheckboxGroup = ({ items }) => (
     <div style={{ display: 'grid', gap: '0.5rem' }}>
       {items.map(({ key, label, points }) => (
@@ -1318,16 +1120,14 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
       ))}
     </div>
   );
-
   return (
     <div className="calculator-form">
       <h3>SLEDAI</h3>
       <p className="calc-description">Systemic Lupus Erythematosus Disease Activity Index</p>
-      
       {!isDoctor && (
-        <div style={{ 
-          padding: '1rem', 
-          backgroundColor: '#fef3c7', 
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef3c7',
           borderRadius: '0.5rem',
           borderLeft: '4px solid #f59e0b',
           marginBottom: '1.5rem'
@@ -1337,7 +1137,6 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           </p>
         </div>
       )}
-      
       <div style={{ marginBottom: '1rem' }}>
         <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Sistema Nervioso (8pts c/u)</h4>
         <CheckboxGroup items={[
@@ -1350,7 +1149,6 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           { key: 'cva', label: 'ACV', points: 8 }
         ]} />
       </div>
-
       <div style={{ marginBottom: '1rem' }}>
         <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Vascular/Muscular</h4>
         <CheckboxGroup items={[
@@ -1359,7 +1157,6 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           { key: 'myositis', label: 'Miositis', points: 4 }
         ]} />
       </div>
-
       <div style={{ marginBottom: '1rem' }}>
         <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Renal (4pts c/u)</h4>
         <CheckboxGroup items={[
@@ -1369,7 +1166,6 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           { key: 'pyuria', label: 'Piuria', points: 4 }
         ]} />
       </div>
-
       <div style={{ marginBottom: '1rem' }}>
         <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Serositis/Cutáneo</h4>
         <CheckboxGroup items={[
@@ -1380,7 +1176,6 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           { key: 'mucosalUlcers', label: 'Úlceras mucosas', points: 2 }
         ]} />
       </div>
-
       <div style={{ marginBottom: '1rem' }}>
         <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Inmunológico/Hematológico</h4>
         <CheckboxGroup items={[
@@ -1391,27 +1186,23 @@ const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
           { key: 'leukopenia', label: 'Leucopenia', points: 1 }
         ]} />
       </div>
-
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular SLEDAI
       </button>
     </div>
   );
 };
-
 const LupusPROCalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     lupusSymptoms: 2, lupusMedications: 2, procreation: 2, physicalHealth: 2,
     painVitality: 2, emotionalHealth: 2, bodyImage: 2, cognition: 2,
     desires: 2, coping: 2, satisfaction: 2
   });
-
   const handleCalculate = () => {
     const score = calculateLupusPRO(components);
     const interpretation = interpretLupusPRO(score);
     onResult({ score, interpretation, components, instrument: 'LupusPRO' });
   };
-
   const domains = [
     { key: 'lupusSymptoms', label: 'Síntomas de lupus' },
     { key: 'lupusMedications', label: 'Medicaciones' },
@@ -1425,7 +1216,6 @@ const LupusPROCalculator = ({ onResult }) => {
     { key: 'coping', label: 'Afrontamiento' },
     { key: 'satisfaction', label: 'Satisfacción con atención médica' }
   ];
-
   return (
     <div className="calculator-form">
       <h3>LupusPRO v1.8</h3>
@@ -1433,7 +1223,6 @@ const LupusPROCalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Escala: 0=Nunca, 1=Casi nunca, 2=A veces, 3=A menudo, 4=Siempre
       </p>
-      
       {domains.map(({ key, label }) => (
         <SliderInput
           key={key}
@@ -1445,14 +1234,12 @@ const LupusPROCalculator = ({ onResult }) => {
           step={0.5}
         />
       ))}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular LupusPRO
       </button>
     </div>
   );
 };
-
 const FACITCalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: 2, q2: 2, q3: 2, q4: 2, q5: 2, q6: 2, q7: 2, q8: 2, q9: 2,
@@ -1460,13 +1247,11 @@ const FACITCalculator = ({ onResult }) => {
     q18: 2, q19: 2, q20: 2, q21: 2, q22: 2, q23: 2, q24: 2, q25: 2,
     q26: 2, q27: 2
   });
-
   const handleCalculate = () => {
     const score = calculateFACIT(components);
     const interpretation = interpretFACIT(score);
     onResult({ score, interpretation, components, instrument: 'FACIT' });
   };
-
   const questions = [
     'Me falta energía', 'Tengo náuseas', 'Debido a mi condición física, tengo dificultad para atender las necesidades de mi familia',
     'Tengo dolor', 'Me molestan los efectos secundarios del tratamiento', 'Me siento enfermo/a',
@@ -1478,7 +1263,6 @@ const FACITCalculator = ({ onResult }) => {
     'Disfruto de mis pasatiempos habituales', 'Estoy contento/a con la calidad de mi vida actualmente', 'Puedo trabajar (incluye trabajo en casa)',
     'Mi trabajo me satisface (incluye trabajo en casa)', 'Puedo disfrutar de la vida', 'He aceptado mi enfermedad'
   ];
-
   return (
     <div className="calculator-form">
       <h3>FACIT-General</h3>
@@ -1486,7 +1270,6 @@ const FACITCalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Escala: 0=Nada, 1=Un poco, 2=Algo, 3=Mucho, 4=Muchísimo
       </p>
-      
       <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
         {questions.map((question, idx) => (
           <SliderInput
@@ -1500,26 +1283,22 @@ const FACITCalculator = ({ onResult }) => {
           />
         ))}
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular FACIT
       </button>
     </div>
   );
 };
-
 const SF36Calculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     physicalFunctioning: 50, rolePhysical: 50, bodilyPain: 50, generalHealth: 50,
     vitality: 50, socialFunctioning: 50, roleEmotional: 50, mentalHealth: 50
   });
-
   const handleCalculate = () => {
     const score = calculateSF36(components);
     const interpretation = interpretSF36(score);
     onResult({ score, interpretation, components, instrument: 'SF36' });
   };
-
   const dimensions = [
     { key: 'physicalFunctioning', label: 'Función física' },
     { key: 'rolePhysical', label: 'Rol físico' },
@@ -1530,7 +1309,6 @@ const SF36Calculator = ({ onResult }) => {
     { key: 'roleEmotional', label: 'Rol emocional' },
     { key: 'mentalHealth', label: 'Salud mental' }
   ];
-
   return (
     <div className="calculator-form">
       <h3>SF-36</h3>
@@ -1538,7 +1316,6 @@ const SF36Calculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Escala: 0-100 (0=Peor, 100=Mejor)
       </p>
-      
       {dimensions.map(({ key, label }) => (
         <SliderInput
           key={key}
@@ -1550,25 +1327,21 @@ const SF36Calculator = ({ onResult }) => {
           step={5}
         />
       ))}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular SF-36
       </button>
     </div>
   );
 };
-
 const BASFICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: 5, q2: 5, q3: 5, q4: 5, q5: 5, q6: 5, q7: 5, q8: 5, q9: 5, q10: 5
   });
-
   const handleCalculate = () => {
     const score = calculateBASFI(components);
     const interpretation = interpretBASFI(score);
     onResult({ score, interpretation, components, instrument: 'BASFI' });
   };
-
   const questions = [
     'Ponerse calcetines o medias sin ayuda',
     'Agacharse a recoger algo del suelo',
@@ -1581,7 +1354,6 @@ const BASFICalculator = ({ onResult }) => {
     'Realizar actividades físicamente exigentes',
     'Realizar un día completo de actividades'
   ];
-
   return (
     <div className="calculator-form">
       <h3>BASFI</h3>
@@ -1589,7 +1361,6 @@ const BASFICalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Escala: 0=Fácil, 10=Imposible
       </p>
-      
       {questions.map((question, idx) => (
         <SliderInput
           key={`q${idx + 1}`}
@@ -1601,27 +1372,23 @@ const BASFICalculator = ({ onResult }) => {
           step={0.5}
         />
       ))}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular BASFI
       </button>
     </div>
   );
 };
-
 const ASASHICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: false, q2: false, q3: false, q4: false, q5: false, q6: false,
     q7: false, q8: false, q9: false, q10: false, q11: false, q12: false,
     q13: false, q14: false, q15: false, q16: false, q17: false
   });
-
   const handleCalculate = () => {
     const score = calculateASASHI(components);
     const interpretation = interpretASASHI(score);
     onResult({ score, interpretation, components, instrument: 'ASASHI' });
   };
-
   const questions = [
     'Dolor', 'Sentimientos de depresión', 'Motivación para hacer cualquier cosa',
     'Manejo de situaciones inesperadas', 'Participar en actividades recreativas',
@@ -1631,7 +1398,6 @@ const ASASHICalculator = ({ onResult }) => {
     'Usar transporte público', 'Conducir un coche', 'Lavar el cuerpo',
     'Vestirse'
   ];
-
   return (
     <div className="calculator-form">
       <h3>ASAS-HI</h3>
@@ -1639,7 +1405,6 @@ const ASASHICalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Marque las actividades con las que tiene dificultad
       </p>
-      
       <div style={{ display: 'grid', gap: '0.75rem' }}>
         {questions.map((question, idx) => (
           <label key={`q${idx + 1}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -1652,27 +1417,23 @@ const ASASHICalculator = ({ onResult }) => {
           </label>
         ))}
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate} style={{ marginTop: '1rem' }}>
         Calcular ASAS-HI
       </button>
     </div>
   );
 };
-
 const ASQoLCalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: false, q2: false, q3: false, q4: false, q5: false, q6: false,
     q7: false, q8: false, q9: false, q10: false, q11: false, q12: false,
     q13: false, q14: false, q15: false, q16: false, q17: false, q18: false
   });
-
   const handleCalculate = () => {
     const score = calculateASQoL(components);
     const interpretation = interpretASQoL(score);
     onResult({ score, interpretation, components, instrument: 'ASQoL' });
   };
-
   const questions = [
     'Siento que mi enfermedad controla mi vida', 'Tengo que depender demasiado de otras personas',
     'Me siento frustrado/a', 'Me siento cansado/a la mayor parte del tiempo',
@@ -1684,7 +1445,6 @@ const ASQoLCalculator = ({ onResult }) => {
     'Tengo dificultad para participar en actividades físicas', 'Evito contacto social',
     'Me siento irritable', 'Mi enfermedad afecta mi relación de pareja'
   ];
-
   return (
     <div className="calculator-form">
       <h3>ASQoL</h3>
@@ -1692,7 +1452,6 @@ const ASQoLCalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Marque las afirmaciones que se aplican a usted
       </p>
-      
       <div style={{ display: 'grid', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
         {questions.map((question, idx) => (
           <label key={`q${idx + 1}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
@@ -1706,14 +1465,12 @@ const ASQoLCalculator = ({ onResult }) => {
           </label>
         ))}
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate} style={{ marginTop: '1rem' }}>
         Calcular ASQoL
       </button>
     </div>
   );
 };
-
 const PSAQoLCalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: false, q2: false, q3: false, q4: false, q5: false, q6: false,
@@ -1721,13 +1478,11 @@ const PSAQoLCalculator = ({ onResult }) => {
     q13: false, q14: false, q15: false, q16: false, q17: false, q18: false,
     q19: false, q20: false
   });
-
   const handleCalculate = () => {
     const score = calculatePSAQoL(components);
     const interpretation = interpretPSAQoL(score);
     onResult({ score, interpretation, components, instrument: 'PSAQoL' });
   };
-
   const questions = [
     'Siento que mi artritis controla mi vida', 'Tengo dificultad para hacer cosas espontáneamente',
     'Siento frustración', 'Me siento cansado/a la mayor parte del tiempo',
@@ -1740,7 +1495,6 @@ const PSAQoLCalculator = ({ onResult }) => {
     'Necesito ayuda para actividades diarias', 'Tengo dificultad para concentrarme',
     'Me preocupa mi apariencia', 'Tengo dificultad para mantener relaciones'
   ];
-
   return (
     <div className="calculator-form">
       <h3>PSAQoL</h3>
@@ -1748,7 +1502,6 @@ const PSAQoLCalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Marque las afirmaciones que se aplican a usted
       </p>
-      
       <div style={{ display: 'grid', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
         {questions.map((question, idx) => (
           <label key={`q${idx + 1}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
@@ -1762,25 +1515,21 @@ const PSAQoLCalculator = ({ onResult }) => {
           </label>
         ))}
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate} style={{ marginTop: '1rem' }}>
         Calcular PSAQoL
       </button>
     </div>
   );
 };
-
 const ESSPRICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     dryness: 5, fatigue: 5, pain: 5
   });
-
   const handleCalculate = () => {
     const score = calculateESSPRI(components);
     const interpretation = interpretESSPRI(score);
     onResult({ score, interpretation, components, instrument: 'ESSPRI' });
   };
-
   return (
     <div className="calculator-form">
       <h3>ESSPRI</h3>
@@ -1788,7 +1537,6 @@ const ESSPRICalculator = ({ onResult }) => {
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
         Escala: 0=Ausente, 10=Máximo
       </p>
-      
       <SliderInput
         label="Sequedad (boca, ojos, piel, etc.)"
         value={components.dryness}
@@ -1813,14 +1561,12 @@ const ESSPRICalculator = ({ onResult }) => {
         max={10}
         step={0.5}
       />
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular ESSPRI
       </button>
     </div>
   );
 };
-
 const SSDAICalculator = ({ onResult, isDoctor = false }) => {
   const [components, setComponents] = useState({
     fever: false, lymphadenopathy: false, lymphadenopathyBiopsy: false,
@@ -1829,13 +1575,11 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
     myositis: false, cns: false, pns: false, leukopenia: false,
     thrombocytopenia: false, hypergammaglobulinemia: false, hypocomplementemia: false
   });
-
   const handleCalculate = () => {
     const score = calculateSSDAI(components);
     const interpretation = interpretSSDAI(score);
     onResult({ score, interpretation, components, instrument: 'SSDAI' });
   };
-
   const CheckboxGroup = ({ items }) => (
     <div style={{ display: 'grid', gap: '0.5rem' }}>
       {items.map(({ key, label, points }) => (
@@ -1850,16 +1594,14 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
       ))}
     </div>
   );
-
   return (
     <div className="calculator-form">
       <h3>SSDAI</h3>
       <p className="calc-description">Sjögren's Syndrome Disease Activity Index (Vitali 2007)</p>
-      
       {!isDoctor && (
-        <div style={{ 
-          padding: '1rem', 
-          backgroundColor: '#fef3c7', 
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#fef3c7',
           borderRadius: '0.5rem',
           borderLeft: '4px solid #f59e0b',
           marginBottom: '1.5rem'
@@ -1869,7 +1611,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
           </p>
         </div>
       )}
-      
       <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Constitucional</h4>
@@ -1879,7 +1620,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
             { key: 'lymphadenopathyBiopsy', label: 'Linfadenopatía (biopsia+)', points: 3 }
           ]} />
         </div>
-
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Glandular/Articular</h4>
           <CheckboxGroup items={[
@@ -1888,7 +1628,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
             { key: 'arthritis', label: 'Artritis', points: 4 }
           ]} />
         </div>
-
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Cutáneo</h4>
           <CheckboxGroup items={[
@@ -1896,7 +1635,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
             { key: 'purpura', label: 'Púrpura', points: 6 }
           ]} />
         </div>
-
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Órgano mayor</h4>
           <CheckboxGroup items={[
@@ -1907,7 +1645,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
             { key: 'pns', label: 'SNP', points: 9 }
           ]} />
         </div>
-
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Hematológico/Inmunológico</h4>
           <CheckboxGroup items={[
@@ -1918,29 +1655,21 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
           ]} />
         </div>
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate} style={{ marginTop: '1rem' }}>
         Calcular SSDAI
       </button>
     </div>
   );
 };
-
-// ============================================
-// PAGE COMPONENTS
-// ============================================
-
 const LandingPage = ({ onNavigate }) => (
   <div className="landing-page">
     <div className="landing-bg" />
     <div className="landing-content">
-      
       <div className="landing-hero">
         <div className="logo-icon">🩺</div>
         <h1>ReumaCal</h1>
         <p className="subtitle">Calculadoras reumatológicas para facilitar tu consulta</p>
       </div>
-      
       <div className="landing-buttons">
         <button className="btn-patient" onClick={() => onNavigate('auth', 'patient')}>
           <span className="btn-icon">👤</span>
@@ -1951,96 +1680,207 @@ const LandingPage = ({ onNavigate }) => (
           <span>Soy reumatólogo/a</span>
         </button>
       </div>
-      
       <div className="landing-features">
-        {/* Espondiloartritis axial */}
-        <div className="feature">
-          <span className="feature-icon">📈</span>
-          <span>ASDAS</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🦴</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Espondiloartritis
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">📈</span>
+              <span>ASDAS</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">📊</span>
+              <span>BASDAI</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🚶</span>
+              <span>BASFI</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">😊</span>
+              <span>ASQoL</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">💡</span>
+              <span>ASAS-HI</span>
+            </div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">📊</span>
-          <span>BASDAI</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🔴</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Artritis psoriásica
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">📉</span>
+              <span>DAPSA</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🎯</span>
+              <span>PsAQoL</span>
+            </div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">🚶</span>
-          <span>BASFI</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🔵</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Artritis reumatoide
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">📋</span>
+              <span>DAS28</span>
+            </div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">😊</span>
-          <span>ASQoL</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🦋</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Lupus eritematoso sistémico
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">🦋</span>
+              <span>SLEDAI</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">📋</span>
+              <span>SLICC</span>
+            </div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">💡</span>
-          <span>ASAS-HI</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>💚</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Calidad de vida
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">💪</span>
+              <span>FACIT</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🏥</span>
+              <span>SF-36</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">💚</span>
+              <span>LupusPRO</span>
+            </div>
+          </div>
         </div>
-        
-        {/* Artritis psoriásica */}
-        <div className="feature">
-          <span className="feature-icon">📉</span>
-          <span>DAPSA</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>💧</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Síndrome de Sjögren
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">💧</span>
+              <span>ESSPRI</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🔬</span>
+              <span>SSDAI</span>
+            </div>
+          </div>
         </div>
-        <div className="feature">
-          <span className="feature-icon">🎯</span>
-          <span>PsAQoL</span>
-        </div>
-        
-        {/* Artritis reumatoide */}
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>DAS28</span>
-        </div>
-        
-        {/* Lupus */}
-        <div className="feature">
-          <span className="feature-icon">🦋</span>
-          <span>SLEDAI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>SLICC</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💚</span>
-          <span>LupusPRO</span>
-        </div>
-        
-        {/* Generales */}
-        <div className="feature">
-          <span className="feature-icon">💪</span>
-          <span>FACIT</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🏥</span>
-          <span>SF-36</span>
-        </div>
-        
-        {/* Sjögren */}
-        <div className="feature">
-          <span className="feature-icon">💧</span>
-          <span>ESSPRI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🔬</span>
-          <span>SSDAI</span>
-        </div>
-        
-        {/* Cardiovasculares */}
-        <div className="feature">
-          <span className="feature-icon">💗</span>
-          <span>SCORE2</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">❤️</span>
-          <span>SCORE2-OP</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🫀</span>
-          <span>QRISK3</span>
+        {}
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '1rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '2px solid rgba(255,255,255,0.2)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>❤️</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>
+              Riesgo cardiovascular
+            </h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature">
+              <span className="feature-icon">💗</span>
+              <span>SCORE2</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">❤️</span>
+              <span>SCORE2-OP</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🫀</span>
+              <span>QRISK3</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    
     <footer className="landing-footer" style={{ paddingBottom: '40px' }}>
       <Brand size="small" />
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', fontSize: '13px', marginTop: '16px' }}>
@@ -2053,25 +1893,20 @@ const LandingPage = ({ onNavigate }) => (
     </footer>
   </div>
 );
-
 const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [components, setComponents] = useState(
     initialData || { age: 55, sex: 'male', smoking: 'no', sbp: 130, cholesterol: 200, region: 'moderate' }
   );
-  
   const handleCalculate = () => {
-    // Convertir colesterol de mg/dL a mmol/L para el cálculo
     const cholesterolMmol = components.cholesterol / 38.67;
     const score = calculateSCORE2({ ...components, cholesterol: cholesterolMmol });
     const interpretation = interpretSCORE2(score);
     onResult({ score, interpretation, components, instrument: 'SCORE2' });
   };
-  
   return (
     <div className="calculator-form">
       <h3>SCORE2 (40-69 años)</h3>
       <p className="calc-description">Riesgo Cardiovascular en adultos de 40-69 años</p>
-      
       <div className="form-group">
         <label>Edad (40-69 años)</label>
         <input
@@ -2089,7 +1924,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           }}
         />
       </div>
-      
       <div className="form-group">
         <label>Sexo</label>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
@@ -2115,7 +1949,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           </label>
         </div>
       </div>
-      
       <div className="form-group">
         <label>Fumador</label>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
@@ -2141,7 +1974,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           </label>
         </div>
       </div>
-      
       <FormInput
         label={isDoctor ? "Presión Arterial Sistólica - PA" : "Presión Arterial Sistólica - PA (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2155,7 +1987,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <FormInput
         label={isDoctor ? "Colesterol Total" : "Colesterol Total (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2169,7 +2000,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <div className="form-group">
         <label>{isDoctor ? "Región de riesgo cardiovascular" : "Región de riesgo cardiovascular (solo puede completarlo el reumatólogo/a)"}</label>
         <select
@@ -2193,32 +2023,26 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           <option value="very_high">Riesgo muy alto (Este Europa)</option>
         </select>
       </div>
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular SCORE2
       </button>
     </div>
   );
 };
-
 const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [components, setComponents] = useState(
     initialData || { age: 75, sex: 'male', smoking: 'no', sbp: 140, cholesterol: 200 }
   );
-  
   const handleCalculate = () => {
-    // Convertir colesterol de mg/dL a mmol/L para el cálculo
     const cholesterolMmol = components.cholesterol / 38.67;
     const score = calculateSCORE2OP({ ...components, cholesterol: cholesterolMmol });
     const interpretation = interpretSCORE2OP(score);
     onResult({ score, interpretation, components, instrument: 'SCORE2-OP' });
   };
-  
   return (
     <div className="calculator-form">
       <h3>SCORE2-OP (+70 años)</h3>
       <p className="calc-description">Riesgo Cardiovascular en mayores de 70 años</p>
-      
       <div className="form-group">
         <label>Edad (70-89 años)</label>
         <input
@@ -2236,7 +2060,6 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
           }}
         />
       </div>
-      
       <div className="form-group">
         <label>Sexo</label>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
@@ -2262,7 +2085,6 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
           </label>
         </div>
       </div>
-      
       <div className="form-group">
         <label>Fumador</label>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
@@ -2288,7 +2110,6 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
           </label>
         </div>
       </div>
-      
       <FormInput
         label={isDoctor ? "Presión Arterial Sistólica - PA" : "Presión Arterial Sistólica - PA (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2302,7 +2123,6 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <FormInput
         label={isDoctor ? "Colesterol Total" : "Colesterol Total (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2316,33 +2136,29 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular SCORE2-OP
       </button>
     </div>
   );
 };
-
 const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [components, setComponents] = useState(
     initialData || { age: 50, sex: 'male', smoking: 'no', diabetes: 'no', sbp: 130, cholesterol: 200, hdl: 50, bmi: 25 }
   );
-  
   const handleCalculate = () => {
     const cholesterolMmol = components.cholesterol / 38.67;
     const hdlMmol = components.hdl / 38.67;
     const calcComponents = { ...components, cholesterol: cholesterolMmol, hdl: hdlMmol };
     const score = calculateQRISK3(calcComponents);
     const interpretation = interpretQRISK3(score);
-    onResult({ 
-      score, 
-      interpretation, 
-      components: calcComponents, 
-      instrument: 'QRISK3' 
+    onResult({
+      score,
+      interpretation,
+      components: calcComponents,
+      instrument: 'QRISK3'
     });
   };
-  
   return (
     <div className="calculator-form">
       <h3>QRISK3</h3>
@@ -2350,7 +2166,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Predicción de riesgo cardiovascular a 10 años
       </p>
-      
       <div className="form-group">
         <label>Edad (25-84 años)</label>
         <input
@@ -2368,7 +2183,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           }}
         />
       </div>
-      
       <div className="form-group">
         <label>Sexo</label>
         <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem' }}>
@@ -2394,7 +2208,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           </label>
         </div>
       </div>
-      
       <div className="form-group">
         <label>Fumador</label>
         <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem' }}>
@@ -2420,7 +2233,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           </label>
         </div>
       </div>
-      
       <FormInput
         label="IMC (kg/m²)"
         type="number"
@@ -2430,7 +2242,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         max={50}
         step={0.1}
       />
-      
       <div className="form-group">
         <label>{isDoctor ? "Diabetes" : "Diabetes (solo puede completarlo el reumatólogo/a)"}</label>
         <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem' }}>
@@ -2460,7 +2271,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
           </label>
         </div>
       </div>
-      
       <FormInput
         label={isDoctor ? "Presión arterial sistólica (mmHg)" : "Presión arterial sistólica (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2473,7 +2283,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <FormInput
         label={isDoctor ? "Colesterol total (mg/dL)" : "Colesterol total (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2486,7 +2295,6 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <FormInput
         label={isDoctor ? "HDL-colesterol (mg/dL)" : "HDL-colesterol (solo puede completarlo el reumatólogo/a)"}
         type="number"
@@ -2499,14 +2307,12 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
         disabled={!isDoctor}
         style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
       />
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular QRISK3
       </button>
     </div>
   );
 };
-
 const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
   const [components, setComponents] = useState(
     initialData || {
@@ -2524,18 +2330,16 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       malignancy: false
     }
   );
-  
   const handleCalculate = () => {
     const score = calculateSLICC(components);
     const interpretation = interpretSLICC(score);
-    onResult({ 
-      score, 
-      interpretation, 
-      components, 
-      instrument: 'SLICC' 
+    onResult({
+      score,
+      interpretation,
+      components,
+      instrument: 'SLICC'
     });
   };
-  
   const items = [
     { key: 'ocular', label: 'Daño ocular (cataratas, cambios retinianos)' },
     { key: 'neuropsych', label: 'Daño neuropsiquiátrico (deterioro cognitivo, psicosis)' },
@@ -2550,7 +2354,6 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
     { key: 'diabetes', label: 'Diabetes' },
     { key: 'malignancy', label: 'Malignidad (excepto displasia)' }
   ];
-  
   if (!isDoctor) {
     return (
       <div className="calculator-form">
@@ -2559,7 +2362,6 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
         <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
           Índice de daño acumulado en lupus eritematoso sistémico
         </p>
-        
         <div style={{
           backgroundColor: '#fef3c7',
           border: '2px solid #f59e0b',
@@ -2574,7 +2376,6 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       </div>
     );
   }
-  
   return (
     <div className="calculator-form">
       <h3>SLICC</h3>
@@ -2582,11 +2383,9 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
         Índice de daño acumulado en lupus eritematoso sistémico
       </p>
-      
       <p style={{ marginBottom: '1rem', color: '#64748b', fontSize: '0.9rem' }}>
         Marcar si existe daño en cada área (presente durante ≥6 meses):
       </p>
-      
       {items.map(item => (
         <div key={item.key} style={{
           padding: '1rem',
@@ -2609,17 +2408,14 @@ const SLICCCalculator = ({ onResult, isDoctor = false, initialData = null }) => 
           </label>
         </div>
       ))}
-      
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular SLICC
       </button>
     </div>
   );
 };
-
 const ConsentModal = ({ onClose, onAccept, onRead }) => {
   const [hasScrolled, setHasScrolled] = useState(false);
-
   const handleScroll = (e) => {
     const element = e.target;
     const scrolledToBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
@@ -2628,7 +2424,6 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
       onRead();
     }
   };
-
   return (
     <div style={{
       position: 'fixed',
@@ -2660,9 +2455,9 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <h2 style={{ 
-            margin: 0, 
-            fontSize: '1.25rem', 
+          <h2 style={{
+            margin: 0,
+            fontSize: '1.25rem',
             fontWeight: '600',
             color: '#1f2937'
           }}>
@@ -2682,8 +2477,7 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
             ×
           </button>
         </div>
-
-        <div 
+        <div
           onScroll={handleScroll}
           style={{
             padding: '1.5rem',
@@ -2699,11 +2493,10 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
               1. Responsable del tratamiento
             </h3>
             <p style={{ margin: 0 }}>
-              ReumaCal (@reumacastro) es una herramienta de apoyo clínico para el seguimiento de enfermedades reumatológicas. 
+              ReumaCal (@reumacastro) es una herramienta de apoyo clínico para el seguimiento de enfermedades reumatológicas.
               El responsable del tratamiento de tus datos es tu médico reumatólogo, quien utiliza esta aplicación como herramienta asistencial.
             </p>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               2. Datos que se recopilan
@@ -2719,7 +2512,6 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
               <li>Histórico de puntuaciones y evolución clínica</li>
             </ul>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               3. Finalidad del tratamiento
@@ -2734,18 +2526,16 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
               <li>Apoyo en la toma de decisiones terapéuticas por parte de tu reumatólogo</li>
             </ul>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               4. Almacenamiento y seguridad
             </h3>
             <p style={{ margin: 0 }}>
-              Tus datos se almacenan de forma segura en servidores de Supabase (infraestructura cloud certificada) 
-              ubicados en la Unión Europea. La aplicación utiliza tecnología de encriptación para proteger tu información. 
+              Tus datos se almacenan de forma segura en servidores de Supabase (infraestructura cloud certificada)
+              ubicados en la Unión Europea. La aplicación utiliza tecnología de encriptación para proteger tu información.
               Solo tu reumatólogo del mismo hospital puede acceder a tus datos.
             </p>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               5. Acceso a los datos
@@ -2761,7 +2551,6 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
               Los datos están compartimentados por hospital. Un médico de otro hospital no puede ver tus datos.
             </p>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               6. Tus derechos (RGPD)
@@ -2780,28 +2569,25 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
               Para ejercer estos derechos, contacta con tu reumatólogo o con el servicio de atención al paciente de tu hospital.
             </p>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               7. Conservación de datos
             </h3>
             <p style={{ margin: 0 }}>
-              Tus datos se conservarán mientras dure tu relación asistencial con el servicio de reumatología y posteriormente 
+              Tus datos se conservarán mientras dure tu relación asistencial con el servicio de reumatología y posteriormente
               durante el plazo establecido por la normativa sanitaria vigente (mínimo 5 años desde la última asistencia).
             </p>
           </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1f2937' }}>
               8. Consentimiento
             </h3>
             <p style={{ margin: 0 }}>
-              Al aceptar estas condiciones, consientes expresamente el tratamiento de tus datos de salud para las finalidades descritas. 
-              Puedes retirar tu consentimiento en cualquier momento, lo que implicará la imposibilidad de seguir utilizando esta herramienta 
+              Al aceptar estas condiciones, consientes expresamente el tratamiento de tus datos de salud para las finalidades descritas.
+              Puedes retirar tu consentimiento en cualquier momento, lo que implicará la imposibilidad de seguir utilizando esta herramienta
               para tu seguimiento clínico.
             </p>
           </div>
-
           <div style={{
             padding: '1rem',
             backgroundColor: '#fef3c7',
@@ -2810,12 +2596,11 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
             marginTop: '1.5rem'
           }}>
             <p style={{ margin: 0, fontSize: '0.8125rem', color: '#92400e', fontWeight: '500' }}>
-              ⚠️ <strong>Importante:</strong> Debes leer todo el documento hasta el final para poder aceptar las condiciones. 
+              ⚠️ <strong>Importante:</strong> Debes leer todo el documento hasta el final para poder aceptar las condiciones.
               Desplázate hacia abajo para continuar.
             </p>
           </div>
         </div>
-
         <div style={{
           padding: '1.5rem',
           borderTop: '1px solid #e5e7eb',
@@ -2860,7 +2645,6 @@ const ConsentModal = ({ onClose, onAccept, onRead }) => {
     </div>
   );
 };
-
 const AuthPage = ({ role, onLogin, onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -2875,8 +2659,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
   const [hospitals, setHospitals] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Cargar hospitales al montar el componente
   useEffect(() => {
     const loadHospitals = async () => {
       const hospitalList = await Storage.getHospitals();
@@ -2884,89 +2666,70 @@ const AuthPage = ({ role, onLogin, onBack }) => {
     };
     loadHospitals();
   }, []);
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
     try {
       if (isLogin) {
-        // Login
         console.log('Intentando login...');
         const user = await Storage.getUserByEmailAndPassword(email, hashPassword(password));
         console.log('Usuario encontrado:', user);
-        
         if (!user) {
           setError('Email o contraseña incorrectos');
           setLoading(false);
           return;
         }
-        if ((role === 'patient' && user.role !== 'PATIENT') || 
+        if ((role === 'patient' && user.role !== 'PATIENT') ||
             (role === 'doctor' && user.role !== 'DOCTOR')) {
           setError('Este usuario no tiene el rol correcto');
           setLoading(false);
           return;
         }
-        
         let patient = null;
         if (user.role === 'PATIENT') {
           console.log('Buscando paciente para user_id:', user.id);
           patient = await Storage.getPatientByUserId(user.id);
           console.log('Paciente encontrado:', patient);
-          
-          // Si no se encuentra el paciente, mostrar error
           if (!patient) {
             setError('Error: No se encontró el perfil de paciente. Por favor, contacte soporte.');
             setLoading(false);
             return;
           }
         }
-        
         onLogin(user, patient);
       } else {
-        // Register
-
-        // Validar que las contraseñas coincidan
         if (!isLogin && password !== confirmPassword) {
           setError('Las contraseñas no coinciden');
           setLoading(false);
           return;
         }
-
-        // Validar consentimiento para pacientes
         if (role === 'patient' && !consentAccepted) {
           setError('Debes leer y aceptar las condiciones de uso de datos');
           setLoading(false);
           return;
         }
-        
         if (role === 'patient' && !hasReadConsent) {
           setError('Debes leer las condiciones completas antes de aceptar');
           setLoading(false);
           return;
         }
-        
         const existingUser = await Storage.getUserByEmail(email);
         if (existingUser) {
           setError('Este email ya está registrado');
           setLoading(false);
           return;
         }
-        
-        // Validar hospital
         if (!hospitalId) {
           setError('Por favor selecciona un hospital');
           setLoading(false);
           return;
         }
-        
         if (role === 'patient' && !nhc) {
           setError('El NHC es obligatorio');
           setLoading(false);
           return;
         }
-        
         if (role === 'patient') {
           const existingPatient = await Storage.getPatientByNhc(nhc, hospitalId);
           if (existingPatient) {
@@ -2975,7 +2738,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
             return;
           }
         }
-        
         const newUser = await Storage.createUser({
           email,
           password_hash: hashPassword(password),
@@ -2983,13 +2745,11 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           display_name: displayName || null,
           hospital_id: hospitalId
         });
-        
         if (!newUser) {
           setError('Error al crear el usuario');
           setLoading(false);
           return;
         }
-        
         let newPatient = null;
         if (role === 'patient') {
           newPatient = await Storage.createPatient({
@@ -2998,7 +2758,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
             hospital_id: hospitalId
           });
         }
-        
         onLogin(newUser, newPatient);
       }
     } catch (err) {
@@ -3007,7 +2766,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
     }
     setLoading(false);
   };
-  
   return (
     <>
       {showConsentModal && (
@@ -3023,26 +2781,24 @@ const AuthPage = ({ role, onLogin, onBack }) => {
       )}
     <div className="auth-page">
       <button className="btn-back" onClick={() => onBack('landing')}>← Volver</button>
-      
       <div className="auth-card">
         <div className="auth-header">
           <h2>{role === 'patient' ? '👤 Paciente' : '👨‍⚕️ Reumatólogo/a'}</h2>
           <div className="auth-tabs">
-            <button 
-              className={isLogin ? 'active' : ''} 
+            <button
+              className={isLogin ? 'active' : ''}
               onClick={() => setIsLogin(true)}
             >
               Iniciar sesión
             </button>
-            <button 
-              className={!isLogin ? 'active' : ''} 
+            <button
+              className={!isLogin ? 'active' : ''}
               onClick={() => setIsLogin(false)}
             >
               Registrarse
             </button>
           </div>
         </div>
-        
         <form onSubmit={handleSubmit}>
           <FormInput
             label="Email"
@@ -3070,9 +2826,8 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               placeholder="••••••••"
             />
           )}
-
           {!isLogin && role === 'patient' && (
-            <div style={{ 
+            <div style={{
               marginTop: '1.5rem',
               padding: '1.25rem',
               backgroundColor: '#fef3c7',
@@ -3103,7 +2858,7 @@ const AuthPage = ({ role, onLogin, onBack }) => {
                     flexShrink: 0
                   }}
                 />
-                <label style={{ 
+                <label style={{
                   cursor: 'pointer',
                   fontSize: '0.875rem',
                   lineHeight: '1.5',
@@ -3113,7 +2868,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
                   He leído y acepto las condiciones de uso de datos personales y de salud
                 </label>
               </div>
-              
               <button
                 type="button"
                 onClick={() => setShowConsentModal(true)}
@@ -3137,12 +2891,11 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               </button>
             </div>
           )}
-          
           {!isLogin && (
             <div className="form-group">
               <label>Hospital *</label>
-              <select 
-                value={hospitalId} 
+              <select
+                value={hospitalId}
                 onChange={(e) => setHospitalId(e.target.value)}
                 required
                 style={{
@@ -3157,17 +2910,13 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               >
                 <option value="">Selecciona tu hospital</option>
                 {(() => {
-                  // Agrupar hospitales por provincia
                   const byProvince = hospitals.reduce((acc, h) => {
                     const prov = h.province || 'Otros';
                     if (!acc[prov]) acc[prov] = [];
                     acc[prov].push(h);
                     return acc;
                   }, {});
-                  
-                  // Ordenar provincias alfabéticamente
                   const sortedProvinces = Object.keys(byProvince).sort();
-                  
                   return sortedProvinces.map(province => (
                     <optgroup key={province} label={province}>
                       {byProvince[province]
@@ -3185,7 +2934,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               </select>
             </div>
           )}
-          
           {!isLogin && role === 'patient' && (
             <>
               <FormInput
@@ -3203,15 +2951,13 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               />
             </>
           )}
-          
           {error && <div className="error-message">{error}</div>}
-          
           <button type="submit" className="btn-submit" disabled={loading}>
             {loading ? 'Procesando...' : (isLogin ? 'Entrar' : 'Crear cuenta')}
           </button>
           {isLogin && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => onBack('forgot-password')}
               style={{
                 marginTop: '1rem',
@@ -3228,7 +2974,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           )}
         </form>
       </div>
-      
       <Brand size="small" />
     </div>
   </>);
@@ -3239,64 +2984,47 @@ const ForgotPasswordPage = ({ onBack }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
     setLoading(true);
-
     try {
-      // Verificar que el email existe
       const user = await Storage.getUserByEmail(email);
-      
       if (!user) {
         setError('No existe ninguna cuenta con ese email');
         setLoading(false);
         return;
       }
-
-      // Generar un código de 6 dígitos
       const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 3600000); // 1 hora
-
-      // Guardar el código en localStorage temporalmente
-      // En producción, esto debería guardarse en la base de datos
+      const expiresAt = new Date(Date.now() + 3600000);
       const resetData = {
         email,
         code: resetCode,
         expiresAt: expiresAt.getTime()
       };
       localStorage.setItem(`reset_${email}`, JSON.stringify(resetData));
-
-      // Aquí iría el envío del email
-      // Por ahora, mostrar el código en pantalla (solo para desarrollo)
       setMessage(`Código de recuperación: ${resetCode}\n\nEn producción, este código se enviaría por email.\n\nEl código expira en 1 hora.`);
       setSent(true);
       setLoading(false);
-
     } catch (err) {
       console.error(err);
       setError('Error al procesar la solicitud');
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-page">
       <button className="btn-back" onClick={() => onBack()}>← Volver</button>
-      
       <div className="auth-card">
         <div className="auth-header">
           <h2>🔑 Recuperar Contraseña</h2>
         </div>
-        
         {!sent ? (
           <form onSubmit={handleSubmit}>
             <p style={{ marginBottom: '1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
               Introduce tu email y te enviaremos un código para resetear tu contraseña
             </p>
-            
             <FormInput
               label="Email"
               type="email"
@@ -3305,9 +3033,7 @@ const ForgotPasswordPage = ({ onBack }) => {
               required
               placeholder="tu@email.com"
             />
-            
             {error && <div className="error-message">{error}</div>}
-            
             <button type="submit" className="btn-submit" disabled={loading}>
               {loading ? 'Enviando...' : 'Enviar código'}
             </button>
@@ -3325,8 +3051,7 @@ const ForgotPasswordPage = ({ onBack }) => {
                 ✅ {message}
               </p>
             </div>
-            
-            <button 
+            <button
               onClick={() => onBack('reset-password', email)}
               className="btn-submit"
             >
@@ -3335,118 +3060,89 @@ const ForgotPasswordPage = ({ onBack }) => {
           </div>
         )}
       </div>
-      
       <Brand size="small" />
     </div>
   );
 };
-
 const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
-      // Validar que las contraseñas coincidan
       if (newPassword !== confirmPassword) {
         setError('Las contraseñas no coinciden');
         setLoading(false);
         return;
       }
-
-      // Validar longitud mínima
       if (newPassword.length < 6) {
         setError('La contraseña debe tener al menos 6 caracteres');
         setLoading(false);
         return;
       }
-
-      // Verificar el código
       const resetDataStr = localStorage.getItem(`reset_${email}`);
       if (!resetDataStr) {
         setError('Código expirado o inválido. Solicita uno nuevo.');
         setLoading(false);
         return;
       }
-
       const resetData = JSON.parse(resetDataStr);
-
-      // Verificar que no haya expirado
       if (Date.now() > resetData.expiresAt) {
         localStorage.removeItem(`reset_${email}`);
         setError('El código ha expirado. Solicita uno nuevo.');
         setLoading(false);
         return;
       }
-
-      // Verificar que el código coincida
       if (code !== resetData.code) {
         setError('Código incorrecto');
         setLoading(false);
         return;
       }
-
-      // Actualizar la contraseña en Supabase
       const { data: users, error: getUserError } = await supabase
         .from('users')
         .select('*')
         .eq('email', email);
-
       if (getUserError || !users || users.length === 0) {
         setError('Usuario no encontrado');
         setLoading(false);
         return;
       }
-
       const user = users[0];
       const newPasswordHash = hashPassword(newPassword);
-
       const { error: updateError } = await supabase
         .from('users')
         .update({ password_hash: newPasswordHash })
         .eq('id', user.id);
-
       if (updateError) {
         setError('Error al actualizar la contraseña');
         setLoading(false);
         return;
       }
-
-      // Limpiar el código usado
       localStorage.removeItem(`reset_${email}`);
-
-      // Mostrar mensaje de éxito
       alert('✅ Contraseña actualizada correctamente');
       onSuccess();
-
     } catch (err) {
       console.error(err);
       setError('Error al procesar la solicitud');
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-page">
       <button className="btn-back" onClick={() => onBack()}>← Volver</button>
-      
       <div className="auth-card">
         <div className="auth-header">
           <h2>🔐 Nueva Contraseña</h2>
         </div>
-        
         <form onSubmit={handleSubmit}>
           <p style={{ marginBottom: '1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>
             Email: <strong>{email}</strong>
           </p>
-          
           <FormInput
             label="Código de recuperación"
             type="text"
@@ -3456,7 +3152,6 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
             placeholder="123456"
             maxLength={6}
           />
-          
           <FormInput
             label="Nueva contraseña"
             type="password"
@@ -3465,7 +3160,6 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
             required
             placeholder="••••••••"
           />
-          
           <FormInput
             label="Confirmar nueva contraseña"
             type="password"
@@ -3474,20 +3168,16 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
             required
             placeholder="••••••••"
           />
-          
           {error && <div className="error-message">{error}</div>}
-          
           <button type="submit" className="btn-submit" disabled={loading}>
             {loading ? 'Actualizando...' : 'Cambiar contraseña'}
           </button>
         </form>
       </div>
-      
       <Brand size="small" />
     </div>
   );
 };
-
 const PatientDashboard = ({ user, patient, onLogout }) => {
   const [view, setView] = useState('home');
   const [selectedCalc, setSelectedCalc] = useState(null);
@@ -3497,71 +3187,67 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [scores, setScores] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-  
+  const [expandedSections, setExpandedSections] = useState({
+    espondilo: true,
+    aps: false,
+    ar: false,
+    lupus: false,
+    calidad: false,
+    sjogren: false,
+    cardiovascular: false
+  });
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
   useEffect(() => {
     loadScores();
   }, [patient]);
-  
   const loadScores = async () => {
     setLoading(true);
     const patientScores = await Storage.getScoresByPatientId(patient.id);
     setScores(patientScores);
     setLoading(false);
   };
-  
   const handleResult = (res) => {
     setResult(res);
     setSaved(false);
   };
-  
   const handleSave = async () => {
     setSaving(true);
-    
-    // Verificar si es calculadora colaborativa
     const isCollaborative = COLLABORATIVE_CALCULATORS[result.instrument]?.collaborative;
-    
     if (isCollaborative) {
-      // Guardar como pendiente para que el médico complete
       const pending = await Storage.savePendingCalculation({
         patient_id: patient.id,
         instrument: result.instrument,
         patient_data: result.components,
         status: 'PENDING'
       });
-      
       if (pending) {
         setSaved(true);
-        // Mostrar mensaje diferente para pendientes
         alert('Datos guardados. El reumatólogo/a completará esta calculadora en la consulta.');
       }
     } else {
-      // Guardar directamente como score completo
       const newScore = await Storage.createScore({
         patient_id: patient.id,
         instrument: result.instrument,
         total_score: result.score,
         components_json: result.components
       });
-      
       if (newScore) {
         setSaved(true);
         loadScores();
       }
     }
-    
     setSaving(false);
   };
-  
   const copyToClipboard = (score) => {
     const text = `${score.instrument}: ${score.total_score} (${formatDate(score.created_at)})`;
     navigator.clipboard.writeText(text);
     alert('Copiado al portapapeles');
   };
-  
-  const filteredScores = historyFilter === 'ALL' 
-    ? scores 
+  const filteredScores = historyFilter === 'ALL'
+    ? scores
     : scores.filter(s => s.instrument === historyFilter);
-  
   const chartData = useMemo(() => {
     if (historyFilter === 'ALL') return [];
     return filteredScores
@@ -3572,10 +3258,9 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
         score: parseFloat(s.total_score)
       }));
   }, [filteredScores, historyFilter]);
-  
   const lastScores = useMemo(() => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
-                        'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
+                        'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
                         'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI', 'SCORE2', 'SCORE2-OP'];
     return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
@@ -3583,12 +3268,10 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       return acc;
     }, {});
   }, [scores]);
-  
   const renderHome = () => (
     <div className="patient-home">
       <h2>Bienvenido/a</h2>
       <p className="nhc-display">NHC: <strong>{patient.nhc}</strong></p>
-      
       <div className="quick-summary">
         <h3>Últimas mediciones</h3>
         {loading ? (
@@ -3614,7 +3297,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
               else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
               else interpretation = { text: 'Sin datos', color: '#9ca3af' };
-              
               return (
                 <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
                   <div className="summary-inst">{inst.replace('_', '-')}</div>
@@ -3633,137 +3315,341 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       </div>
     </div>
   );
-  
   const renderCalculators = () => (
     <div className="calculators-view">
       {!selectedCalc ? (
         <>
           <h2>Calculadoras</h2>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus síntomas (el reumatólogo/a añadirá la analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa el dolor (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida APs</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tu evaluación (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Esta calculadora la completará el reumatólogo/a en consulta
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Calidad de vida general</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo cardiovascular 40-69 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo cardiovascular +70 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá datos clínicos)
-              </span>
-            </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('espondilo')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.espondilo && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">ASDAS</span>
+                    <span className="calc-desc">Espondiloartritis axial</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa tus síntomas (el reumatólogo/a añadirá la analítica)
+                    </span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">BASDAI</span>
+                    <span className="calc-desc">Espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
+                    <span className="calc-icon">🚶</span>
+                    <span className="calc-name">BASFI</span>
+                    <span className="calc-desc">Función espondilitis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
+                    <span className="calc-icon">😊</span>
+                    <span className="calc-name">ASQoL</span>
+                    <span className="calc-desc">Calidad de vida EA</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
+                    <span className="calc-icon">💡</span>
+                    <span className="calc-name">ASAS-HI</span>
+                    <span className="calc-desc">Impacto en salud</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('aps')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🔴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis psoriásica</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.aps ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.aps && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
+                    <span className="calc-icon">📉</span>
+                    <span className="calc-name">DAPSA</span>
+                    <span className="calc-desc">Artritis psoriásica</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa el dolor (el reumatólogo/a añadirá exploración y analítica)
+                    </span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                    <span className="calc-icon">🎯</span>
+                    <span className="calc-name">PsAQoL</span>
+                    <span className="calc-desc">Calidad de vida APs</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('ar')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🔵</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis reumatoide</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>1 calculadora disponible</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.ar ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.ar && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">DAS28</span>
+                    <span className="calc-desc">Artritis reumatoide</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa tu evaluación (el reumatólogo/a añadirá exploración y analítica)
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('lupus')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦋</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Lupus eritematoso sistémico</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.lupus ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.lupus && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
+                    <span className="calc-icon">🦋</span>
+                    <span className="calc-name">SLEDAI</span>
+                    <span className="calc-desc">Actividad lupus</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">SLICC</span>
+                    <span className="calc-desc">Daño en lupus</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Esta calculadora la completará el reumatólogo/a en consulta
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('calidad')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💚</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.calidad && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
+                    <span className="calc-icon">💪</span>
+                    <span className="calc-name">FACIT</span>
+                    <span className="calc-desc">Calidad de vida general</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
+                    <span className="calc-icon">🏥</span>
+                    <span className="calc-name">SF-36</span>
+                    <span className="calc-desc">Encuesta de salud</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
+                    <span className="calc-name">LupusPRO</span>
+                    <span className="calc-desc">Calidad de vida lupus</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('sjogren')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💧</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Síndrome de Sjögren</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.sjogren ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.sjogren && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
+                    <span className="calc-icon">💧</span>
+                    <span className="calc-name">ESSPRI</span>
+                    <span className="calc-desc">Síntomas Sjögren</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
+                    <span className="calc-icon">🔬</span>
+                    <span className="calc-name">SSDAI</span>
+                    <span className="calc-desc">Actividad Sjögren</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('cardiovascular')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>❤️</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Riesgo cardiovascular</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras disponibles</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.cardiovascular ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.cardiovascular && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
+                    <span className="calc-icon">💗</span>
+                    <span className="calc-name">SCORE2</span>
+                    <span className="calc-desc">Riesgo cardiovascular 40-69 años</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
+                    </span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
+                    <span className="calc-icon">❤️</span>
+                    <span className="calc-name">SCORE2-OP</span>
+                    <span className="calc-desc">Riesgo cardiovascular +70 años</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
+                    </span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
+                    <span className="calc-icon">🫀</span>
+                    <span className="calc-name">QRISK3</span>
+                    <span className="calc-desc">Riesgo cardiovascular</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                      Completa tus datos básicos (el reumatólogo/a añadirá datos clínicos)
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </>
       ) : (
@@ -3771,7 +3657,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
           <button className="btn-back-calc" onClick={() => { setSelectedCalc(null); setResult(null); }}>
             ← Volver a calculadoras
           </button>
-          
           <div className="calc-container">
             {selectedCalc === 'BASDAI' && <BASDAICalculator onResult={handleResult} />}
             {selectedCalc === 'ASDAS' && <ASDASCalculator onResult={handleResult} isDoctor={false} />}
@@ -3791,7 +3676,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'SCORE2-OP' && <SCORE2OPCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'QRISK3' && <QRISK3Calculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'SLICC' && <SLICCCalculator onResult={handleResult} isDoctor={false} />}
-            
             {result && (
               <ResultCard
                 score={result.score}
@@ -3807,11 +3691,9 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       )}
     </div>
   );
-  
   const renderHistory = () => (
     <div className="history-view">
       <h2>Histórico</h2>
-      
       <div className="history-filter">
         <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
           <option value="ALL">Todos los instrumentos</option>
@@ -3835,7 +3717,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
           <option value="SCORE2-OP">SCORE2-OP (+70 años)</option>
         </select>
       </div>
-      
       {historyFilter !== 'ALL' && chartData.length > 1 && (
         <div className="history-chart">
           <ResponsiveContainer width="100%" height={200}>
@@ -3849,7 +3730,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
           </ResponsiveContainer>
         </div>
       )}
-      
       {loading ? (
         <p>Cargando...</p>
       ) : (
@@ -3871,7 +3751,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                 else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
                 else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
                 else interpretation = interpretDAS28(score.total_score);
-                
                 return (
                   <tr key={score.id}>
                     <td>{formatDate(score.created_at)}</td>
@@ -3901,7 +3780,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       )}
     </div>
   );
-  
   const renderProfile = () => (
     <div className="profile-view">
       <h2>Mi perfil</h2>
@@ -3916,7 +3794,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       </div>
     </div>
   );
-  
   return (
     <div className="dashboard patient-dashboard">
       <header className="dashboard-header">
@@ -3932,14 +3809,12 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
         </nav>
         <button className="btn-logout" onClick={onLogout}>Salir</button>
       </header>
-      
       <main className="dashboard-content">
         {view === 'home' && renderHome()}
         {view === 'calculators' && renderCalculators()}
         {view === 'history' && renderHistory()}
         {view === 'profile' && renderProfile()}
       </main>
-      
       <footer className="dashboard-footer">
         <Brand size="small" />
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', fontSize: '12px', marginTop: '8px' }}>
@@ -3953,7 +3828,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
     </div>
   );
 };
-
 const DoctorDashboard = ({ user, onLogout }) => {
   const [view, setView] = useState('search');
   const [searchNhc, setSearchNhc] = useState('');
@@ -3970,8 +3844,18 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  
-  // Cargar información del hospital del usuario
+  const [expandedSections, setExpandedSections] = useState({
+    espondilo: true,
+    aps: false,
+    ar: false,
+    lupus: false,
+    calidad: false,
+    sjogren: false,
+    cardiovascular: false
+  });
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
   useEffect(() => {
     const loadUserHospital = async () => {
       if (user.hospital_id) {
@@ -3982,14 +3866,10 @@ const DoctorDashboard = ({ user, onLogout }) => {
     };
     loadUserHospital();
   }, [user.hospital_id]);
-  
   const searchPatient = async () => {
     setError('');
     setLoading(true);
-    
-    // Buscar paciente por NHC Y hospital del médico
     const patient = await Storage.getPatientByNhc(searchNhc, user.hospital_id);
-    
     if (!patient) {
       setError('No se encontró ningún paciente con ese NHC en tu hospital');
       setSelectedPatient(null);
@@ -3997,35 +3877,27 @@ const DoctorDashboard = ({ user, onLogout }) => {
       setLoading(false);
       return;
     }
-    
-    // Cargar información del hospital del paciente
     if (patient.hospital_id) {
       const hospitals = await Storage.getHospitals();
       const hospital = hospitals.find(h => h.id === patient.hospital_id);
       setPatientHospital(hospital);
     }
-    
-    // Log access
     await Storage.createAccessLog({
       doctor_id: user.id,
       patient_id: patient.id,
       nhc: searchNhc
     });
-    
     const scores = await Storage.getScoresByPatientId(patient.id);
     const pendings = await Storage.getPendingCalculations(patient.id);
-    
     setSelectedPatient(patient);
     setPatientScores(scores);
     setPendingCalcs(pendings || []);
     setView('patient');
     setLoading(false);
   };
-  
   const filteredScores = historyFilter === 'ALL'
     ? patientScores
     : patientScores.filter(s => s.instrument === historyFilter);
-  
   const chartData = useMemo(() => {
     if (historyFilter === 'ALL') return [];
     return filteredScores
@@ -4036,7 +3908,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
         score: parseFloat(s.total_score)
       }));
   }, [filteredScores, historyFilter]);
-  
   const lastScores = useMemo(() => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
@@ -4047,67 +3918,49 @@ const DoctorDashboard = ({ user, onLogout }) => {
       return acc;
     }, {});
   }, [patientScores]);
-  
   const handlePrint = () => {
     window.print();
   };
-  
   const handleResult = async (resultData) => {
     setResult(resultData);
     setSaved(false);
   };
-  
   const handleSaveScore = async () => {
     if (!selectedPatient || !result) {
       console.error('Falta selectedPatient o result:', { selectedPatient, result });
       return;
     }
-    
     console.log('=== GUARDANDO SCORE ===');
     console.log('Paciente:', selectedPatient.id);
     console.log('Result:', result);
     console.log('SelectedPending:', selectedPending);
-    
     setSaving(true);
-    
-    // Si estamos completando una pendiente, marcarla como completada
     if (selectedPending) {
       console.log('Completando pendiente:', selectedPending.id);
       const completed = await Storage.completePendingCalculation(selectedPending.id, user.id);
       console.log('Pendiente completada:', completed);
     }
-    
-    // Guardar el score completo
     const score = {
       patient_id: selectedPatient.id,
       instrument: result.instrument,
       total_score: result.score.toFixed(2),
       components_json: result.components
     };
-    
     console.log('Guardando score:', score);
     const savedScore = await Storage.createScore(score);
     console.log('Score guardado:', savedScore);
-    
     if (savedScore) {
       setSaved(true);
-      
-      // Recargar scores y pendientes del paciente
       console.log('Recargando scores y pendientes...');
       const updatedScores = await Storage.getScoresByPatientId(selectedPatient.id);
       const updatedPendings = await Storage.getPendingCalculations(selectedPatient.id);
       console.log('Scores actualizados:', updatedScores?.length || 0);
       console.log('Pendientes actualizadas:', updatedPendings?.length || 0);
-      
       setPatientScores(updatedScores);
       setPendingCalcs(updatedPendings || []);
-      
-      // Limpiar estados
       setSelectedPending(null);
       setSelectedCalc(null);
       setResult(null);
-      
-      // Volver a vista de paciente después de 1 segundo
       setTimeout(() => {
         setView('patient');
         setSaved(false);
@@ -4118,7 +3971,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
     }
     setSaving(false);
   };
-  
   const renderSearch = () => (
     <div className="search-view">
       <h2>Buscar paciente</h2>
@@ -4153,13 +4005,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
       {error && <div className="error-message">{error}</div>}
     </div>
   );
-  
   const renderPatient = () => (
     <div className="patient-view">
       <button className="btn-back-calc" onClick={() => { setView('search'); setSelectedPatient(null); }}>
         ← Nueva búsqueda
       </button>
-      
       <div className="patient-header">
         <h2>Paciente NHC: {selectedPatient.nhc}</h2>
         {patientHospital && (
@@ -4170,8 +4020,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
         )}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
           {!selectedCalc && (
-            <button 
-              className="btn-print" 
+            <button
+              className="btn-print"
               onClick={() => setView('calculator')}
               style={{ backgroundColor: '#3b82f6' }}
             >
@@ -4181,8 +4031,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
           <button className="btn-print" onClick={handlePrint}>🖨️ Imprimir</button>
         </div>
       </div>
-      
-      {/* Sección de calculadoras pendientes */}
+      {}
       {pendingCalcs.length > 0 && (
         <div className="pending-section" style={{
           backgroundColor: '#fef3c7',
@@ -4203,9 +4052,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 key={pending.id}
                 onClick={() => {
                   setSelectedPending(pending);
-                  // Mantener el instrumento completo para saber la variante
-                  const baseInstrument = pending.instrument.includes('_') 
-                    ? pending.instrument.split('_')[0] 
+                  const baseInstrument = pending.instrument.includes('_')
+                    ? pending.instrument.split('_')[0]
                     : pending.instrument;
                   setSelectedCalc(baseInstrument);
                   setView('calculator');
@@ -4227,7 +4075,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
           </div>
         </div>
       )}
-      
       <div className="patient-summary">
         <h3>Resumen última medición</h3>
         <div className="summary-grid">
@@ -4237,7 +4084,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
             else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
             else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
             else interpretation = interpretDAS28(score.total_score);
-            
             return (
               <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
                 <div className="summary-inst">{inst.replace('_', '-')}</div>
@@ -4256,10 +4102,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
           <p className="no-data">Este paciente no tiene mediciones registradas</p>
         )}
       </div>
-      
       <div className="patient-history">
         <h3>Histórico completo</h3>
-        
         <div className="history-filter">
           <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
             <option value="ALL">Todos los instrumentos</option>
@@ -4271,7 +4115,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
             <option value="DAS28_ESR">DAS28-VSG</option>
           </select>
         </div>
-        
         {historyFilter !== 'ALL' && chartData.length > 1 && (
           <div className="history-chart">
             <ResponsiveContainer width="100%" height={250}>
@@ -4285,7 +4128,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </ResponsiveContainer>
           </div>
         )}
-        
         <div className="history-table">
           <table>
             <thead>
@@ -4303,7 +4145,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
                 else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
                 else interpretation = interpretDAS28(score.total_score);
-                
                 return (
                   <tr key={score.id}>
                     <td>{formatDate(score.created_at)}</td>
@@ -4328,19 +4169,17 @@ const DoctorDashboard = ({ user, onLogout }) => {
       </div>
     </div>
   );
-  
   const renderCalculator = () => (
     <div className="calculator-view">
-      <button className="btn-back-calc" onClick={() => { 
-        setView('patient'); 
-        setSelectedCalc(null); 
-        setResult(null); 
+      <button className="btn-back-calc" onClick={() => {
+        setView('patient');
+        setSelectedCalc(null);
+        setResult(null);
         setSaved(false);
         setSelectedPending(null);
       }}>
         ← Volver al paciente
       </button>
-      
       {selectedPending ? (
         <div style={{
           backgroundColor: '#fef3c7',
@@ -4359,117 +4198,320 @@ const DoctorDashboard = ({ user, onLogout }) => {
       ) : (
         <h2>Nueva Calculadora - {selectedPatient.nhc}</h2>
       )}
-      
       {!selectedCalc ? (
         <>
           <p style={{ marginBottom: '2rem', color: '#64748b' }}>
             Selecciona una calculadora para realizar una nueva medición:
           </p>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Actividad espondiloartritis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida AP</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Fatiga</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo CV 40-69 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo CV +70 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-            </button>
-          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('espondilo')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.espondilo && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">ASDAS</span>
+                    <span className="calc-desc">Actividad espondiloartritis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">BASDAI</span>
+                    <span className="calc-desc">Espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
+                    <span className="calc-icon">🚶</span>
+                    <span className="calc-name">BASFI</span>
+                    <span className="calc-desc">Función espondilitis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
+                    <span className="calc-icon">😊</span>
+                    <span className="calc-name">ASQoL</span>
+                    <span className="calc-desc">Calidad de vida EA</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
+                    <span className="calc-icon">💡</span>
+                    <span className="calc-name">ASAS-HI</span>
+                    <span className="calc-desc">Impacto en salud</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('aps')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🔴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis psoriásica</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.aps ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.aps && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
+                    <span className="calc-icon">📉</span>
+                    <span className="calc-name">DAPSA</span>
+                    <span className="calc-desc">Artritis psoriásica</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                    <span className="calc-icon">🎯</span>
+                    <span className="calc-name">PsAQoL</span>
+                    <span className="calc-desc">Calidad de vida AP</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('ar')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🔵</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis reumatoide</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>1 calculadora</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.ar ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.ar && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">DAS28</span>
+                    <span className="calc-desc">Artritis reumatoide</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('lupus')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦋</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Lupus eritematoso sistémico</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.lupus ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.lupus && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
+                    <span className="calc-icon">🦋</span>
+                    <span className="calc-name">SLEDAI</span>
+                    <span className="calc-desc">Actividad lupus</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">SLICC</span>
+                    <span className="calc-desc">Daño en lupus</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('calidad')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💚</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.calidad && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
+                    <span className="calc-icon">💪</span>
+                    <span className="calc-name">FACIT</span>
+                    <span className="calc-desc">Fatiga</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
+                    <span className="calc-icon">🏥</span>
+                    <span className="calc-name">SF-36</span>
+                    <span className="calc-desc">Encuesta de salud</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
+                    <span className="calc-name">LupusPRO</span>
+                    <span className="calc-desc">Calidad de vida lupus</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('sjogren')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💧</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Síndrome de Sjögren</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.sjogren ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.sjogren && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
+                    <span className="calc-icon">💧</span>
+                    <span className="calc-name">ESSPRI</span>
+                    <span className="calc-desc">Síntomas Sjögren</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
+                    <span className="calc-icon">🔬</span>
+                    <span className="calc-name">SSDAI</span>
+                    <span className="calc-desc">Actividad Sjögren</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            {}
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleSection('cardiovascular')}
+                style={{
+                  width: '100%',
+                  padding: '1.25rem',
+                  backgroundColor: '#f8fafc',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>❤️</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Riesgo cardiovascular</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.cardiovascular ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.cardiovascular && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
+                    <span className="calc-icon">💗</span>
+                    <span className="calc-name">SCORE2</span>
+                    <span className="calc-desc">Riesgo CV 40-69 años</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
+                    <span className="calc-icon">❤️</span>
+                    <span className="calc-name">SCORE2-OP</span>
+                    <span className="calc-desc">Riesgo CV +70 años</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
+                    <span className="calc-icon">🫀</span>
+                    <span className="calc-name">QRISK3</span>
+                    <span className="calc-desc">Riesgo cardiovascular</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div
         </>
       ) : (
         <>
@@ -4491,7 +4533,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'SCORE2-OP' && <SCORE2OPCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'QRISK3' && <QRISK3Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SLICC' && <SLICCCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
-          
           {result && (
             <ResultCard
               score={result.score}
@@ -4506,7 +4547,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
       )}
     </div>
   );
-  
   return (
     <div className="dashboard doctor-dashboard">
       <header className="dashboard-header doctor-header">
@@ -4525,13 +4565,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
         </nav>
         <button className="btn-logout" onClick={onLogout}>Salir</button>
       </header>
-      
       <main className="dashboard-content">
         {view === 'search' && renderSearch()}
         {view === 'patient' && selectedPatient && renderPatient()}
         {view === 'calculator' && selectedPatient && renderCalculator()}
       </main>
-      
       <footer className="dashboard-footer">
         <Brand size="small" />
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', fontSize: '12px', marginTop: '8px', color: '#999' }}>
@@ -4541,18 +4579,12 @@ const DoctorDashboard = ({ user, onLogout }) => {
     </div>
   );
 };
-// ============================================
-// PÁGINAS LEGALES
-// ============================================
-
 const PoliticaPrivacidadPage = ({ onBack }) => (
   <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, sans-serif', color: '#333', lineHeight: '1.7' }}>
     <button onClick={() => onBack()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', marginBottom: '20px', color: '#4f46e5' }}>← Volver</button>
     <h1>🔒 Política de Privacidad</h1>
     <p style={{ color: '#666' }}>Última actualización: febrero 2026</p>
-
-    {/* ⚠️ CAMBIA LOS DATOS ENTRE CORCHETES POR LOS TUYOS */}
-
+    {}
     <h2>1. Identificación del responsable y del encargado del tratamiento</h2>
     <p><strong>Encargado del tratamiento (proveedor de la plataforma):</strong></p>
     <ul>
@@ -4563,7 +4595,6 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
     </ul>
     <p><strong>Responsable del tratamiento:</strong></p>
     <p>ReumaCal actúa como <strong>encargado del tratamiento</strong> conforme al artículo 28 del RGPD. El responsable del tratamiento de los datos de cada paciente es el <strong>centro hospitalario o servicio de reumatología</strong> al que pertenece el profesional sanitario que utiliza esta herramienta como apoyo clínico.</p>
-
     <h2>2. Datos personales que se recopilan</h2>
     <p><strong>Datos de identificación:</strong></p>
     <ul>
@@ -4578,7 +4609,6 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
       <li>Fechas de evaluaciones</li>
       <li>Histórico de puntuaciones y evolución clínica</li>
     </ul>
-
     <h2>3. Finalidad del tratamiento</h2>
     <ul>
       <li>Seguimiento clínico de tu enfermedad reumatológica</li>
@@ -4587,14 +4617,12 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
       <li>Apoyo en la toma de decisiones terapéuticas por parte de tu reumatólogo</li>
     </ul>
     <p>En ningún caso tus datos serán utilizados con fines comerciales, publicitarios ni serán cedidos a terceros ajenos a tu atención sanitaria.</p>
-
     <h2>4. Base legal del tratamiento</h2>
     <ul>
       <li><strong>Consentimiento explícito (art. 6.1.a y art. 9.2.a RGPD):</strong> Al registrarte y aceptar las condiciones, otorgas tu consentimiento explícito para el tratamiento de tus datos de salud.</li>
       <li><strong>Fines asistenciales (art. 9.2.h RGPD):</strong> El tratamiento es necesario para fines de medicina preventiva, diagnóstico médico y gestión de sistemas sanitarios.</li>
       <li><strong>Obligación legal (art. 6.1.c RGPD):</strong> Conservación de datos clínicos conforme a la Ley 41/2002 reguladora de la autonomía del paciente.</li>
     </ul>
-
     <h2>5. Almacenamiento y seguridad</h2>
     <p>Tus datos se almacenan en servidores de <strong>Supabase</strong> (infraestructura cloud certificada) ubicados en la <strong>Unión Europea</strong>. No se realizan transferencias internacionales fuera del EEE.</p>
     <p>Medidas de seguridad:</p>
@@ -4604,7 +4632,6 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
       <li>Compartimentación de datos por centro hospitalario (Row Level Security)</li>
       <li>Acceso restringido según rol (reumatólogo / paciente)</li>
     </ul>
-
     <h2>6. Acceso a los datos</h2>
     <ul>
       <li>Tu médico reumatólogo responsable de tu atención</li>
@@ -4612,7 +4639,6 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
       <li>Tú mismo, como paciente, a tus propios datos</li>
     </ul>
     <p>Los datos están compartimentados por hospital. Un profesional de otro centro no puede acceder a tus datos.</p>
-
     <h2>7. Tus derechos (RGPD)</h2>
     <p>Conforme al RGPD (UE) 2016/679 y la LOPDGDD (LO 3/2018), tienes derecho a:</p>
     <ul>
@@ -4624,31 +4650,24 @@ const PoliticaPrivacidadPage = ({ onBack }) => (
       <li><strong>Oposición:</strong> Oponerte al tratamiento de tus datos</li>
     </ul>
     <p>Para ejercer estos derechos, contacta con tu reumatólogo o directamente en: <strong>[d.castrocorredor@gmail.com]</strong></p>
-    <p><strong>Derecho de reclamación:</strong> Puedes presentar una reclamación ante la <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer">Agencia Española de Protección de Datos (AEPD)</a>, C/ Jorge Juan 6, 28001 Madrid.</p>
-
+    <p><strong>Derecho de reclamación:</strong> Puedes presentar una reclamación ante la <a href="https:
     <h2>8. Conservación de datos</h2>
     <p>Tus datos se conservarán mientras dure tu relación asistencial y posteriormente durante el plazo de la normativa sanitaria vigente (mínimo 5 años desde la última asistencia, Ley 41/2002). Si solicitas la supresión de tu cuenta, los datos clínicos podrán conservarse anonimizados.</p>
-
     <h2>9. Consentimiento</h2>
     <p>Al registrarte consientes expresamente el tratamiento de tus datos de salud. Puedes retirar tu consentimiento en cualquier momento en <strong>[d.castrocorredor@gmail.com]</strong>, sin que ello afecte a la licitud del tratamiento previo.</p>
-
     <h2>10. Modificaciones</h2>
     <p>ReumaCal se reserva el derecho de modificar esta Política de Privacidad. En caso de cambios sustanciales, se notificará a los usuarios a través de la aplicación.</p>
-
     <footer style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '40px', color: '#666', fontSize: '14px' }}>
       <p>© {new Date().getFullYear()} ReumaCal (@reumacastro). Todos los derechos reservados.</p>
     </footer>
   </div>
 );
-
 const AvisoLegalPage = ({ onBack }) => (
   <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, sans-serif', color: '#333', lineHeight: '1.7' }}>
     <button onClick={() => onBack()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', marginBottom: '20px', color: '#4f46e5' }}>← Volver</button>
     <h1>⚖️ Aviso Legal</h1>
     <p style={{ color: '#666' }}>Última actualización: febrero 2026</p>
-
-    {/* ⚠️ CAMBIA LOS DATOS ENTRE CORCHETES POR LOS TUYOS */}
-
+    {}
     <h2>1. Datos identificativos del titular</h2>
     <p>En cumplimiento del artículo 10 de la Ley 34/2002 (LSSI-CE):</p>
     <ul>
@@ -4657,10 +4676,8 @@ const AvisoLegalPage = ({ onBack }) => (
       <li><strong>Email:</strong> [d.castrocorredor@gmail.com]</li>
       <li><strong>Sitio web:</strong> www.reumacal.com</li>
     </ul>
-
     <h2>2. Objeto y ámbito de aplicación</h2>
     <p>ReumaCal es una plataforma web de apoyo clínico con calculadoras reumatológicas para el seguimiento de enfermedades reumáticas. Está dirigida a profesionales sanitarios y sus pacientes. <strong>No sustituye en ningún caso el criterio médico profesional.</strong></p>
-
     <h2>3. Condiciones de uso</h2>
     <p>El usuario se compromete a:</p>
     <ul>
@@ -4670,39 +4687,30 @@ const AvisoLegalPage = ({ onBack }) => (
       <li>No introducir datos falsos o de terceros sin su consentimiento</li>
       <li>No realizar acciones que puedan dañar o sobrecargar el sitio web</li>
     </ul>
-
     <h2>4. Exención de responsabilidad</h2>
     <p><strong>Uso clínico:</strong> Los resultados de las calculadoras tienen carácter orientativo y <strong>no constituyen un diagnóstico médico ni una recomendación terapéutica</strong>. Las decisiones clínicas deben ser tomadas por un profesional sanitario cualificado.</p>
     <p><strong>Disponibilidad:</strong> No se garantiza la disponibilidad continua e ininterrumpida del sitio web.</p>
-
     <h2>5. Propiedad intelectual e industrial</h2>
     <p>Todos los contenidos del sitio web (textos, diseño gráfico, código fuente, logotipos, marcas, algoritmos de cálculo y estructura de la base de datos) son propiedad del titular y están protegidos por las leyes de propiedad intelectual e industrial.</p>
     <p>La marca «ReumaCal» es propiedad del titular. Queda prohibida su reproducción, distribución o transformación sin autorización expresa.</p>
-
     <h2>6. Protección de datos</h2>
     <p>El tratamiento de datos personales se rige por nuestra <span style={{ color: '#4f46e5', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBack('politica-privacidad')}>Política de Privacidad</span>. ReumaCal cumple con el RGPD (UE) 2016/679 y la LOPDGDD (LO 3/2018).</p>
-
     <h2>7. Legislación aplicable y jurisdicción</h2>
     <p>Este Aviso Legal se rige por la legislación española. Para cualquier controversia, las partes se someten a los Juzgados y Tribunales de [Ciudad Real].</p>
-
     <h2>8. Modificaciones</h2>
     <p>El titular se reserva el derecho a modificar este Aviso Legal en cualquier momento.</p>
-
     <footer style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '40px', color: '#666', fontSize: '14px' }}>
       <p>© {new Date().getFullYear()} ReumaCal (@reumacastro). Todos los derechos reservados.</p>
     </footer>
   </div>
 );
-
 const PoliticaCookiesPage = ({ onBack }) => (
   <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, sans-serif', color: '#333', lineHeight: '1.7' }}>
     <button onClick={() => onBack()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', marginBottom: '20px', color: '#4f46e5' }}>← Volver</button>
     <h1>🍪 Política de Cookies</h1>
     <p style={{ color: '#666' }}>Última actualización: febrero 2026</p>
-
     <h2>1. ¿Qué son las cookies?</h2>
     <p>Las cookies son pequeños archivos de texto que los sitios web almacenan en tu dispositivo cuando los visitas. Sirven para recordar tu sesión de usuario y tus preferencias.</p>
-
     <h2>2. Cookies que utiliza ReumaCal</h2>
     <h3>Cookies estrictamente necesarias (técnicas)</h3>
     <p>Son imprescindibles para el funcionamiento de la aplicación y no requieren tu consentimiento.</p>
@@ -4730,76 +4738,61 @@ const PoliticaCookiesPage = ({ onBack }) => (
         </tr>
       </tbody>
     </table>
-
     <h2>3. ¿Cómo gestionar las cookies?</h2>
     <p>Puedes configurar tu navegador para aceptar o rechazar cookies. Si desactivas las cookies técnicas, es posible que no puedas iniciar sesión.</p>
     <ul>
-      <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer">Google Chrome</a></li>
-      <li><a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" target="_blank" rel="noopener noreferrer">Mozilla Firefox</a></li>
-      <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" target="_blank" rel="noopener noreferrer">Safari</a></li>
-      <li><a href="https://support.microsoft.com/es-es/microsoft-edge/eliminar-las-cookies-en-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener noreferrer">Microsoft Edge</a></li>
+      <li><a href="https:
+      <li><a href="https:
+      <li><a href="https:
+      <li><a href="https:
     </ul>
-
     <h2>4. Base legal</h2>
     <p>La utilización de cookies se rige por el artículo 22.2 de la Ley 34/2002 (LSSI-CE) y la Guía de uso de cookies de la AEPD. Las cookies estrictamente necesarias no requieren consentimiento.</p>
-
     <h2>5. Contacto</h2>
     <p>Si tienes dudas: <strong>[d.castrocorredor@gmail.com]</strong></p>
-
     <footer style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '40px', color: '#666', fontSize: '14px' }}>
       <p>© {new Date().getFullYear()} ReumaCal (@reumacastro). Todos los derechos reservados.</p>
     </footer>
   </div>
 );
-
-// ============================================
-// MAIN APP
-// ============================================
-
 export default function App() {
   const [page, setPage] = useState('landing');
   const [authRole, setAuthRole] = useState(null);
   const [resetEmail, setResetEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
-  
   const handleNavigate = (newPage, role = null) => {
     setPage(newPage);
     if (role) {
       if (role === 'forgot-password') {
         setPage('forgot-password');
       } else if (role === 'reset-password') {
-        setResetEmail(newPage); // newPage contiene el email
+        setResetEmail(newPage);
         setPage('reset-password');
       } else {
         setAuthRole(role);
       }
     }
   };
-  
   const handleLogin = (user, patient) => {
     setCurrentUser(user);
     setCurrentPatient(patient);
     setPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
   };
-  
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPatient(null);
     setPage('landing');
   };
-  
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-        
+        @import url('https:
         * {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
         }
-        
         :root {
           --primary: #0891b2;
           --primary-dark: #0e7490;
@@ -4816,14 +4809,12 @@ export default function App() {
           --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
           --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         }
-        
         body {
           font-family: 'DM Sans', sans-serif;
           background: var(--bg);
           color: var(--text);
           min-height: 100vh;
         }
-        
         .brand {
           display: flex;
           align-items: center;
@@ -4834,7 +4825,6 @@ export default function App() {
         .brand.small { font-size: 1.5rem; opacity: 1; }
         .brand-at { color: var(--primary); font-weight: 700; }
         .brand-name { color: var(--text); font-weight: 600; }
-        
         .landing-page {
           min-height: 100vh;
           display: flex;
@@ -4939,9 +4929,11 @@ export default function App() {
         .btn-icon { font-size: 2rem; }
         .landing-features {
           display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+          width: 100%;
+          max-width: 900px;
         }
         .feature {
           display: flex;
@@ -4969,7 +4961,6 @@ export default function App() {
           font-size: 0.75rem;
           color: var(--text-light);
         }
-        
         .auth-page {
           min-height: 100vh;
           display: flex;
@@ -5029,7 +5020,6 @@ export default function App() {
           background: white;
           box-shadow: var(--shadow);
         }
-        
         .form-group { margin-bottom: 1.25rem; }
         .form-group label {
           display: block;
@@ -5082,7 +5072,6 @@ export default function App() {
           margin-bottom: 1rem;
           text-align: center;
         }
-        
         .dashboard {
           min-height: 100vh;
           display: flex;
@@ -5164,7 +5153,6 @@ export default function App() {
           background: white;
           border-top: 1px solid var(--border);
         }
-        
         .patient-home h2 {
           font-size: 1.75rem;
           margin-bottom: 0.5rem;
@@ -5221,7 +5209,6 @@ export default function App() {
           color: var(--text-light);
           padding: 2rem;
         }
-        
         .calculators-view h2 {
           font-size: 1.75rem;
           margin-bottom: 1.5rem;
@@ -5278,7 +5265,6 @@ export default function App() {
         @media (max-width: 768px) {
           .calc-container { grid-template-columns: 1fr; }
         }
-        
         .calculator-form {
           background: white;
           border-radius: 16px;
@@ -5374,7 +5360,6 @@ export default function App() {
           transform: translateY(-1px);
           box-shadow: var(--shadow);
         }
-        
         .result-card {
           background: white;
           border-radius: 16px;
@@ -5433,7 +5418,6 @@ export default function App() {
           font-weight: 600;
           text-align: center;
         }
-        
         .history-view h2 {
           font-size: 1.75rem;
           margin-bottom: 1.5rem;
@@ -5500,7 +5484,6 @@ export default function App() {
           transition: all 0.2s;
         }
         .btn-copy:hover { background: var(--border); }
-        
         .profile-view h2 {
           font-size: 1.75rem;
           margin-bottom: 1.5rem;
@@ -5529,7 +5512,6 @@ export default function App() {
           color: var(--text-light);
         }
         .profile-info strong { color: var(--text); }
-        
         .doctor-header {
           background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
         }
@@ -5554,7 +5536,6 @@ export default function App() {
         .doctor-header .logo-mini {
           filter: brightness(0) invert(1);
         }
-        
         .search-view h2 {
           font-size: 1.75rem;
           margin-bottom: 1.5rem;
@@ -5583,7 +5564,6 @@ export default function App() {
           box-shadow: var(--shadow);
         }
         .btn-search:disabled { opacity: 0.6; cursor: not-allowed; }
-        
         .patient-view .patient-header {
           display: flex;
           align-items: center;
@@ -5611,7 +5591,6 @@ export default function App() {
           margin-bottom: 1rem;
           color: var(--text-light);
         }
-        
         @media print {
           .dashboard-header,
           .dashboard-footer,
@@ -5627,7 +5606,6 @@ export default function App() {
             border: 1px solid var(--border);
           }
         }
-        
         @media (max-width: 768px) {
           .landing-hero h1 { font-size: 2.5rem; }
           .landing-buttons {
@@ -5655,31 +5633,25 @@ export default function App() {
             padding: 0.75rem 0.5rem;
           }
         }
-        
-        /* Estilos para radio buttons */
         input[type="radio"] {
           width: 20px;
           height: 20px;
           cursor: pointer;
           accent-color: var(--primary);
         }
-        
         input[type="radio"]:checked + span {
           font-weight: 600;
           color: var(--primary);
         }
-        
         label:has(input[type="radio"]) {
           cursor: pointer;
           padding: 0.5rem 1rem;
           border-radius: 0.5rem;
           transition: background-color 0.2s;
         }
-        
         label:has(input[type="radio"]:checked) {
           background-color: #e0f2fe;
         }
-        
         label:has(input[type="radio"]) span {
           user-select: none;
           font-size: 1rem;
@@ -5687,7 +5659,6 @@ export default function App() {
           text-decoration: none !important;
         }
       `}</style>
-      
       {page === 'landing' && <LandingPage onNavigate={handleNavigate} />}
       {page === 'auth' && <AuthPage role={authRole} onLogin={handleLogin} onBack={handleNavigate} />}
       {page === 'forgot-password' && <ForgotPasswordPage onBack={(action, email) => {
