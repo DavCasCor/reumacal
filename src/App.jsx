@@ -4063,6 +4063,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [viewingPatient, setViewingPatient] = useState(null);
+  const [returnToSearch, setReturnToSearch] = useState(false);
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   // Cargar información del hospital del usuario
@@ -4076,6 +4078,21 @@ const DoctorDashboard = ({ user, onLogout }) => {
     };
     loadUserHospital();
   }, [user.hospital_id]);
+  
+  useEffect(() => {
+    const handleDoctorPopState = () => {
+      if (selectedPatient && !returnToSearch) {
+        setReturnToSearch(true);
+        setSelectedPatient(null);
+        setSelectedCalc(null);
+        setResult(null);
+        window.history.pushState(null, '', window.location.pathname + window.location.search);
+      }
+    };
+
+    window.addEventListener('popstate', handleDoctorPopState);
+    return () => window.removeEventListener('popstate', handleDoctorPopState);
+  }, [selectedPatient, returnToSearch]);
   
   const searchPatient = async () => {
     setError('');
@@ -4114,6 +4131,10 @@ const DoctorDashboard = ({ user, onLogout }) => {
     setPendingCalcs(pendings || []);
     setView('patient');
     setLoading(false);
+    
+    // Añadir al historial cuando se selecciona un paciente
+    window.history.pushState({ viewingPatient: true }, '', window.location.pathname + window.location.search);
+    setReturnToSearch(false);
   };
   
   const filteredScores = historyFilter === 'ALL'
@@ -4239,6 +4260,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
           value={searchNhc}
           onChange={setSearchNhc}
           placeholder="Introduzca el NHC"
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              searchPatient();
+            }
+          }}
         />
         <button className="btn-search" onClick={searchPatient} disabled={loading}>
           {loading ? '⏳ Buscando...' : '🔍 Buscar'}
@@ -4250,7 +4276,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
   
   const renderPatient = () => (
     <div className="patient-view">
-      <button className="btn-back-calc" onClick={() => { setView('search'); setSelectedPatient(null); }}>
+      <button className="btn-back-calc" onClick={() => { setView('search'); setSelectedPatient(null); window.history.back(); }}>
         ← Nueva búsqueda
       </button>
       
