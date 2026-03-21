@@ -5016,7 +5016,10 @@ export default function App() {
   const handleLogin = (user, patient) => {
     setCurrentUser(user);
     setCurrentPatient(patient);
-    navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+    // Esperar a que los estados se actualicen antes de navegar
+    setTimeout(() => {
+      navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+    }, 0);
   };
   
   const handleLogout = () => {
