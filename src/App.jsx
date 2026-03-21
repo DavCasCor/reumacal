@@ -4957,19 +4957,45 @@ const PoliticaCookiesPage = ({ onBack }) => (
 
 export default function App() {
   const [page, setPage] = useState('landing');
+  const navigateToPage = (newPage) => {
+    navigateToPage(newPage);
+    window.history.pushState({ page: newPage }, '', `#${newPage}`);
+  };
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.page) {
+        setPage(event.state.page);
+      } else {
+        setPage('landing');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Inicializar estado del historial
+    if (window.location.hash) {
+      const initialPage = window.location.hash.substring(1);
+      navigateToPage(initialPage);
+    } else {
+      window.history.replaceState({ page: 'landing' }, '', '#landing');
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [authRole, setAuthRole] = useState(null);
   const [resetEmail, setResetEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
   
   const handleNavigate = (newPage, role = null) => {
-    setPage(newPage);
+    navigateToPage(newPage);
     if (role) {
       if (role === 'forgot-password') {
-        setPage('forgot-password');
+        navigateToPage('forgot-password');
       } else if (role === 'reset-password') {
         setResetEmail(newPage); // newPage contiene el email
-        setPage('reset-password');
+        navigateToPage('reset-password');
       } else {
         setAuthRole(role);
       }
@@ -4979,7 +5005,7 @@ export default function App() {
   const handleLogin = (user, patient) => {
     setCurrentUser(user);
     setCurrentPatient(patient);
-    setPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+    navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
   };
   
   const handleLogout = () => {
@@ -5894,7 +5920,7 @@ export default function App() {
       {page === 'forgot-password' && <ForgotPasswordPage onBack={(action, email) => {
         if (action === 'reset-password') {
           setResetEmail(email);
-          setPage('reset-password');
+          navigateToPage('reset-password');
         } else {
           setPage('landing');
         }
