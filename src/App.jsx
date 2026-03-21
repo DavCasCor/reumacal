@@ -1956,7 +1956,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🦴</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Espondiloartritis</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Espondiloartritis</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">📈</span><span>ASDAS</span></div>
@@ -1970,7 +1970,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🔴</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Artritis psoriásica</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Artritis psoriásica</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">📉</span><span>DAPSA</span></div>
@@ -1981,7 +1981,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🔵</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Artritis reumatoide</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Artritis reumatoide</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">📋</span><span>DAS28</span></div>
@@ -1991,7 +1991,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🦋</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Lupus eritematoso sistémico</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Lupus eritematoso sistémico</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">🦋</span><span>SLEDAI</span></div>
@@ -2002,7 +2002,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>💚</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Calidad de vida</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
@@ -2014,7 +2014,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>💧</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Síndrome de Sjögren</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Síndrome de Sjögren</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💧</span><span>ESSPRI</span></div>
@@ -2025,7 +2025,7 @@ const LandingPage = ({ onNavigate }) => (
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>❤️</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: 'rgba(255,255,255,0.95)' }}>Riesgo cardiovascular</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Riesgo cardiovascular</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💗</span><span>SCORE2</span></div>
@@ -3492,7 +3492,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [scores, setScores] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-  const [expandedSections, setExpandedSections] = useState({ espondilo: true, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   useEffect(() => {
@@ -4062,7 +4062,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({ espondilo: true, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   // Cargar información del hospital del usuario
