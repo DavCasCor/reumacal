@@ -4957,19 +4957,37 @@ const PoliticaCookiesPage = ({ onBack }) => (
 
 export default function App() {
   const [page, setPage] = useState('landing');
+
+  const navigateToPage = (newPage) => {
+    navigateToPage(newPage);
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      // Solo prevenir que salga de la app, no cambiar el estado
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [authRole, setAuthRole] = useState(null);
   const [resetEmail, setResetEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPatient, setCurrentPatient] = useState(null);
   
   const handleNavigate = (newPage, role = null) => {
-    setPage(newPage);
+    navigateToPage(newPage);
     if (role) {
       if (role === 'forgot-password') {
-        setPage('forgot-password');
+        navigateToPage('forgot-password');
       } else if (role === 'reset-password') {
         setResetEmail(newPage); // newPage contiene el email
-        setPage('reset-password');
+        navigateToPage('reset-password');
       } else {
         setAuthRole(role);
       }
@@ -4979,13 +4997,13 @@ export default function App() {
   const handleLogin = (user, patient) => {
     setCurrentUser(user);
     setCurrentPatient(patient);
-    setPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+    navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
   };
   
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPatient(null);
-    setPage('landing');
+    navigateToPage('landing');
   };
   
   return (
@@ -5894,21 +5912,21 @@ export default function App() {
       {page === 'forgot-password' && <ForgotPasswordPage onBack={(action, email) => {
         if (action === 'reset-password') {
           setResetEmail(email);
-          setPage('reset-password');
+          navigateToPage('reset-password');
         } else {
-          setPage('landing');
+          navigateToPage('landing');
         }
       }} />}
-      {page === 'reset-password' && <ResetPasswordPage email={resetEmail} onBack={() => setPage('landing')} onSuccess={() => setPage('landing')} />}
+      {page === 'reset-password' && <ResetPasswordPage email={resetEmail} onBack={() => navigateToPage('landing')} onSuccess={() => navigateToPage('landing')} />}
       {page === 'patient-dashboard' && currentUser && currentPatient && (
         <PatientDashboard user={currentUser} patient={currentPatient} onLogout={handleLogout} />
       )}
       {page === 'doctor-dashboard' && currentUser && (
         <DoctorDashboard user={currentUser} onLogout={handleLogout} />
       )}
-      {page === 'politica-privacidad' && <PoliticaPrivacidadPage onBack={() => setPage('landing')} />}
-      {page === 'aviso-legal' && <AvisoLegalPage onBack={(dest) => dest ? setPage(dest) : setPage('landing')} />}
-      {page === 'politica-cookies' && <PoliticaCookiesPage onBack={() => setPage('landing')} />}
+      {page === 'politica-privacidad' && <PoliticaPrivacidadPage onBack={() => navigateToPage('landing')} />}
+      {page === 'aviso-legal' && <AvisoLegalPage onBack={(dest) => dest ? navigateToPage(dest) : navigateToPage('landing')} />}
+      {page === 'politica-cookies' && <PoliticaCookiesPage onBack={() => navigateToPage('landing')} />}
     </>
   );
 }
