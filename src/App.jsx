@@ -2,16 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { createClient } from '@supabase/supabase-js';
 
-// ============================================
-// REUMACAL - Calculadoras Reumatológicas
-// @reumacastro
-// ============================================
 
-// ⚠️ CONFIGURACIÓN DE SUPABASE - CAMBIA ESTOS VALORES
 const SUPABASE_URL = 'https://gprqwiiyzfanfzstoujz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcnF3aWl5emZhbmZ6c3RvdWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTQzMzcsImV4cCI6MjA4NTk3MDMzN30.tMYqfeTVsLRlwjfvynuaFRsFx6I8SdKz4jYU6gO-ZB0';
 
-// Verificar que las credenciales están configuradas
 const isConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL_AQUI' && SUPABASE_ANON_KEY !== 'TU_SUPABASE_ANON_KEY_AQUI';
 
 const supabase = isConfigured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -20,7 +14,6 @@ if (!isConfigured) {
   console.warn('⚠️ SUPABASE NO CONFIGURADO: Edita App.jsx y pon tus credenciales de Supabase');
 }
 
-// Utility functions
 const hashPassword = (password) => {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {
@@ -48,9 +41,6 @@ const formatShortDate = (date) => {
   });
 };
 
-// ============================================
-// CALCULATION FORMULAS
-// ============================================
 
 const calculateBASDAI = (components) => {
   const { q1, q2, q3, q4, q5, q6 } = components;
@@ -137,10 +127,8 @@ const interpretDAS28 = (score) => {
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
 
-// SLEDAI - Systemic Lupus Erythematosus Disease Activity Index
 const calculateSLEDAI = (components) => {
   let total = 0;
-  // Sistema nervioso central (8 puntos cada uno)
   if (components.seizure) total += 8;
   if (components.psychosis) total += 8;
   if (components.organicBrainSyndrome) total += 8;
@@ -149,25 +137,19 @@ const calculateSLEDAI = (components) => {
   if (components.lupusHeadache) total += 8;
   if (components.cva) total += 8;
   if (components.vasculitis) total += 8;
-  // Muscular (4 puntos)
   if (components.arthritis) total += 4;
   if (components.myositis) total += 4;
-  // Renal (4 puntos cada uno)
   if (components.urinaryCasts) total += 4;
   if (components.hematuria) total += 4;
   if (components.proteinuria) total += 4;
   if (components.pyuria) total += 4;
-  // Respiratorio (4 puntos)
   if (components.pleurisy) total += 4;
-  // Cardiovascular (8 y 4 puntos)
   if (components.pericarditis) total += 4;
   if (components.lowComplement) total += 2;
   if (components.increasedDnaBind) total += 2;
-  // Hematológico (1-2 puntos)
   if (components.fever) total += 1;
   if (components.thrombocytopenia) total += 1;
   if (components.leukopenia) total += 1;
-  // Cutáneo (2 puntos cada uno)
   if (components.rash) total += 2;
   if (components.alopecia) total += 2;
   if (components.mucosalUlcers) total += 2;
@@ -182,9 +164,7 @@ const interpretSLEDAI = (score) => {
   return { text: 'Actividad muy alta', color: '#dc2626', level: 'very_high' };
 };
 
-// LupusPRO v1.8 - Quality of Life in Lupus
 const calculateLupusPRO = (components) => {
-  // Promedio de todos los dominios (escala 0-4, convertir a 0-100)
   const domains = [
     'lupusSymptoms', 'lupusMedications', 'procreation', 'physicalHealth',
     'painVitality', 'emotionalHealth', 'bodyImage', 'cognition',
@@ -197,16 +177,13 @@ const calculateLupusPRO = (components) => {
 };
 
 const interpretLupusPRO = (score) => {
-  // Menor puntuación = mejor calidad de vida
   if (score <= 25) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score <= 50) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score <= 75) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
-// FACIT-General
 const calculateFACIT = (components) => {
-  // 27 items, escala 0-4, rango total 0-108
   let total = 0;
   for (let i = 1; i <= 27; i++) {
     total += parseFloat(components[`q${i}`] || 0);
@@ -215,16 +192,13 @@ const calculateFACIT = (components) => {
 };
 
 const interpretFACIT = (score) => {
-  // Mayor puntuación = mejor calidad de vida
   if (score >= 80) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score >= 60) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score >= 40) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
-// SF-36 - Short Form 36 Health Survey
 const calculateSF36 = (components) => {
-  // Calcular 8 dimensiones (cada una 0-100)
   const dimensions = {
     physicalFunctioning: parseFloat(components.physicalFunctioning || 50),
     rolePhysical: parseFloat(components.rolePhysical || 50),
@@ -243,14 +217,12 @@ const calculateSF36 = (components) => {
 };
 
 const interpretSF36 = (score) => {
-  // Mayor puntuación = mejor calidad de vida
   if (score >= 75) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
   if (score >= 50) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
   if (score >= 25) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
-// BASFI - Bath Ankylosing Spondylitis Functional Index
 const calculateBASFI = (components) => {
   let sum = 0;
   for (let i = 1; i <= 10; i++) {
@@ -260,13 +232,11 @@ const calculateBASFI = (components) => {
 };
 
 const interpretBASFI = (score) => {
-  // Mayor puntuación = peor función
   if (score < 4) return { text: 'Buena función', color: '#10b981', level: 'good' };
   if (score < 7) return { text: 'Limitación moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Limitación importante', color: '#ef4444', level: 'severe' };
 };
 
-// ASAS-HI - ASAS Health Index
 const calculateASASHI = (components) => {
   let total = 0;
   for (let i = 1; i <= 17; i++) {
@@ -281,7 +251,6 @@ const interpretASASHI = (score) => {
   return { text: 'Impacto alto', color: '#ef4444', level: 'high' };
 };
 
-// ASQoL - Ankylosing Spondylitis Quality of Life
 const calculateASQoL = (components) => {
   let total = 0;
   for (let i = 1; i <= 18; i++) {
@@ -296,7 +265,6 @@ const interpretASQoL = (score) => {
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
-// PSAQoL - Psoriatic Arthritis Quality of Life (20 items)
 const calculatePSAQoL = (components) => {
   let total = 0;
   for (let i = 1; i <= 20; i++) {
@@ -311,7 +279,6 @@ const interpretPSAQoL = (score) => {
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
-// ESSPRI - EULAR Sjögren's Syndrome Patient Reported Index
 const calculateESSPRI = (components) => {
   const { dryness, fatigue, pain } = components;
   const total = (parseFloat(dryness) + parseFloat(fatigue) + parseFloat(pain)) / 3;
@@ -323,36 +290,23 @@ const interpretESSPRI = (score) => {
   return { text: 'Síntomas significativos', color: '#ef4444', level: 'significant' };
 };
 
-// SSDAI - Sjögren's Syndrome Disease Activity Index (Vitali 2007)
 const calculateSSDAI = (components) => {
   let total = 0;
-  // Constitucional (máx 7)
   if (components.fever) total += 1;
   if (components.lymphadenopathy) total += 2;
-  // Linfático (máx 3)
   if (components.lymphadenopathyBiopsy) total += 3;
-  // Glandular (máx 2)
   if (components.glandularSwelling) total += 2;
-  // Articular (máx 6)
   if (components.arthralgia) total += 2;
   if (components.arthritis) total += 4;
-  // Cutáneo (máx 9)
   if (components.vasculitis) total += 3;
   if (components.purpura) total += 6;
-  // Pulmonar (máx 9)
   if (components.pulmonary) total += 9;
-  // Renal (máx 9)
   if (components.renal) total += 9;
-  // Muscular (máx 6)
   if (components.myositis) total += 6;
-  // SNC (máx 9)
   if (components.cns) total += 9;
-  // PNS (máx 9)
   if (components.pns) total += 9;
-  // Hematológico (máx 3)
   if (components.leukopenia) total += 1;
   if (components.thrombocytopenia) total += 2;
-  // Biológico (máx 3)
   if (components.hypergammaglobulinemia) total += 1;
   if (components.hypocomplementemia) total += 2;
   return total;
@@ -365,9 +319,6 @@ const interpretSSDAI = (score) => {
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
 
-// ============================================
-// HELPER: Interpret any instrument score
-// ============================================
 const interpretScore = (instrument, score) => {
   if (instrument === 'BASDAI') return interpretBASDAI(score);
   if (instrument.startsWith('ASDAS')) return interpretASDAS(score);
@@ -386,14 +337,12 @@ const interpretScore = (instrument, score) => {
   return { text: 'Sin datos', color: '#9ca3af' };
 };
 
-// All instrument keys
 const ALL_INSTRUMENTS = [
   'BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
   'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
   'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI'
 ];
 
-// SCORE2 - Cardiovascular Risk Calculator (40-69 years)
 const calculateSCORE2 = (components) => {
   const age = parseInt(components.age || 50);
   const sex = components.sex || 'male';
@@ -434,7 +383,6 @@ const interpretSCORE2 = (score) => {
   return { text: 'Riesgo muy alto (≥10%)', color: '#dc2626', level: 'very_high' };
 };
 
-// SCORE2-OP - Cardiovascular Risk Calculator (70+ years)
 const calculateSCORE2OP = (components) => {
   const age = parseInt(components.age || 70);
   const sex = components.sex || 'male';
@@ -469,7 +417,6 @@ const interpretSCORE2OP = (score) => {
   return { text: 'Riesgo muy alto (≥22.5%)', color: '#dc2626', level: 'very_high' };
 };
 
-// QRISK3 - Riesgo cardiovascular
 const calculateQRISK3 = (components) => {
   const age = parseInt(components.age || 40);
   const sex = components.sex || 'male';
@@ -512,7 +459,6 @@ const interpretQRISK3 = (score) => {
   return { text: 'Riesgo alto (≥20%)', color: '#ef4444', level: 'high' };
 };
 
-// SLICC - Systemic Lupus International Collaborating Clinics Damage Index
 const calculateSLICC = (components) => {
   let total = 0;
   Object.keys(components).forEach(key => {
@@ -530,11 +476,7 @@ const interpretSLICC = (score) => {
   return { text: 'Daño severo (≥5)', color: '#ef4444', level: 'severe' };
 };
 
-// ============================================
-// CONFIGURACIÓN DE CALCULADORAS
-// ============================================
 
-// Definir qué calculadoras son colaborativas (requieren datos del médico)
 const COLLABORATIVE_CALCULATORS = {
   'ASDAS_CRP': {
     collaborative: true,
@@ -610,22 +552,16 @@ const COLLABORATIVE_CALCULATORS = {
   }
 };
 
-// Calculadoras que solo puede hacer el médico
 const DOCTOR_ONLY_CALCULATORS = ['SLEDAI', 'SSDAI', 'SLICC'];
 
-// Verificar si una calculadora es colaborativa
 const isCollaborative = (instrument) => {
   return COLLABORATIVE_CALCULATORS.hasOwnProperty(instrument);
 };
 
-// Verificar si una calculadora es solo para médicos
 const isDoctorOnly = (instrument) => {
   return DOCTOR_ONLY_CALCULATORS.includes(instrument);
 };
 
-// ============================================
-// SUPABASE STORAGE FUNCTIONS
-// ============================================
 
 const Storage = {
   async getHospitals() {
@@ -737,7 +673,6 @@ const Storage = {
         .select('*')
         .eq('nhc', nhc);
       
-      // Si se proporciona hospital_id, también filtrar por hospital
       if (hospitalId) {
         query = query.eq('hospital_id', hospitalId);
       }
@@ -878,9 +813,6 @@ const Storage = {
   }
 };
 
-// ============================================
-// COMPONENTS
-// ============================================
 
 const Brand = ({ size = 'normal' }) => (
   <div className={`brand ${size}`}>
@@ -957,9 +889,6 @@ const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }
   </div>
 );
 
-// ============================================
-// CALCULATOR COMPONENTS
-// ============================================
 
 const BASDAICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
@@ -1286,7 +1215,6 @@ const DAS28Calculator = ({ onResult, isDoctor = false, initialData = null }) => 
   );
 };
 
-// ===== NUEVAS CALCULADORAS =====
 
 const SLEDAICalculator = ({ onResult, isDoctor = false }) => {
   const [components, setComponents] = useState({
@@ -1926,9 +1854,6 @@ const SSDAICalculator = ({ onResult, isDoctor = false }) => {
   );
 };
 
-// ============================================
-// PAGE COMPONENTS
-// ============================================
 
 const LandingPage = ({ onNavigate }) => (
   <div className="landing-page">
@@ -1953,93 +1878,81 @@ const LandingPage = ({ onNavigate }) => (
       </div>
       
       <div className="landing-features">
-        {/* Espondiloartritis axial */}
-        <div className="feature">
-          <span className="feature-icon">📈</span>
-          <span>ASDAS</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📊</span>
-          <span>BASDAI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🚶</span>
-          <span>BASFI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">😊</span>
-          <span>ASQoL</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💡</span>
-          <span>ASAS-HI</span>
-        </div>
-        
-        {/* Artritis psoriásica */}
-        <div className="feature">
-          <span className="feature-icon">📉</span>
-          <span>DAPSA</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🎯</span>
-          <span>PsAQoL</span>
-        </div>
-        
-        {/* Artritis reumatoide */}
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>DAS28</span>
-        </div>
-        
-        {/* Lupus */}
-        <div className="feature">
-          <span className="feature-icon">🦋</span>
-          <span>SLEDAI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">📋</span>
-          <span>SLICC</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">💚</span>
-          <span>LupusPRO</span>
-        </div>
-        
-        {/* Generales */}
-        <div className="feature">
-          <span className="feature-icon">💪</span>
-          <span>FACIT</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🏥</span>
-          <span>SF-36</span>
-        </div>
-        
-        {/* Sjögren */}
-        <div className="feature">
-          <span className="feature-icon">💧</span>
-          <span>ESSPRI</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🔬</span>
-          <span>SSDAI</span>
-        </div>
-        
-        {/* Cardiovasculares */}
-        <div className="feature">
-          <span className="feature-icon">💗</span>
-          <span>SCORE2</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">❤️</span>
-          <span>SCORE2-OP</span>
-        </div>
-        <div className="feature">
-          <span className="feature-icon">🫀</span>
-          <span>QRISK3</span>
-        </div>
-      </div>
-    </div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>🦴</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Espondiloartritis</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">📈</span><span>ASDAS</span></div>
+<div className="feature"><span className="feature-icon">📊</span><span>BASDAI</span></div>
+<div className="feature"><span className="feature-icon">🚶</span><span>BASFI</span></div>
+<div className="feature"><span className="feature-icon">😊</span><span>ASQoL</span></div>
+<div className="feature"><span className="feature-icon">💡</span><span>ASAS-HI</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>🔴</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Artritis psoriásica</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">📉</span><span>DAPSA</span></div>
+<div className="feature"><span className="feature-icon">🎯</span><span>PsAQoL</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>🔵</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Artritis reumatoide</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">📋</span><span>DAS28</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>🦋</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Lupus eritematoso</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">🦋</span><span>SLEDAI</span></div>
+<div className="feature"><span className="feature-icon">📋</span><span>SLICC</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>💚</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Calidad de vida</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
+<div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
+<div className="feature"><span className="feature-icon">💚</span><span>LupusPRO</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>💧</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Sjögren</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">💧</span><span>ESSPRI</span></div>
+<div className="feature"><span className="feature-icon">🔬</span><span>SSDAI</span></div>
+</div>
+</div>
+<div style={{width:'100%',marginTop:'2rem',marginBottom:'1.5rem'}}>
+<div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem',paddingBottom:'0.5rem',borderBottom:'2px solid rgba(255,255,255,0.2)'}}>
+<span style={{fontSize:'1.5rem'}}>❤️</span>
+<h3 style={{margin:0,fontSize:'1.1rem',fontWeight:'600',color:'rgba(255,255,255,0.95)'}}>Riesgo cardiovascular</h3>
+</div>
+<div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center'}}>
+<div className="feature"><span className="feature-icon">💗</span><span>SCORE2</span></div>
+<div className="feature"><span className="feature-icon">❤️</span><span>SCORE2-OP</span></div>
+<div className="feature"><span className="feature-icon">🫀</span><span>QRISK3</span></div>
+</div>
+</div>
+</div>
     
     <footer className="landing-footer" style={{ paddingBottom: '40px' }}>
       <Brand size="small" />
@@ -2060,7 +1973,6 @@ const SCORE2Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
   );
   
   const handleCalculate = () => {
-    // Convertir colesterol de mg/dL a mmol/L para el cálculo
     const cholesterolMmol = components.cholesterol / 38.67;
     const score = calculateSCORE2({ ...components, cholesterol: cholesterolMmol });
     const interpretation = interpretSCORE2(score);
@@ -2207,7 +2119,6 @@ const SCORE2OPCalculator = ({ onResult, isDoctor = false, initialData = null }) 
   );
   
   const handleCalculate = () => {
-    // Convertir colesterol de mg/dL a mmol/L para el cálculo
     const cholesterolMmol = components.cholesterol / 38.67;
     const score = calculateSCORE2OP({ ...components, cholesterol: cholesterolMmol });
     const interpretation = interpretSCORE2OP(score);
@@ -2876,7 +2787,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Cargar hospitales al montar el componente
   useEffect(() => {
     const loadHospitals = async () => {
       const hospitalList = await Storage.getHospitals();
@@ -2892,7 +2802,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
     
     try {
       if (isLogin) {
-        // Login
         console.log('Intentando login...');
         const user = await Storage.getUserByEmailAndPassword(email, hashPassword(password));
         console.log('Usuario encontrado:', user);
@@ -2915,7 +2824,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           patient = await Storage.getPatientByUserId(user.id);
           console.log('Paciente encontrado:', patient);
           
-          // Si no se encuentra el paciente, mostrar error
           if (!patient) {
             setError('Error: No se encontró el perfil de paciente. Por favor, contacte soporte.');
             setLoading(false);
@@ -2925,16 +2833,13 @@ const AuthPage = ({ role, onLogin, onBack }) => {
         
         onLogin(user, patient);
       } else {
-        // Register
 
-        // Validar que las contraseñas coincidan
         if (!isLogin && password !== confirmPassword) {
           setError('Las contraseñas no coinciden');
           setLoading(false);
           return;
         }
 
-        // Validar consentimiento para pacientes
         if (role === 'patient' && !consentAccepted) {
           setError('Debes leer y aceptar las condiciones de uso de datos');
           setLoading(false);
@@ -2954,7 +2859,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
           return;
         }
         
-        // Validar hospital
         if (!hospitalId) {
           setError('Por favor selecciona un hospital');
           setLoading(false);
@@ -3157,7 +3061,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
               >
                 <option value="">Selecciona tu hospital</option>
                 {(() => {
-                  // Agrupar hospitales por provincia
                   const byProvince = hospitals.reduce((acc, h) => {
                     const prov = h.province || 'Otros';
                     if (!acc[prov]) acc[prov] = [];
@@ -3165,7 +3068,6 @@ const AuthPage = ({ role, onLogin, onBack }) => {
                     return acc;
                   }, {});
                   
-                  // Ordenar provincias alfabéticamente
                   const sortedProvinces = Object.keys(byProvince).sort();
                   
                   return sortedProvinces.map(province => (
@@ -3247,7 +3149,6 @@ const ForgotPasswordPage = ({ onBack }) => {
     setLoading(true);
 
     try {
-      // Verificar que el email existe
       const user = await Storage.getUserByEmail(email);
       
       if (!user) {
@@ -3256,12 +3157,9 @@ const ForgotPasswordPage = ({ onBack }) => {
         return;
       }
 
-      // Generar un código de 6 dígitos
       const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 3600000); // 1 hora
 
-      // Guardar el código en localStorage temporalmente
-      // En producción, esto debería guardarse en la base de datos
       const resetData = {
         email,
         code: resetCode,
@@ -3269,8 +3167,6 @@ const ForgotPasswordPage = ({ onBack }) => {
       };
       localStorage.setItem(`reset_${email}`, JSON.stringify(resetData));
 
-      // Aquí iría el envío del email
-      // Por ahora, mostrar el código en pantalla (solo para desarrollo)
       setMessage(`Código de recuperación: ${resetCode}\n\nEn producción, este código se enviaría por email.\n\nEl código expira en 1 hora.`);
       setSent(true);
       setLoading(false);
@@ -3354,21 +3250,18 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
     setLoading(true);
 
     try {
-      // Validar que las contraseñas coincidan
       if (newPassword !== confirmPassword) {
         setError('Las contraseñas no coinciden');
         setLoading(false);
         return;
       }
 
-      // Validar longitud mínima
       if (newPassword.length < 6) {
         setError('La contraseña debe tener al menos 6 caracteres');
         setLoading(false);
         return;
       }
 
-      // Verificar el código
       const resetDataStr = localStorage.getItem(`reset_${email}`);
       if (!resetDataStr) {
         setError('Código expirado o inválido. Solicita uno nuevo.');
@@ -3378,7 +3271,6 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
 
       const resetData = JSON.parse(resetDataStr);
 
-      // Verificar que no haya expirado
       if (Date.now() > resetData.expiresAt) {
         localStorage.removeItem(`reset_${email}`);
         setError('El código ha expirado. Solicita uno nuevo.');
@@ -3386,14 +3278,12 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
         return;
       }
 
-      // Verificar que el código coincida
       if (code !== resetData.code) {
         setError('Código incorrecto');
         setLoading(false);
         return;
       }
 
-      // Actualizar la contraseña en Supabase
       const { data: users, error: getUserError } = await supabase
         .from('users')
         .select('*')
@@ -3419,10 +3309,8 @@ const ResetPasswordPage = ({ email, onBack, onSuccess }) => {
         return;
       }
 
-      // Limpiar el código usado
       localStorage.removeItem(`reset_${email}`);
 
-      // Mostrar mensaje de éxito
       alert('✅ Contraseña actualizada correctamente');
       onSuccess();
 
@@ -3497,6 +3385,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [scores, setScores] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+const [expandedSections,setExpandedSections]=useState({espondilo:true,aps:false,ar:false,lupus:false,calidad:false,sjogren:false,cardiovascular:false});
+const toggleSection=(s)=>setExpandedSections(p=>({...p,[s]:!p[s]}));
   
   useEffect(() => {
     loadScores();
@@ -3517,11 +3407,9 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const handleSave = async () => {
     setSaving(true);
     
-    // Verificar si es calculadora colaborativa
     const isCollaborative = COLLABORATIVE_CALCULATORS[result.instrument]?.collaborative;
     
     if (isCollaborative) {
-      // Guardar como pendiente para que el médico complete
       const pending = await Storage.savePendingCalculation({
         patient_id: patient.id,
         instrument: result.instrument,
@@ -3531,11 +3419,9 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       
       if (pending) {
         setSaved(true);
-        // Mostrar mensaje diferente para pendientes
         alert('Datos guardados. El reumatólogo/a completará esta calculadora en la consulta.');
       }
     } else {
-      // Guardar directamente como score completo
       const newScore = await Storage.createScore({
         patient_id: patient.id,
         instrument: result.instrument,
@@ -3639,132 +3525,203 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       {!selectedCalc ? (
         <>
           <h2>Calculadoras</h2>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus síntomas (el reumatólogo/a añadirá la analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa el dolor (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida APs</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tu evaluación (el reumatólogo/a añadirá exploración y analítica)
-              </span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Esta calculadora la completará el reumatólogo/a en consulta
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Calidad de vida general</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo cardiovascular 40-69 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo cardiovascular +70 años</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá PA y colesterol)
-              </span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-              <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>
-                Completa tus datos básicos (el reumatólogo/a añadirá datos clínicos)
-              </span>
-            </button>
-          </div>
+<div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('espondilo')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Espondiloartritis</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>5 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.espondilo?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.espondilo&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASDAS');setResult(null);}}>
+<span className="calc-icon">📈</span>
+<span className="calc-name">ASDAS</span>
+<span className="calc-desc">Espondilo axial</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Síntomas (médico: analítica)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASDAI');setResult(null);}}>
+<span className="calc-icon">📊</span>
+<span className="calc-name">BASDAI</span>
+<span className="calc-desc">Espondilo axial</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASFI');setResult(null);}}>
+<span className="calc-icon">🚶</span>
+<span className="calc-name">BASFI</span>
+<span className="calc-desc">Función espon</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASQoL');setResult(null);}}>
+<span className="calc-icon">😊</span>
+<span className="calc-name">ASQoL</span>
+<span className="calc-desc">Calidad vida EA</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASASHI');setResult(null);}}>
+<span className="calc-icon">💡</span>
+<span className="calc-name">ASAS-HI</span>
+<span className="calc-desc">Impacto salud</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('aps')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis psoriásica</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.aps?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.aps&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAPSA');setResult(null);}}>
+<span className="calc-icon">📉</span>
+<span className="calc-name">DAPSA</span>
+<span className="calc-desc">APs</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Dolor (médico: exploración)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('PSAQoL');setResult(null);}}>
+<span className="calc-icon">🎯</span>
+<span className="calc-name">PsAQoL</span>
+<span className="calc-desc">Calidad vida APs</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('ar')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔵</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis reumatoide</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>1 calc</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.ar?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.ar&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAS28');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">DAS28</span>
+<span className="calc-desc">AR</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Evaluación (médico: exploración)</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('lupus')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦋</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Lupus eritematoso</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.lupus?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.lupus&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLEDAI');setResult(null);}}>
+<span className="calc-icon">🦋</span>
+<span className="calc-name">SLEDAI</span>
+<span className="calc-desc">Act. lupus</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLICC');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">SLICC</span>
+<span className="calc-desc">Daño lupus</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Solo reumatólogo/a</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('calidad')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💚</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Calidad de vida</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.calidad?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.calidad&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('FACIT');setResult(null);}}>
+<span className="calc-icon">💪</span>
+<span className="calc-name">FACIT</span>
+<span className="calc-desc">Fatiga</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SF36');setResult(null);}}>
+<span className="calc-icon">🏥</span>
+<span className="calc-name">SF-36</span>
+<span className="calc-desc">Encuesta salud</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('LupusPRO');setResult(null);}}>
+<span className="calc-icon">💚</span>
+<span className="calc-name">LupusPRO</span>
+<span className="calc-desc">Calidad vida lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('sjogren')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💧</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Sjögren</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.sjogren?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.sjogren&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ESSPRI');setResult(null);}}>
+<span className="calc-icon">💧</span>
+<span className="calc-name">ESSPRI</span>
+<span className="calc-desc">Sint. Sjögren</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SSDAI');setResult(null);}}>
+<span className="calc-icon">🔬</span>
+<span className="calc-name">SSDAI</span>
+<span className="calc-desc">Act. Sjögren</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('cardiovascular')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>❤️</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Riesgo cardiovascular</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.cardiovascular?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.cardiovascular&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2');setResult(null);}}>
+<span className="calc-icon">💗</span>
+<span className="calc-name">SCORE2</span>
+<span className="calc-desc">Riesgo CV 40-69a</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: PA/col)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2-OP');setResult(null);}}>
+<span className="calc-icon">❤️</span>
+<span className="calc-name">SCORE2-OP</span>
+<span className="calc-desc">Riesgo CV +70a</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: PA/col)</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('QRISK3');setResult(null);}}>
+<span className="calc-icon">🫀</span>
+<span className="calc-name">QRISK3</span>
+<span className="calc-desc">Riesgo CV</span>
+<span className="calc-desc" style={{color:'#f59e0b',fontWeight:'600',marginTop:'0.25rem',fontSize:'0.85rem'}}>Datos (médico: clínicos)</span>
+</button>
+</div>)}
+</div>
+</div></div>
         </>
       ) : (
         <>
@@ -3970,8 +3927,9 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+const [expandedSections,setExpandedSections]=useState({espondilo:true,aps:false,ar:false,lupus:false,calidad:false,sjogren:false,cardiovascular:false});
+const toggleSection=(s)=>setExpandedSections(p=>({...p,[s]:!p[s]}));
   
-  // Cargar información del hospital del usuario
   useEffect(() => {
     const loadUserHospital = async () => {
       if (user.hospital_id) {
@@ -3987,7 +3945,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
     setError('');
     setLoading(true);
     
-    // Buscar paciente por NHC Y hospital del médico
     const patient = await Storage.getPatientByNhc(searchNhc, user.hospital_id);
     
     if (!patient) {
@@ -3998,14 +3955,12 @@ const DoctorDashboard = ({ user, onLogout }) => {
       return;
     }
     
-    // Cargar información del hospital del paciente
     if (patient.hospital_id) {
       const hospitals = await Storage.getHospitals();
       const hospital = hospitals.find(h => h.id === patient.hospital_id);
       setPatientHospital(hospital);
     }
     
-    // Log access
     await Storage.createAccessLog({
       doctor_id: user.id,
       patient_id: patient.id,
@@ -4070,14 +4025,12 @@ const DoctorDashboard = ({ user, onLogout }) => {
     
     setSaving(true);
     
-    // Si estamos completando una pendiente, marcarla como completada
     if (selectedPending) {
       console.log('Completando pendiente:', selectedPending.id);
       const completed = await Storage.completePendingCalculation(selectedPending.id, user.id);
       console.log('Pendiente completada:', completed);
     }
     
-    // Guardar el score completo
     const score = {
       patient_id: selectedPatient.id,
       instrument: result.instrument,
@@ -4092,7 +4045,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
     if (savedScore) {
       setSaved(true);
       
-      // Recargar scores y pendientes del paciente
       console.log('Recargando scores y pendientes...');
       const updatedScores = await Storage.getScoresByPatientId(selectedPatient.id);
       const updatedPendings = await Storage.getPendingCalculations(selectedPatient.id);
@@ -4102,12 +4054,10 @@ const DoctorDashboard = ({ user, onLogout }) => {
       setPatientScores(updatedScores);
       setPendingCalcs(updatedPendings || []);
       
-      // Limpiar estados
       setSelectedPending(null);
       setSelectedCalc(null);
       setResult(null);
       
-      // Volver a vista de paciente después de 1 segundo
       setTimeout(() => {
         setView('patient');
         setSaved(false);
@@ -4203,7 +4153,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 key={pending.id}
                 onClick={() => {
                   setSelectedPending(pending);
-                  // Mantener el instrumento completo para saber la variante
                   const baseInstrument = pending.instrument.includes('_') 
                     ? pending.instrument.split('_')[0] 
                     : pending.instrument;
@@ -4362,114 +4311,197 @@ const DoctorDashboard = ({ user, onLogout }) => {
       
       {!selectedCalc ? (
         <>
-          <p style={{ marginBottom: '2rem', color: '#64748b' }}>
-            Selecciona una calculadora para realizar una nueva medición:
-          </p>
-          <div className="calc-grid">
-            {/* Espondiloartritis axial */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-              <span className="calc-icon">📈</span>
-              <span className="calc-name">ASDAS</span>
-              <span className="calc-desc">Actividad espondiloartritis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-              <span className="calc-icon">📊</span>
-              <span className="calc-name">BASDAI</span>
-              <span className="calc-desc">Espondiloartritis axial</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-              <span className="calc-icon">🚶</span>
-              <span className="calc-name">BASFI</span>
-              <span className="calc-desc">Función espondilitis</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-              <span className="calc-icon">😊</span>
-              <span className="calc-name">ASQoL</span>
-              <span className="calc-desc">Calidad de vida EA</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-              <span className="calc-icon">💡</span>
-              <span className="calc-name">ASAS-HI</span>
-              <span className="calc-desc">Impacto en salud</span>
-            </button>
-            
-            {/* Artritis psoriásica */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAPSA'); setResult(null); }}>
-              <span className="calc-icon">📉</span>
-              <span className="calc-name">DAPSA</span>
-              <span className="calc-desc">Artritis psoriásica</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
-              <span className="calc-icon">🎯</span>
-              <span className="calc-name">PsAQoL</span>
-              <span className="calc-desc">Calidad de vida AP</span>
-            </button>
-            
-            {/* Artritis reumatoide */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('DAS28'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">DAS28</span>
-              <span className="calc-desc">Artritis reumatoide</span>
-            </button>
-            
-            {/* Lupus */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLEDAI'); setResult(null); }}>
-              <span className="calc-icon">🦋</span>
-              <span className="calc-name">SLEDAI</span>
-              <span className="calc-desc">Actividad lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SLICC'); setResult(null); }}>
-              <span className="calc-icon">📋</span>
-              <span className="calc-name">SLICC</span>
-              <span className="calc-desc">Daño en lupus</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-              <span className="calc-icon">💚</span>
-              <span className="calc-name">LupusPRO</span>
-              <span className="calc-desc">Calidad de vida lupus</span>
-            </button>
-            
-            {/* Generales */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-              <span className="calc-icon">💪</span>
-              <span className="calc-name">FACIT</span>
-              <span className="calc-desc">Fatiga</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-              <span className="calc-icon">🏥</span>
-              <span className="calc-name">SF-36</span>
-              <span className="calc-desc">Encuesta de salud</span>
-            </button>
-            
-            {/* Sjögren */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('ESSPRI'); setResult(null); }}>
-              <span className="calc-icon">💧</span>
-              <span className="calc-name">ESSPRI</span>
-              <span className="calc-desc">Síntomas Sjögren</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
-              <span className="calc-icon">🔬</span>
-              <span className="calc-name">SSDAI</span>
-              <span className="calc-desc">Actividad Sjögren</span>
-            </button>
-            
-            {/* Cardiovasculares */}
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2'); setResult(null); }}>
-              <span className="calc-icon">💗</span>
-              <span className="calc-name">SCORE2</span>
-              <span className="calc-desc">Riesgo CV 40-69 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('SCORE2-OP'); setResult(null); }}>
-              <span className="calc-icon">❤️</span>
-              <span className="calc-name">SCORE2-OP</span>
-              <span className="calc-desc">Riesgo CV +70 años</span>
-            </button>
-            <button className="calc-card" onClick={() => { setSelectedCalc('QRISK3'); setResult(null); }}>
-              <span className="calc-icon">🫀</span>
-              <span className="calc-name">QRISK3</span>
-              <span className="calc-desc">Riesgo cardiovascular</span>
-            </button>
-          </div>
+          <p style={{marginBottom:'2rem',color:'#64748b'}}>Selecciona calculadora:</p>
+<div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('espondilo')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Espondiloartritis</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>5 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.espondilo?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.espondilo&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASDAS');setResult(null);}}>
+<span className="calc-icon">📈</span>
+<span className="calc-name">ASDAS</span>
+<span className="calc-desc">Act. espondilo</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASDAI');setResult(null);}}>
+<span className="calc-icon">📊</span>
+<span className="calc-name">BASDAI</span>
+<span className="calc-desc">Espondilo axial</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('BASFI');setResult(null);}}>
+<span className="calc-icon">🚶</span>
+<span className="calc-name">BASFI</span>
+<span className="calc-desc">Función espon</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASQoL');setResult(null);}}>
+<span className="calc-icon">😊</span>
+<span className="calc-name">ASQoL</span>
+<span className="calc-desc">Calidad vida EA</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ASASHI');setResult(null);}}>
+<span className="calc-icon">💡</span>
+<span className="calc-name">ASAS-HI</span>
+<span className="calc-desc">Impacto salud</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('aps')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔴</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis psoriásica</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.aps?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.aps&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAPSA');setResult(null);}}>
+<span className="calc-icon">📉</span>
+<span className="calc-name">DAPSA</span>
+<span className="calc-desc">APs</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('PSAQoL');setResult(null);}}>
+<span className="calc-icon">🎯</span>
+<span className="calc-name">PsAQoL</span>
+<span className="calc-desc">Calidad vida AP</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('ar')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🔵</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Artritis reumatoide</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>1 calc</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.ar?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.ar&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('DAS28');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">DAS28</span>
+<span className="calc-desc">AR</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('lupus')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>🦋</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Lupus eritematoso</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.lupus?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.lupus&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLEDAI');setResult(null);}}>
+<span className="calc-icon">🦋</span>
+<span className="calc-name">SLEDAI</span>
+<span className="calc-desc">Act. lupus</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SLICC');setResult(null);}}>
+<span className="calc-icon">📋</span>
+<span className="calc-name">SLICC</span>
+<span className="calc-desc">Daño lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('calidad')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💚</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Calidad de vida</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.calidad?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.calidad&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('FACIT');setResult(null);}}>
+<span className="calc-icon">💪</span>
+<span className="calc-name">FACIT</span>
+<span className="calc-desc">Fatiga</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SF36');setResult(null);}}>
+<span className="calc-icon">🏥</span>
+<span className="calc-name">SF-36</span>
+<span className="calc-desc">Encuesta salud</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('LupusPRO');setResult(null);}}>
+<span className="calc-icon">💚</span>
+<span className="calc-name">LupusPRO</span>
+<span className="calc-desc">Calidad vida lupus</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('sjogren')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>💧</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Sjögren</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>2 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.sjogren?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.sjogren&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('ESSPRI');setResult(null);}}>
+<span className="calc-icon">💧</span>
+<span className="calc-name">ESSPRI</span>
+<span className="calc-desc">Sint. Sjögren</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SSDAI');setResult(null);}}>
+<span className="calc-icon">🔬</span>
+<span className="calc-name">SSDAI</span>
+<span className="calc-desc">Act. Sjögren</span>
+</button>
+</div>)}
+</div>
+<div style={{border:'2px solid #e2e8f0',borderRadius:'0.75rem',overflow:'hidden'}}>
+<button onClick={()=>toggleSection('cardiovascular')} style={{width:'100%',padding:'1.25rem',backgroundColor:'#f8fafc',border:'none',display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='#f1f5f9'} onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='#f8fafc'}>
+<div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+<span style={{fontSize:'1.5rem'}}>❤️</span>
+<div style={{textAlign:'left'}}>
+<div style={{fontWeight:'700',fontSize:'1.1rem',color:'#1e293b'}}>Riesgo cardiovascular</div>
+<div style={{fontSize:'0.85rem',color:'#64748b',marginTop:'0.25rem'}}>3 calcs</div>
+</div>
+</div>
+<span style={{fontSize:'1.5rem',transform:expandedSections.cardiovascular?'rotate(180deg)':'rotate(0deg)',transition:'transform 0.3s'}}>▼</span>
+</button>
+{expandedSections.cardiovascular&&(<div className="calc-grid" style={{padding:'1rem',backgroundColor:'white'}}>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2');setResult(null);}}>
+<span className="calc-icon">💗</span>
+<span className="calc-name">SCORE2</span>
+<span className="calc-desc">Riesgo CV 40-69a</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('SCORE2-OP');setResult(null);}}>
+<span className="calc-icon">❤️</span>
+<span className="calc-name">SCORE2-OP</span>
+<span className="calc-desc">Riesgo CV +70a</span>
+</button>
+<button className="calc-card" onClick={()=>{setSelectedCalc('QRISK3');setResult(null);}}>
+<span className="calc-icon">🫀</span>
+<span className="calc-name">QRISK3</span>
+<span className="calc-desc">Riesgo CV</span>
+</button>
+</div>)}
+</div>
+</div>
         </>
       ) : (
         <>
@@ -4541,9 +4573,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
     </div>
   );
 };
-// ============================================
-// PÁGINAS LEGALES
-// ============================================
 
 const PoliticaPrivacidadPage = ({ onBack }) => (
   <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px', fontFamily: 'system-ui, sans-serif', color: '#333', lineHeight: '1.7' }}>
@@ -4752,9 +4781,6 @@ const PoliticaCookiesPage = ({ onBack }) => (
   </div>
 );
 
-// ============================================
-// MAIN APP
-// ============================================
 
 export default function App() {
   const [page, setPage] = useState('landing');
@@ -4939,9 +4965,11 @@ export default function App() {
         .btn-icon { font-size: 2rem; }
         .landing-features {
           display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          gap: 0;
+          width: 100%;
+          max-width: 900px;
         }
         .feature {
           display: flex;
