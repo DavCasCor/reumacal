@@ -3560,6 +3560,11 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
     ? scores 
     : scores.filter(s => s.instrument === historyFilter);
   
+  const availableInstruments = useMemo(() => {
+    const unique = [...new Set(scores.map(s => s.instrument))];
+    return unique.sort();
+  }, [scores]);
+  
   const chartData = useMemo(() => {
     if (historyFilter === 'ALL') return [];
     return filteredScores
@@ -3908,24 +3913,35 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
       <div className="history-filter">
         <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
           <option value="ALL">Todos los instrumentos</option>
-          <option value="BASDAI">BASDAI</option>
-          <option value="ASDAS_CRP">ASDAS-PCR</option>
-          <option value="ASDAS_ESR">ASDAS-VSG</option>
-          <option value="DAPSA">DAPSA</option>
-          <option value="DAS28_CRP">DAS28-PCR</option>
-          <option value="DAS28_ESR">DAS28-VSG</option>
-          <option value="SLEDAI">SLEDAI</option>
-          <option value="LupusPRO">LupusPRO</option>
-          <option value="FACIT">FACIT</option>
-          <option value="SF36">SF-36</option>
-          <option value="BASFI">BASFI</option>
-          <option value="ASASHI">ASAS-HI</option>
-          <option value="ASQoL">ASQoL</option>
-          <option value="PSAQoL">PSAQoL</option>
-          <option value="ESSPRI">ESSPRI</option>
-          <option value="SSDAI">SSDAI</option>
-          <option value="SCORE2">SCORE2 (40-69 años)</option>
-          <option value="SCORE2-OP">SCORE2-OP (+70 años)</option>
+          {availableInstruments.map(inst => {
+            const displayNames = {
+              'BASDAI': 'BASDAI',
+              'ASDAS_CRP': 'ASDAS-PCR',
+              'ASDAS_ESR': 'ASDAS-VSG',
+              'BASFI': 'BASFI',
+              'ASQoL': 'ASQoL',
+              'ASASHI': 'ASAS-HI',
+              'DAPSA': 'DAPSA',
+              'PSAQoL': 'PSAQoL',
+              'DAS28_CRP': 'DAS28-PCR',
+              'DAS28_ESR': 'DAS28-VSG',
+              'SLEDAI': 'SLEDAI',
+              'SLICC': 'SLICC',
+              'FACIT': 'FACIT',
+              'SF36': 'SF-36',
+              'LupusPRO': 'LupusPRO',
+              'ESSPRI': 'ESSPRI',
+              'SSDAI': 'SSDAI',
+              'SCORE2': 'SCORE2 (40-69 años)',
+              'SCORE2-OP': 'SCORE2-OP (+70 años)',
+              'QRISK3': 'QRISK3'
+            };
+            return (
+              <option key={inst} value={inst}>
+                {displayNames[inst] || inst}
+              </option>
+            );
+          })}
         </select>
       </div>
       
