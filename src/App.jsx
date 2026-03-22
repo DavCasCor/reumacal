@@ -4146,6 +4146,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
     ? patientScores
     : patientScores.filter(s => s.instrument === historyFilter);
   
+  const availableInstruments = useMemo(() => {
+    const unique = [...new Set(patientScores.map(s => s.instrument))];
+    return unique.sort();
+  }, [patientScores]);
+  
   const chartData = useMemo(() => {
     if (historyFilter === 'ALL') return [];
     return filteredScores
@@ -4158,9 +4163,13 @@ const DoctorDashboard = ({ user, onLogout }) => {
   }, [filteredScores, historyFilter]);
   
   const lastScores = useMemo(() => {
-    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
-                        'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
-                        'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI', 'SCORE2', 'SCORE2-OP'];
+    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'BASFI', 'ASQoL', 'ASASHI',
+                        'DAPSA', 'PSAQoL',
+                        'DAS28_CRP', 'DAS28_ESR',
+                        'SLEDAI', 'SLICC',
+                        'FACIT', 'SF36', 'LupusPRO',
+                        'ESSPRI', 'SSDAI',
+                        'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
       const last = patientScores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
@@ -4386,12 +4395,35 @@ const DoctorDashboard = ({ user, onLogout }) => {
         <div className="history-filter">
           <select value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)}>
             <option value="ALL">Todos los instrumentos</option>
-            <option value="BASDAI">BASDAI</option>
-            <option value="ASDAS_CRP">ASDAS-PCR</option>
-            <option value="ASDAS_ESR">ASDAS-VSG</option>
-            <option value="DAPSA">DAPSA</option>
-            <option value="DAS28_CRP">DAS28-PCR</option>
-            <option value="DAS28_ESR">DAS28-VSG</option>
+            {availableInstruments.map(inst => {
+              const displayNames = {
+                'BASDAI': 'BASDAI',
+                'ASDAS_CRP': 'ASDAS-PCR',
+                'ASDAS_ESR': 'ASDAS-VSG',
+                'BASFI': 'BASFI',
+                'ASQoL': 'ASQoL',
+                'ASASHI': 'ASAS-HI',
+                'DAPSA': 'DAPSA',
+                'PSAQoL': 'PsAQoL',
+                'DAS28_CRP': 'DAS28-PCR',
+                'DAS28_ESR': 'DAS28-VSG',
+                'SLEDAI': 'SLEDAI',
+                'SLICC': 'SLICC',
+                'FACIT': 'FACIT',
+                'SF36': 'SF-36',
+                'LupusPRO': 'LupusPRO',
+                'ESSPRI': 'ESSPRI',
+                'SSDAI': 'SSDAI',
+                'SCORE2': 'SCORE2',
+                'SCORE2-OP': 'SCORE2-OP',
+                'QRISK3': 'QRISK3'
+              };
+              return (
+                <option key={inst} value={inst}>
+                  {displayNames[inst] || inst}
+                </option>
+              );
+            })}
           </select>
         </div>
         
