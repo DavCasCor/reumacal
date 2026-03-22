@@ -4093,24 +4093,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
     loadUserHospital();
   }, [user.hospital_id]);
   
-  useEffect(() => {
-    const handleDoctorBack = (event) => {
-      if (event.state && event.state.doctorView) {
-        setView(event.state.doctorView);
-      } else if (viewHistory.length > 1) {
-        // Si no hay estado pero tenemos historial, retroceder
-        const newHistory = [...viewHistory];
-        newHistory.pop(); // Quitar vista actual
-        const previousView = newHistory[newHistory.length - 1] || 'search';
-        setView(previousView);
-        setViewHistory(newHistory);
-      }
-    };
-
-    window.addEventListener('popstate', handleDoctorBack);
-    return () => window.removeEventListener('popstate', handleDoctorBack);
-  }, [viewHistory]);
-
   const navigateView = (newView) => {
     setView(newView);
   };
