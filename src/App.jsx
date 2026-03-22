@@ -796,6 +796,21 @@ const Storage = {
     }
   },
   
+  async deleteScore(scoreId) {
+    if (!supabase) { console.error('Supabase no configurado'); return false; }
+    try {
+      const { error } = await supabase.from('scores').delete().eq('id', scoreId);
+      if (error) { 
+        console.error('Error deleting score:', error); 
+        return false; 
+      }
+      return true;
+    } catch (err) {
+      console.error('Exception deleting score:', err);
+      return false;
+    }
+  },
+  
   async createAccessLog(log) {
     if (!supabase) { console.error('Supabase no configurado'); return null; }
     try {
@@ -4275,6 +4290,30 @@ const DoctorDashboard = ({ user, onLogout }) => {
     setSaving(false);
   };
   
+  const handleDeleteScore = async (scoreId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.')) {
+      return;
+    }
+    
+    try {
+      // Eliminar el score de la base de datos
+      const success = await Storage.deleteScore(scoreId);
+      
+      if (success) {
+        // Recargar los scores del paciente
+        const updatedScores = await Storage.getScoresByPatientId(selectedPatient.id);
+        setPatientScores(updatedScores);
+        
+        alert('Registro eliminado correctamente');
+      } else {
+        alert('Error al eliminar el registro');
+      }
+    } catch (error) {
+      console.error('Error eliminando score:', error);
+      alert('Error al eliminar el registro');
+    }
+  };
+  
   const renderSearch = () => (
     <div className="search-view">
       <h2>Buscar paciente</h2>
@@ -4476,6 +4515,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 <th>Instrumento</th>
                 <th>Puntuación</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -4497,6 +4537,15 @@ const DoctorDashboard = ({ user, onLogout }) => {
                       <span className="status-badge" style={{ backgroundColor: interpretation.color }}>
                         {interpretation.text}
                       </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn-delete-score"
+                        onClick={() => handleDeleteScore(score.id)}
+                        title="Eliminar registro"
+                      >
+                        🗑️
+                      </button>
                     </td>
                   </tr>
                 );
@@ -5608,6 +5657,22 @@ export default function App() {
           transition: all 0.2s;
         }
         .btn-back-calc:hover { background: var(--border); }
+        
+        .btn-delete-score {
+          background: #fee2e2;
+          color: #dc2626;
+          border: 1px solid #fecaca;
+          padding: 0.4rem 0.8rem;
+          border-radius: 6px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-delete-score:hover {
+          background: #fecaca;
+          border-color: #dc2626;
+        }
+        
         .calc-container {
           display: grid;
           grid-template-columns: 1fr 1fr;
