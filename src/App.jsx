@@ -4095,7 +4095,40 @@ const DoctorDashboard = ({ user, onLogout }) => {
   
   const navigateView = (newView) => {
     setView(newView);
+    // Usar pushState para añadir al historial del navegador
+    window.history.pushState(
+      { page: 'doctor-dashboard', doctorView: newView }, 
+      '', 
+      `#doctor-dashboard?view=${newView}`
+    );
   };
+
+  useEffect(() => {
+    // Restaurar vista desde URL al cargar
+    const hash = window.location.hash;
+    if (hash.includes('view=')) {
+      const urlView = hash.split('view=')[1];
+      if (['search', 'patient', 'calculator'].includes(urlView)) {
+        setView(urlView);
+      }
+    }
+    
+    // Escuchar cambios en el historial (botón atrás/adelante)
+    const handleViewChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes('view=')) {
+        const urlView = hash.split('view=')[1];
+        if (['search', 'patient', 'calculator'].includes(urlView)) {
+          setView(urlView);
+        }
+      } else if (hash === '#doctor-dashboard') {
+        setView('search');
+      }
+    };
+    
+    window.addEventListener('popstate', handleViewChange);
+    return () => window.removeEventListener('popstate', handleViewChange);
+  }, []);
 
   const searchPatient = async () => {
     setError('');
@@ -5029,11 +5062,13 @@ export default function App() {
         }
       } else {
         const hash = window.location.hash.substring(1);
-        if (hash && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(hash)) {
-          setPage(hash);
+        const basePage = hash.split('?')[0]; // Extraer la página sin query params
+        
+        if (basePage && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(basePage)) {
+          setPage(basePage);
           
           // Limpiar sesión si vuelves a landing o auth
-          if (hash === 'landing' || hash === 'auth') {
+          if (basePage === 'landing' || basePage === 'auth') {
             setCurrentUser(null);
             setCurrentPatient(null);
           }
@@ -5049,7 +5084,8 @@ export default function App() {
 
     const initialHash = window.location.hash.substring(1);
     if (initialHash) {
-      window.history.replaceState({ page: initialHash }, '', `#${initialHash}`);
+      const basePage = initialHash.split('?')[0];
+      window.history.replaceState({ page: basePage }, '', `#${initialHash}`);
     } else {
       window.history.replaceState({ page: 'landing' }, '', '#landing');
     }
