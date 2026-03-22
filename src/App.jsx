@@ -5094,12 +5094,12 @@ export default function App() {
   };
   
   const handleLogin = (user, patient) => {
-  setCurrentUser(user);
-  setCurrentPatient(patient);
-  setTimeout(() => {
-    navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
-  }, 10);
-};
+    setCurrentUser(user);
+    setCurrentPatient(patient);
+    setTimeout(() => {
+      navigateToPage(user.role === 'PATIENT' ? 'patient-dashboard' : 'doctor-dashboard');
+    }, 50);
+  };
   
   const handleLogout = () => {
     setCurrentUser(null);
