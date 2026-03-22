@@ -3494,7 +3494,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
-  const [viewHistory, setViewHistory] = useState(['search']);
   
   useEffect(() => {
     loadScores();
@@ -4081,7 +4080,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [saved, setSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
-  const [viewHistory, setViewHistory] = useState(['search']);
   
   // Cargar información del hospital del usuario
   useEffect(() => {
@@ -4115,8 +4113,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
 
   const navigateView = (newView) => {
     setView(newView);
-    setViewHistory(prev => [...prev, newView]);
-    window.history.pushState({ doctorView: newView }, '', window.location.pathname + window.location.search);
   };
 
   const searchPatient = async () => {
@@ -4302,8 +4298,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const renderPatient = () => (
     <div className="patient-view">
       <button className="btn-back-calc" onClick={() => { 
-        setSelectedPatient(null); 
-        window.history.back();
+        setSelectedPatient(null);
+        setView('search');
       }}>
         ← Nueva búsqueda
       </button>
@@ -4503,11 +4499,12 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const renderCalculator = () => (
     <div className="calculator-view">
       <button className="btn-back-calc" onClick={() => { 
-  setSelectedCalc(null); 
-  setResult(null); 
-  setSaved(false); 
-  window.history.back();
-}}>
+        setSelectedCalc(null); 
+        setResult(null); 
+        setSaved(false);
+        setSelectedPending(null);
+        setView('patient');
+      }}>
         ← Volver al paciente
       </button>
       
