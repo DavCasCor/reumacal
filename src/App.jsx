@@ -3720,6 +3720,48 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
+  // Sistema de navegación con historial
+  const navigateView = (newView) => {
+    setView(newView);
+    window.history.pushState(
+      { page: 'patient-dashboard', patientView: newView },
+      '',
+      `#patient-dashboard?view=${newView}`
+    );
+  };
+  
+  useEffect(() => {
+    // Restaurar vista desde URL al cargar
+    const hash = window.location.hash;
+    if (hash.includes('view=')) {
+      const urlView = hash.split('view=')[1];
+      if (['home', 'calculators', 'history', 'profile'].includes(urlView)) {
+        setView(urlView);
+      }
+    }
+    
+    // Escuchar cambios en el historial (botón atrás/adelante)
+    const handleViewChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes('view=')) {
+        const urlView = hash.split('view=')[1];
+        if (['home', 'calculators', 'history', 'profile'].includes(urlView)) {
+          setView(urlView);
+          // Limpiar estados de calculadora al navegar
+          setSelectedCalc(null);
+          setResult(null);
+        }
+      } else if (hash === '#patient-dashboard') {
+        setView('home');
+        setSelectedCalc(null);
+        setResult(null);
+      }
+    };
+    
+    window.addEventListener('popstate', handleViewChange);
+    return () => window.removeEventListener('popstate', handleViewChange);
+  }, []);
+  
   useEffect(() => {
     loadScores();
   }, [patient]);
@@ -4277,10 +4319,10 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
           <span className="app-name">ReumaCal</span>
         </div>
         <nav className="header-nav">
-          <button className={view === 'home' ? 'active' : ''} onClick={() => setView('home')}>Inicio</button>
-          <button className={view === 'calculators' ? 'active' : ''} onClick={() => setView('calculators')}>Calculadoras</button>
-          <button className={view === 'history' ? 'active' : ''} onClick={() => setView('history')}>Histórico</button>
-          <button className={view === 'profile' ? 'active' : ''} onClick={() => setView('profile')}>Perfil</button>
+          <button className={view === 'home' ? 'active' : ''} onClick={() => navigateView('home')}>Inicio</button>
+          <button className={view === 'calculators' ? 'active' : ''} onClick={() => navigateView('calculators')}>Calculadoras</button>
+          <button className={view === 'history' ? 'active' : ''} onClick={() => navigateView('history')}>Histórico</button>
+          <button className={view === 'profile' ? 'active' : ''} onClick={() => navigateView('profile')}>Perfil</button>
         </nav>
         <button className="btn-logout" onClick={onLogout}>Salir</button>
       </header>
