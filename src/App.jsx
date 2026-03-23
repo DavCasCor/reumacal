@@ -5347,30 +5347,30 @@ export default function App() {
   useEffect(() => {
     const handlePopState = (event) => {
       if (event.state && event.state.page) {
-        const targetPage = event.state.page;
+        setPage(event.state.page);
         
-        // Solo limpiar sesión si explícitamente vamos a landing o auth
-        if (targetPage === 'landing' || targetPage === 'auth') {
+        // Limpiar sesión si vuelves a landing o auth
+        if (event.state.page === 'landing' || event.state.page === 'auth') {
           setCurrentUser(null);
           setCurrentPatient(null);
         }
-        
-        setPage(targetPage);
       } else {
         const hash = window.location.hash.substring(1);
         const basePage = hash.split('?')[0]; // Extraer la página sin query params
         
         if (basePage && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(basePage)) {
-          // Solo limpiar sesión si explícitamente vamos a landing o auth
+          setPage(basePage);
+          
+          // Limpiar sesión si vuelves a landing o auth
           if (basePage === 'landing' || basePage === 'auth') {
             setCurrentUser(null);
             setCurrentPatient(null);
           }
-          
-          setPage(basePage);
+        } else {
+          setPage('landing');
+          setCurrentUser(null);
+          setCurrentPatient(null);
         }
-        // Si el hash no es válido, no hacer nada (no limpiar sesión ni cambiar página)
-        // Esto permite la navegación interna en dashboards
       }
     };
 
