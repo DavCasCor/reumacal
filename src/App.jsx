@@ -2178,20 +2178,6 @@ const LandingPage = ({ onNavigate }) => (
       <div className="landing-features">
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
-            <span style={{ fontSize: '1.5rem' }}>🦴</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Espondiloartritis</h3>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <div className="feature"><span className="feature-icon">📈</span><span>ASDAS</span></div>
-            <div className="feature"><span className="feature-icon">📊</span><span>BASDAI</span></div>
-            <div className="feature"><span className="feature-icon">🚶</span><span>BASFI</span></div>
-            <div className="feature"><span className="feature-icon">😊</span><span>ASQoL</span></div>
-            <div className="feature"><span className="feature-icon">💡</span><span>ASAS-HI</span></div>
-          </div>
-        </div>
-        
-        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🔴</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Artritis psoriásica</h3>
           </div>
@@ -2215,6 +2201,20 @@ const LandingPage = ({ onNavigate }) => (
         
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
+            <span style={{ fontSize: '1.5rem' }}>🦴</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Espondiloartritis</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature"><span className="feature-icon">📈</span><span>ASDAS</span></div>
+            <div className="feature"><span className="feature-icon">📊</span><span>BASDAI</span></div>
+            <div className="feature"><span className="feature-icon">🚶</span><span>BASFI</span></div>
+            <div className="feature"><span className="feature-icon">😊</span><span>ASQoL</span></div>
+            <div className="feature"><span className="feature-icon">💡</span><span>ASAS-HI</span></div>
+          </div>
+        </div>
+        
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>🦋</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Lupus eritematoso sistémico</h3>
           </div>
@@ -2227,23 +2227,23 @@ const LandingPage = ({ onNavigate }) => (
         
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
-            <span style={{ fontSize: '1.5rem' }}>💚</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida general</h3>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
-            <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
-          </div>
-        </div>
-        
-        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>💧</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Síndrome de Sjögren</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💧</span><span>ESSPRI</span></div>
             <div className="feature"><span className="feature-icon">🔬</span><span>SSDAI</span></div>
+          </div>
+        </div>
+        
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
+            <span style={{ fontSize: '1.5rem' }}>💚</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida general</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
+            <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
           </div>
         </div>
         
@@ -3913,49 +3913,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
-              <button onClick={() => toggleSection('espondilo')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
-              </button>
-              {expandedSections.espondilo && (
-                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-                    <span className="calc-icon">📈</span>
-                    <span className="calc-name">ASDAS</span>
-                    <span className="calc-desc">Actividad espondiloartritis</span>
-                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa tus síntomas (el reumatólogo/a añadirá la analítica)</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-                    <span className="calc-icon">📊</span>
-                    <span className="calc-name">BASDAI</span>
-                    <span className="calc-desc">Actividad de la enfermedad en espondiloartritis axial</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-                    <span className="calc-icon">🚶</span>
-                    <span className="calc-name">BASFI</span>
-                    <span className="calc-desc">Función espondilitis</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-                    <span className="calc-icon">😊</span>
-                    <span className="calc-name">ASQoL</span>
-                    <span className="calc-desc">Calidad de vida en espondiloartritis axial</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-                    <span className="calc-icon">💡</span>
-                    <span className="calc-name">ASAS-HI</span>
-                    <span className="calc-desc">Impacto en salud</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('aps')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>🔴</span>
@@ -4019,6 +3976,49 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('espondilo')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.espondilo && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">ASDAS</span>
+                    <span className="calc-desc">Actividad espondiloartritis</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa tus síntomas (el reumatólogo/a añadirá la analítica)</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">BASDAI</span>
+                    <span className="calc-desc">Actividad de la enfermedad en espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
+                    <span className="calc-icon">🚶</span>
+                    <span className="calc-name">BASFI</span>
+                    <span className="calc-desc">Función espondilitis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
+                    <span className="calc-icon">😊</span>
+                    <span className="calc-name">ASQoL</span>
+                    <span className="calc-desc">Calidad de vida en espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
+                    <span className="calc-icon">💡</span>
+                    <span className="calc-name">ASAS-HI</span>
+                    <span className="calc-desc">Impacto en salud</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('lupus')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>🦋</span>
@@ -4053,33 +4053,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
-              <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>💚</span>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
-              </button>
-              {expandedSections.calidad && (
-                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-                    <span className="calc-icon">💪</span>
-                    <span className="calc-name">FACIT</span>
-                    <span className="calc-desc">Fatiga</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-                    <span className="calc-icon">🏥</span>
-                    <span className="calc-name">SF-36</span>
-                    <span className="calc-desc">Encuesta de salud</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('sjogren')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💧</span>
@@ -4102,6 +4075,33 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-name">SSDAI</span>
                     <span className="calc-desc">Actividad Sjögren</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Esta calculadora la completará el reumatólogo/a en consulta</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💚</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.calidad && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
+                    <span className="calc-icon">💪</span>
+                    <span className="calc-name">FACIT</span>
+                    <span className="calc-desc">Fatiga</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
+                    <span className="calc-icon">🏥</span>
+                    <span className="calc-name">SF-36</span>
+                    <span className="calc-desc">Encuesta de salud</span>
                   </button>
                 </div>
               )}
@@ -4872,48 +4872,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
-              <button onClick={() => toggleSection('espondilo')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
-              </button>
-              {expandedSections.espondilo && (
-                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
-                    <span className="calc-icon">📈</span>
-                    <span className="calc-name">ASDAS</span>
-                    <span className="calc-desc">Actividad espondiloartritis</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
-                    <span className="calc-icon">📊</span>
-                    <span className="calc-name">BASDAI</span>
-                    <span className="calc-desc">Actividad de la enfermedad en espondiloartritis axial</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
-                    <span className="calc-icon">🚶</span>
-                    <span className="calc-name">BASFI</span>
-                    <span className="calc-desc">Función espondilitis</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
-                    <span className="calc-icon">😊</span>
-                    <span className="calc-name">ASQoL</span>
-                    <span className="calc-desc">Calidad de vida en espondiloartritis axial</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
-                    <span className="calc-icon">💡</span>
-                    <span className="calc-name">ASAS-HI</span>
-                    <span className="calc-desc">Impacto en salud</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('aps')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>🔴</span>
@@ -4973,6 +4931,48 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('espondilo')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Espondiloartritis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>5 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.espondilo ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.espondilo && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASDAS'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">ASDAS</span>
+                    <span className="calc-desc">Actividad espondiloartritis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASDAI'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">BASDAI</span>
+                    <span className="calc-desc">Actividad de la enfermedad en espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('BASFI'); setResult(null); }}>
+                    <span className="calc-icon">🚶</span>
+                    <span className="calc-name">BASFI</span>
+                    <span className="calc-desc">Función espondilitis</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASQoL'); setResult(null); }}>
+                    <span className="calc-icon">😊</span>
+                    <span className="calc-name">ASQoL</span>
+                    <span className="calc-desc">Calidad de vida en espondiloartritis axial</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('ASASHI'); setResult(null); }}>
+                    <span className="calc-icon">💡</span>
+                    <span className="calc-name">ASAS-HI</span>
+                    <span className="calc-desc">Impacto en salud</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('lupus')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>🦋</span>
@@ -5005,33 +5005,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
-              <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>💚</span>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
-              </button>
-              {expandedSections.calidad && (
-                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
-                    <span className="calc-icon">💪</span>
-                    <span className="calc-name">FACIT</span>
-                    <span className="calc-desc">Fatiga</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
-                    <span className="calc-icon">🏥</span>
-                    <span className="calc-name">SF-36</span>
-                    <span className="calc-desc">Encuesta de salud</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('sjogren')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💧</span>
@@ -5053,6 +5026,33 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-icon">🔬</span>
                     <span className="calc-name">SSDAI</span>
                     <span className="calc-desc">Actividad Sjögren</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💚</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.calidad && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
+                    <span className="calc-icon">💪</span>
+                    <span className="calc-name">FACIT</span>
+                    <span className="calc-desc">Fatiga</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
+                    <span className="calc-icon">🏥</span>
+                    <span className="calc-name">SF-36</span>
+                    <span className="calc-desc">Encuesta de salud</span>
                   </button>
                 </div>
               )}
