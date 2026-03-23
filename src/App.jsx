@@ -108,6 +108,12 @@ const interpretDAPSA = (score) => {
   return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
 
+const interpretMDAScore = (score) => {
+  // score es el número de criterios cumplidos (0-7)
+  if (score >= 5) return { text: 'MDA alcanzado', color: '#10b981', level: 'achieved' };
+  return { text: 'MDA no alcanzado', color: '#ef4444', level: 'not-achieved' };
+};
+
 const calculateDAS28withCRP = (components) => {
   const { tjc28, sjc28, global, crp } = components;
   const t = parseFloat(tjc28);
@@ -1186,6 +1192,208 @@ const DAPSACalculator = ({ onResult, isDoctor = false, initialData = null }) => 
       
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular DAPSA
+      </button>
+    </div>
+  );
+};
+
+const MDACalculator = ({ onResult, isDoctor = false, initialData = null }) => {
+  const [components, setComponents] = useState(
+    initialData || { 
+      tjc: 0,        // Articulaciones dolorosas (médico)
+      sjc: 0,        // Articulaciones inflamadas (médico)
+      pasi: 0,       // PASI (médico)
+      pain: 0,       // Dolor del paciente VAS 0-10 (paciente)
+      patientGlobal: 0,  // Evaluación global del paciente VAS 0-10 (paciente)
+      haq: 0,        // HAQ (paciente)
+      enthesitis: 0  // Entesitis (médico)
+    }
+  );
+  
+  const calculateMDA = (comp) => {
+    // MDA requiere cumplir 5 de 7 criterios:
+    // 1. TJC ≤ 1
+    // 2. SJC ≤ 1
+    // 3. PASI ≤ 1 o BSA ≤ 3%
+    // 4. Dolor del paciente ≤ 1.5 (en escala 0-10)
+    // 5. Evaluación global del paciente ≤ 2 (en escala 0-10)
+    // 6. HAQ ≤ 0.5
+    // 7. Entesitis ≤ 1
+    
+    let criteriasMet = 0;
+    const criterias = [];
+    
+    if (comp.tjc <= 1) {
+      criteriasMet++;
+      criterias.push('✓ Articulaciones dolorosas ≤1');
+    } else {
+      criterias.push('✗ Articulaciones dolorosas >1');
+    }
+    
+    if (comp.sjc <= 1) {
+      criteriasMet++;
+      criterias.push('✓ Articulaciones inflamadas ≤1');
+    } else {
+      criterias.push('✗ Articulaciones inflamadas >1');
+    }
+    
+    if (comp.pasi <= 1) {
+      criteriasMet++;
+      criterias.push('✓ PASI ≤1');
+    } else {
+      criterias.push('✗ PASI >1');
+    }
+    
+    if (comp.pain <= 1.5) {
+      criteriasMet++;
+      criterias.push('✓ Dolor del paciente ≤1.5');
+    } else {
+      criterias.push('✗ Dolor del paciente >1.5');
+    }
+    
+    if (comp.patientGlobal <= 2) {
+      criteriasMet++;
+      criterias.push('✓ Evaluación global del paciente ≤2');
+    } else {
+      criterias.push('✗ Evaluación global del paciente >2');
+    }
+    
+    if (comp.haq <= 0.5) {
+      criteriasMet++;
+      criterias.push('✓ HAQ ≤0.5');
+    } else {
+      criterias.push('✗ HAQ >0.5');
+    }
+    
+    if (comp.enthesitis <= 1) {
+      criteriasMet++;
+      criterias.push('✓ Entesitis ≤1');
+    } else {
+      criterias.push('✗ Entesitis >1');
+    }
+    
+    return { criteriasMet, criterias };
+  };
+  
+  const interpretMDA = (criteriasMet) => {
+    if (criteriasMet >= 5) {
+      return {
+        text: 'MDA alcanzado',
+        color: '#22c55e',
+        description: 'El paciente cumple con la actividad mínima de la enfermedad (≥5/7 criterios)'
+      };
+    } else {
+      return {
+        text: 'MDA no alcanzado',
+        color: '#ef4444',
+        description: `El paciente NO cumple MDA (solo ${criteriasMet}/7 criterios)`
+      };
+    }
+  };
+  
+  const handleCalculate = () => {
+    const { criteriasMet, criterias } = calculateMDA(components);
+    const interpretation = interpretMDA(criteriasMet);
+    onResult({ 
+      score: criteriasMet, 
+      interpretation: {
+        ...interpretation,
+        criterias
+      }, 
+      components, 
+      instrument: 'MDA' 
+    });
+  };
+  
+  return (
+    <div className="calculator-form">
+      <h3>MDA</h3>
+      <p className="calc-description">Minimal Disease Activity</p>
+      <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
+        Actividad mínima de la enfermedad en artritis psoriásica
+      </p>
+      
+      <FormInput
+        label={isDoctor ? "Articulaciones dolorosas (TJC)" : "Articulaciones dolorosas (TJC) (solo puede completarlo el reumatólogo/a)"}
+        type="number"
+        value={components.tjc}
+        onChange={(val) => setComponents(prev => ({ ...prev, tjc: val }))}
+        min={0}
+        max={68}
+        step={1}
+        placeholder="0-68"
+        disabled={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+      
+      <FormInput
+        label={isDoctor ? "Articulaciones inflamadas (SJC)" : "Articulaciones inflamadas (SJC) (solo puede completarlo el reumatólogo/a)"}
+        type="number"
+        value={components.sjc}
+        onChange={(val) => setComponents(prev => ({ ...prev, sjc: val }))}
+        min={0}
+        max={66}
+        step={1}
+        placeholder="0-66"
+        disabled={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+      
+      <FormInput
+        label={isDoctor ? "PASI" : "PASI (solo puede completarlo el reumatólogo/a)"}
+        type="number"
+        value={components.pasi}
+        onChange={(val) => setComponents(prev => ({ ...prev, pasi: val }))}
+        min={0}
+        max={72}
+        step={0.1}
+        placeholder="0-72"
+        disabled={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+      
+      <SliderInput
+        label="Dolor del paciente (VAS 0-10)"
+        value={components.pain}
+        onChange={(val) => setComponents(prev => ({ ...prev, pain: val }))}
+        max={10}
+        step={0.1}
+      />
+      
+      <SliderInput
+        label="Evaluación global del paciente (VAS 0-10)"
+        value={components.patientGlobal}
+        onChange={(val) => setComponents(prev => ({ ...prev, patientGlobal: val }))}
+        max={10}
+        step={0.1}
+      />
+      
+      <FormInput
+        label="HAQ (Health Assessment Questionnaire)"
+        type="number"
+        value={components.haq}
+        onChange={(val) => setComponents(prev => ({ ...prev, haq: val }))}
+        min={0}
+        max={3}
+        step={0.1}
+        placeholder="0-3"
+      />
+      
+      <FormInput
+        label={isDoctor ? "Entesitis" : "Entesitis (solo puede completarlo el reumatólogo/a)"}
+        type="number"
+        value={components.enthesitis}
+        onChange={(val) => setComponents(prev => ({ ...prev, enthesitis: val }))}
+        min={0}
+        max={50}
+        step={1}
+        placeholder="0-50"
+        disabled={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+      
+      <button className="btn-calculate" onClick={handleCalculate}>
+        Calcular MDA
       </button>
     </div>
   );
@@ -3591,9 +3799,10 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   }, [filteredScores, historyFilter]);
   
   const lastScores = useMemo(() => {
-    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
+    const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
+                        'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
-                        'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI', 'SCORE2', 'SCORE2-OP'];
+                        'ASQoL', 'ESSPRI', 'SSDAI', 'SCORE2', 'SCORE2-OP'];
     return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
@@ -3617,6 +3826,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               if (inst === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
               else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
               else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+              else if (inst === 'MDA') interpretation = interpretMDAScore(score.total_score);
               else if (inst.startsWith('DAS28')) interpretation = interpretDAS28(score.total_score);
               else if (inst === 'SLEDAI') interpretation = interpretSLEDAI(score.total_score);
               else if (inst === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
@@ -3707,7 +3917,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>🔴</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis psoriásica</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>4 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.aps ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -3720,8 +3930,20 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-desc">Actividad de la enfermedad en artritis psoriásica</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa el dolor (el reumatólogo/a añadirá exploración y analítica)</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
                     <span className="calc-icon">🎯</span>
+                    <span className="calc-name">MDA</span>
+                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa dolor y HAQ (el reumatólogo/a añadirá exploración y PASI)</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAS28_PCR_APS'); setResult(null); }}>
+                    <span className="calc-icon">🩺</span>
+                    <span className="calc-name">DAS28-PCR</span>
+                    <span className="calc-desc">Actividad de la enfermedad con PCR</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa valoración global (el reumatólogo/a añadirá exploración y analítica)</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
                     <span className="calc-name">PsAQoL</span>
                     <span className="calc-desc">Calidad de vida en artritis psoriásica</span>
                   </button>
@@ -3888,6 +4110,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'BASDAI' && <BASDAICalculator onResult={handleResult} />}
             {selectedCalc === 'ASDAS' && <ASDASCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'DAPSA' && <DAPSACalculator onResult={handleResult} isDoctor={false} />}
+            {selectedCalc === 'MDA' && <MDACalculator onResult={handleResult} isDoctor={false} />}
+            {selectedCalc === 'DAS28_PCR_APS' && <DAS28Calculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'DAS28' && <DAS28Calculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'SLEDAI' && <SLEDAICalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'LupusPRO' && <LupusPROCalculator onResult={handleResult} />}
@@ -3936,6 +4160,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               'ASQoL': 'ASQoL',
               'ASASHI': 'ASAS-HI',
               'DAPSA': 'DAPSA',
+              'MDA': 'MDA',
+              'DAS28_PCR_APS': 'DAS28-PCR (APs)',
               'PSAQoL': 'PSAQoL',
               'DAS28_CRP': 'DAS28-PCR',
               'DAS28_ESR': 'DAS28-VSG',
@@ -3993,6 +4219,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                 if (score.instrument === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
                 else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
                 else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+                else if (score.instrument === 'MDA') interpretation = interpretMDAScore(score.total_score);
                 else interpretation = interpretDAS28(score.total_score);
                 
                 return (
@@ -4206,7 +4433,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
   
   const lastScores = useMemo(() => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'BASFI', 'ASQoL', 'ASASHI',
-                        'DAPSA', 'PSAQoL',
+                        'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
                         'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'SLICC',
                         'FACIT', 'SF36', 'LupusPRO',
@@ -4434,6 +4661,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
             if (inst === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
             else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
             else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+            else if (inst === 'MDA') interpretation = interpretMDAScore(score.total_score);
             else interpretation = interpretDAS28(score.total_score);
             
             return (
@@ -4470,6 +4698,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 'ASQoL': 'ASQoL',
                 'ASASHI': 'ASAS-HI',
                 'DAPSA': 'DAPSA',
+                'MDA': 'MDA',
+                'DAS28_PCR_APS': 'DAS28-PCR (APs)',
                 'PSAQoL': 'PsAQoL',
                 'DAS28_CRP': 'DAS28-PCR',
                 'DAS28_ESR': 'DAS28-VSG',
@@ -4524,6 +4754,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 if (score.instrument === 'BASDAI') interpretation = interpretBASDAI(score.total_score);
                 else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
                 else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
+                else if (score.instrument === 'MDA') interpretation = interpretMDAScore(score.total_score);
                 else interpretation = interpretDAS28(score.total_score);
                 
                 return (
@@ -4644,7 +4875,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>🔴</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Artritis psoriásica</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>4 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.aps ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -4656,8 +4887,18 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-name">DAPSA</span>
                     <span className="calc-desc">Actividad de la enfermedad en artritis psoriásica</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
                     <span className="calc-icon">🎯</span>
+                    <span className="calc-name">MDA</span>
+                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('DAS28_PCR_APS'); setResult(null); }}>
+                    <span className="calc-icon">🩺</span>
+                    <span className="calc-name">DAS28-PCR</span>
+                    <span className="calc-desc">Actividad de la enfermedad con PCR</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
                     <span className="calc-name">PsAQoL</span>
                     <span className="calc-desc">Calidad de vida en artritis psoriásica</span>
                   </button>
@@ -4812,6 +5053,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'BASDAI' && <BASDAICalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'ASDAS' && <ASDASCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'DAPSA' && <DAPSACalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'MDA' && <MDACalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'DAS28_PCR_APS' && <DAS28Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'DAS28' && <DAS28Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SLEDAI' && <SLEDAICalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'LupusPRO' && <LupusPROCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
