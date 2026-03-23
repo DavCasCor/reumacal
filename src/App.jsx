@@ -5349,7 +5349,7 @@ export default function App() {
       if (event.state && event.state.page) {
         setPage(event.state.page);
         
-        // Limpiar sesión si vuelves a landing o auth
+        // Limpiar sesión SOLO si vuelves explícitamente a landing o auth
         if (event.state.page === 'landing' || event.state.page === 'auth') {
           setCurrentUser(null);
           setCurrentPatient(null);
@@ -5361,15 +5361,21 @@ export default function App() {
         if (basePage && ['landing', 'auth', 'patient-dashboard', 'doctor-dashboard', 'forgot-password', 'reset-password', 'politica-privacidad', 'aviso-legal', 'politica-cookies'].includes(basePage)) {
           setPage(basePage);
           
-          // Limpiar sesión si vuelves a landing o auth
+          // Limpiar sesión SOLO si vuelves explícitamente a landing o auth
           if (basePage === 'landing' || basePage === 'auth') {
             setCurrentUser(null);
             setCurrentPatient(null);
           }
         } else {
-          setPage('landing');
-          setCurrentUser(null);
-          setCurrentPatient(null);
+          // Si el hash no es válido pero tenemos usuario, mantener en el dashboard
+          // Esto evita que te expulse al navegar dentro del dashboard
+          if (currentUser) {
+            // No hacer nada, mantener la página actual
+            return;
+          } else {
+            // Si no hay usuario, ir a landing
+            setPage('landing');
+          }
         }
       }
     };
@@ -5385,7 +5391,7 @@ export default function App() {
     }
 
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [currentUser]);
   const [authRole, setAuthRole] = useState(null);
   const [resetEmail, setResetEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
