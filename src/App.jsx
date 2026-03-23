@@ -2197,7 +2197,9 @@ const LandingPage = ({ onNavigate }) => (
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">📉</span><span>DAPSA</span></div>
-            <div className="feature"><span className="feature-icon">🎯</span><span>PsAQoL</span></div>
+            <div className="feature"><span className="feature-icon">🩺</span><span>DAS28-PCR</span></div>
+            <div className="feature"><span className="feature-icon">🎯</span><span>MDA</span></div>
+            <div className="feature"><span className="feature-icon">💚</span><span>PsAQoL</span></div>
           </div>
         </div>
         
@@ -3930,17 +3932,17 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-desc">Actividad de la enfermedad en artritis psoriásica</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa el dolor (el reumatólogo/a añadirá exploración y analítica)</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
-                    <span className="calc-icon">🎯</span>
-                    <span className="calc-name">MDA</span>
-                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
-                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa dolor y HAQ (el reumatólogo/a añadirá exploración y PASI)</span>
-                  </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('DAS28_PCR_APS'); setResult(null); }}>
                     <span className="calc-icon">🩺</span>
                     <span className="calc-name">DAS28-PCR</span>
                     <span className="calc-desc">Actividad de la enfermedad con PCR</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa valoración global (el reumatólogo/a añadirá exploración y analítica)</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
+                    <span className="calc-icon">🎯</span>
+                    <span className="calc-name">MDA</span>
+                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa dolor y HAQ (el reumatólogo/a añadirá exploración y PASI)</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
                     <span className="calc-icon">💚</span>
@@ -4887,15 +4889,15 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-name">DAPSA</span>
                     <span className="calc-desc">Actividad de la enfermedad en artritis psoriásica</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
-                    <span className="calc-icon">🎯</span>
-                    <span className="calc-name">MDA</span>
-                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
-                  </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('DAS28_PCR_APS'); setResult(null); }}>
                     <span className="calc-icon">🩺</span>
                     <span className="calc-name">DAS28-PCR</span>
                     <span className="calc-desc">Actividad de la enfermedad con PCR</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('MDA'); setResult(null); }}>
+                    <span className="calc-icon">🎯</span>
+                    <span className="calc-name">MDA</span>
+                    <span className="calc-desc">Actividad mínima de la enfermedad</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('PSAQoL'); setResult(null); }}>
                     <span className="calc-icon">💚</span>
