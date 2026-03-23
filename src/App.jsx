@@ -2221,18 +2221,18 @@ const LandingPage = ({ onNavigate }) => (
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">🦋</span><span>SLEDAI</span></div>
             <div className="feature"><span className="feature-icon">📋</span><span>SLICC</span></div>
+            <div className="feature"><span className="feature-icon">💚</span><span>LupusPRO</span></div>
           </div>
         </div>
         
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>💚</span>
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida general</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
             <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
-            <div className="feature"><span className="feature-icon">💚</span><span>LupusPRO</span></div>
           </div>
         </div>
         
@@ -3982,7 +3982,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>🦋</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Lupus eritematoso sistémico</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.lupus ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -4001,6 +4001,11 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-desc">Daño en lupus</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Esta calculadora la completará el reumatólogo/a en consulta</span>
                   </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
+                    <span className="calc-name">LupusPRO</span>
+                    <span className="calc-desc">Calidad de vida lupus</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -4010,8 +4015,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -4027,11 +4032,6 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-icon">🏥</span>
                     <span className="calc-name">SF-36</span>
                     <span className="calc-desc">Encuesta de salud</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-                    <span className="calc-icon">💚</span>
-                    <span className="calc-name">LupusPRO</span>
-                    <span className="calc-desc">Calidad de vida lupus</span>
                   </button>
                 </div>
               )}
@@ -4936,7 +4936,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>🦋</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Lupus eritematoso sistémico</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.lupus ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -4953,6 +4953,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-name">SLICC</span>
                     <span className="calc-desc">Daño en lupus</span>
                   </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
+                    <span className="calc-icon">💚</span>
+                    <span className="calc-name">LupusPRO</span>
+                    <span className="calc-desc">Calidad de vida lupus</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -4962,8 +4967,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -4979,11 +4984,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-icon">🏥</span>
                     <span className="calc-name">SF-36</span>
                     <span className="calc-desc">Encuesta de salud</span>
-                  </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('LupusPRO'); setResult(null); }}>
-                    <span className="calc-icon">💚</span>
-                    <span className="calc-name">LupusPRO</span>
-                    <span className="calc-desc">Calidad de vida lupus</span>
                   </button>
                 </div>
               )}
