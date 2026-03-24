@@ -518,6 +518,20 @@ const interpretQRISK3 = (score) => {
   return { text: 'Riesgo alto (≥20%)', color: '#ef4444', level: 'high' };
 };
 
+const interpretFRAX = (majorFractureRisk) => {
+  const risk = parseFloat(majorFractureRisk);
+  if (risk >= 20) return { text: 'Riesgo alto de fractura (≥20%)', color: '#ef4444', level: 'high' };
+  if (risk >= 10) return { text: 'Riesgo moderado de fractura (10-20%)', color: '#f59e0b', level: 'moderate' };
+  return { text: 'Riesgo bajo de fractura (<10%)', color: '#10b981', level: 'low' };
+};
+
+const interpretFRAXplus = (immediateFractureRisk) => {
+  const risk = parseFloat(immediateFractureRisk);
+  if (risk >= 20) return { text: 'Riesgo muy alto de fractura (≥20%)', color: '#dc2626', level: 'very-high' };
+  if (risk >= 10) return { text: 'Riesgo alto de fractura (10-20%)', color: '#f59e0b', level: 'high' };
+  return { text: 'Riesgo moderado-bajo de fractura (<10%)', color: '#10b981', level: 'moderate-low' };
+};
+
 // SLICC - Systemic Lupus International Collaborating Clinics Damage Index
 const calculateSLICC = (components) => {
   let total = 0;
@@ -2238,6 +2252,17 @@ const LandingPage = ({ onNavigate }) => (
         
         <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
+            <span style={{ fontSize: '1.5rem' }}>🦴</span>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Osteoporosis</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="feature"><span className="feature-icon">📊</span><span>FRAX</span></div>
+            <div className="feature"><span className="feature-icon">📈</span><span>FRAX+</span></div>
+          </div>
+        </div>
+        
+        <div style={{ width: '100%', marginTop: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid rgba(255,255,255,0.2)' }}>
             <span style={{ fontSize: '1.5rem' }}>💚</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida general</h3>
           </div>
@@ -2722,6 +2747,478 @@ const QRISK3Calculator = ({ onResult, isDoctor = false, initialData = null }) =>
       
       <button className="btn-calculate" onClick={handleCalculate}>
         Calcular QRISK3
+      </button>
+    </div>
+  );
+};
+
+const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
+  const [formData, setFormData] = useState(initialData || {
+    age: '',
+    sex: '',
+    weight: '',
+    height: '',
+    previousFracture: false,
+    parentFracture: false,
+    currentSmoker: false,
+    glucocorticoids: false,
+    rheumatoidArthritis: false,
+    secondaryOsteoporosis: false,
+    alcohol3Plus: false,
+    boneDensity: '', // Médico
+  });
+
+  const handleCalculate = () => {
+    if (!formData.age || !formData.sex || !formData.weight || !formData.height) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    // Calcular BMI
+    const heightInMeters = parseFloat(formData.height) / 100;
+    const bmi = parseFloat(formData.weight) / (heightInMeters * heightInMeters);
+
+    // Cálculo simplificado de riesgo FRAX (esto es una aproximación)
+    // En producción, se debería usar la API oficial de FRAX
+    let riskFactors = 0;
+    if (formData.previousFracture) riskFactors += 1.5;
+    if (formData.parentFracture) riskFactors += 1.2;
+    if (formData.currentSmoker) riskFactors += 1.3;
+    if (formData.glucocorticoids) riskFactors += 1.5;
+    if (formData.rheumatoidArthritis) riskFactors += 1.4;
+    if (formData.secondaryOsteoporosis) riskFactors += 1.6;
+    if (formData.alcohol3Plus) riskFactors += 1.2;
+    if (bmi < 20) riskFactors += 1.3;
+
+    // Ajuste por edad
+    const age = parseInt(formData.age);
+    const ageMultiplier = age < 50 ? 0.5 : age < 60 ? 1.0 : age < 70 ? 1.5 : 2.0;
+
+    // Ajuste por sexo
+    const sexMultiplier = formData.sex === 'female' ? 1.2 : 1.0;
+
+    // Ajuste por densidad ósea si está disponible
+    let boneMultiplier = 1.0;
+    if (formData.boneDensity) {
+      const tScore = parseFloat(formData.boneDensity);
+      if (tScore < -2.5) boneMultiplier = 2.0;
+      else if (tScore < -1.0) boneMultiplier = 1.5;
+    }
+
+    const majorFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1));
+    const hipFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1));
+
+    const result = {
+      score: majorFractureRisk,
+      interpretation: interpretFRAX(majorFractureRisk, hipFractureRisk),
+      details: {
+        majorFractureRisk: `${majorFractureRisk}%`,
+        hipFractureRisk: `${hipFractureRisk}%`,
+        bmi: bmi.toFixed(1),
+        age: formData.age,
+        sex: formData.sex === 'female' ? 'Mujer' : 'Hombre',
+        boneDensity: formData.boneDensity || 'No disponible'
+      }
+    };
+
+    onResult(result);
+  };
+
+  const interpretFRAX = (major, hip) => {
+    if (major >= 20 || hip >= 3) return 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico.';
+    if (major >= 10 || hip >= 1) return 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos.';
+    return 'Riesgo bajo de fractura. Medidas preventivas y seguimiento.';
+  };
+
+  return (
+    <div className="calculator-form">
+      <h3>FRAX</h3>
+      <p className="calc-description">Fracture Risk Assessment Tool</p>
+      <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
+        Herramienta de evaluación del riesgo de fractura a 10 años
+      </p>
+
+      <label className="input-label">Edad (años) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.age}
+        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+        min="40"
+        max="90"
+      />
+
+      <label className="input-label">Sexo *</label>
+      <select
+        className="input-field"
+        value={formData.sex}
+        onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+      >
+        <option value="">Seleccionar...</option>
+        <option value="female">Mujer</option>
+        <option value="male">Hombre</option>
+      </select>
+
+      <label className="input-label">Peso (kg) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.weight}
+        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+        step="0.1"
+      />
+
+      <label className="input-label">Altura (cm) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.height}
+        onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+        step="0.1"
+      />
+
+      <div style={{ marginTop: '1rem' }}>
+        <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Factores de riesgo:</p>
+        
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.previousFracture}
+            onChange={(e) => setFormData({ ...formData, previousFracture: e.target.checked })}
+          />
+          <span>Fractura previa por fragilidad</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.parentFracture}
+            onChange={(e) => setFormData({ ...formData, parentFracture: e.target.checked })}
+          />
+          <span>Fractura de cadera en algún progenitor</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.currentSmoker}
+            onChange={(e) => setFormData({ ...formData, currentSmoker: e.target.checked })}
+          />
+          <span>Fumador/a actual</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.glucocorticoids}
+            onChange={(e) => setFormData({ ...formData, glucocorticoids: e.target.checked })}
+          />
+          <span>Glucocorticoides (≥5 mg/día prednisona ≥3 meses)</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.rheumatoidArthritis}
+            onChange={(e) => setFormData({ ...formData, rheumatoidArthritis: e.target.checked })}
+          />
+          <span>Artritis reumatoide</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.secondaryOsteoporosis}
+            onChange={(e) => setFormData({ ...formData, secondaryOsteoporosis: e.target.checked })}
+          />
+          <span>Osteoporosis secundaria</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.alcohol3Plus}
+            onChange={(e) => setFormData({ ...formData, alcohol3Plus: e.target.checked })}
+          />
+          <span>Alcohol (3 o más unidades al día)</span>
+        </label>
+      </div>
+
+      <label className="input-label" style={{ marginTop: '1rem' }}>
+        Densidad mineral ósea (T-score cuello femoral)
+        {!isDoctor && <span style={{ color: '#f59e0b', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>
+          Este campo será completado por el reumatólogo/a
+        </span>}
+      </label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.boneDensity}
+        onChange={(e) => setFormData({ ...formData, boneDensity: e.target.value })}
+        step="0.1"
+        placeholder="Ejemplo: -2.5"
+        disabled={!isDoctor}
+        readOnly={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+
+      <button className="btn-calculate" onClick={handleCalculate}>
+        Calcular FRAX
+      </button>
+    </div>
+  );
+};
+
+const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
+  const [formData, setFormData] = useState(initialData || {
+    age: '',
+    sex: '',
+    weight: '',
+    height: '',
+    previousFracture: false,
+    parentFracture: false,
+    currentSmoker: false,
+    glucocorticoids: false,
+    rheumatoidArthritis: false,
+    secondaryOsteoporosis: false,
+    alcohol3Plus: false,
+    boneDensity: '', // Médico
+    falls: '', // Adicional en FRAX+
+    recentFracture: false, // Adicional en FRAX+
+  });
+
+  const handleCalculate = () => {
+    if (!formData.age || !formData.sex || !formData.weight || !formData.height) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    // Calcular BMI
+    const heightInMeters = parseFloat(formData.height) / 100;
+    const bmi = parseFloat(formData.weight) / (heightInMeters * heightInMeters);
+
+    // Cálculo similar a FRAX pero con factores adicionales
+    let riskFactors = 0;
+    if (formData.previousFracture) riskFactors += 1.5;
+    if (formData.parentFracture) riskFactors += 1.2;
+    if (formData.currentSmoker) riskFactors += 1.3;
+    if (formData.glucocorticoids) riskFactors += 1.5;
+    if (formData.rheumatoidArthritis) riskFactors += 1.4;
+    if (formData.secondaryOsteoporosis) riskFactors += 1.6;
+    if (formData.alcohol3Plus) riskFactors += 1.2;
+    if (bmi < 20) riskFactors += 1.3;
+
+    // Factores adicionales de FRAX+
+    if (formData.falls) {
+      const fallsCount = parseInt(formData.falls);
+      if (fallsCount >= 2) riskFactors += 1.4;
+      else if (fallsCount === 1) riskFactors += 1.2;
+    }
+    if (formData.recentFracture) riskFactors += 1.8;
+
+    // Ajuste por edad
+    const age = parseInt(formData.age);
+    const ageMultiplier = age < 50 ? 0.5 : age < 60 ? 1.0 : age < 70 ? 1.5 : 2.0;
+
+    // Ajuste por sexo
+    const sexMultiplier = formData.sex === 'female' ? 1.2 : 1.0;
+
+    // Ajuste por densidad ósea
+    let boneMultiplier = 1.0;
+    if (formData.boneDensity) {
+      const tScore = parseFloat(formData.boneDensity);
+      if (tScore < -2.5) boneMultiplier = 2.0;
+      else if (tScore < -1.0) boneMultiplier = 1.5;
+    }
+
+    const majorFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1));
+    const hipFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1));
+    const immediateFractureRisk = formData.recentFracture ? Math.min(99, (majorFractureRisk * 1.5).toFixed(1)) : majorFractureRisk;
+
+    const result = {
+      score: immediateFractureRisk,
+      interpretation: interpretFRAXplus(immediateFractureRisk, hipFractureRisk, formData.recentFracture),
+      details: {
+        majorFractureRisk: `${majorFractureRisk}%`,
+        hipFractureRisk: `${hipFractureRisk}%`,
+        immediateFractureRisk: `${immediateFractureRisk}%`,
+        bmi: bmi.toFixed(1),
+        age: formData.age,
+        sex: formData.sex === 'female' ? 'Mujer' : 'Hombre',
+        falls: formData.falls || '0',
+        boneDensity: formData.boneDensity || 'No disponible'
+      }
+    };
+
+    onResult(result);
+  };
+
+  const interpretFRAXplus = (immediate, hip, recentFracture) => {
+    if (recentFracture) {
+      return 'Riesgo muy alto de fractura inminente. Se recomienda inicio urgente de tratamiento antiosteoporótico.';
+    }
+    if (immediate >= 20 || hip >= 3) {
+      return 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico y medidas preventivas intensivas.';
+    }
+    if (immediate >= 10 || hip >= 1) {
+      return 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos adicionales.';
+    }
+    return 'Riesgo bajo de fractura. Mantener medidas preventivas y seguimiento periódico.';
+  };
+
+  return (
+    <div className="calculator-form">
+      <h3>FRAX+</h3>
+      <p className="calc-description">FRAX Plus - Enhanced Fracture Risk Assessment</p>
+      <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
+        Herramienta mejorada de evaluación del riesgo de fractura incluyendo caídas y fractura reciente
+      </p>
+
+      <label className="input-label">Edad (años) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.age}
+        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+        min="40"
+        max="90"
+      />
+
+      <label className="input-label">Sexo *</label>
+      <select
+        className="input-field"
+        value={formData.sex}
+        onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+      >
+        <option value="">Seleccionar...</option>
+        <option value="female">Mujer</option>
+        <option value="male">Hombre</option>
+      </select>
+
+      <label className="input-label">Peso (kg) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.weight}
+        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+        step="0.1"
+      />
+
+      <label className="input-label">Altura (cm) *</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.height}
+        onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+        step="0.1"
+      />
+
+      <label className="input-label">Número de caídas en el último año</label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.falls}
+        onChange={(e) => setFormData({ ...formData, falls: e.target.value })}
+        min="0"
+        placeholder="0"
+      />
+
+      <div style={{ marginTop: '1rem' }}>
+        <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Factores de riesgo:</p>
+        
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.recentFracture}
+            onChange={(e) => setFormData({ ...formData, recentFracture: e.target.checked })}
+          />
+          <span style={{ fontWeight: '600', color: '#dc2626' }}>Fractura en los últimos 2 años</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.previousFracture}
+            onChange={(e) => setFormData({ ...formData, previousFracture: e.target.checked })}
+          />
+          <span>Fractura previa por fragilidad</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.parentFracture}
+            onChange={(e) => setFormData({ ...formData, parentFracture: e.target.checked })}
+          />
+          <span>Fractura de cadera en algún progenitor</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.currentSmoker}
+            onChange={(e) => setFormData({ ...formData, currentSmoker: e.target.checked })}
+          />
+          <span>Fumador/a actual</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.glucocorticoids}
+            onChange={(e) => setFormData({ ...formData, glucocorticoids: e.target.checked })}
+          />
+          <span>Glucocorticoides (≥5 mg/día prednisona ≥3 meses)</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.rheumatoidArthritis}
+            onChange={(e) => setFormData({ ...formData, rheumatoidArthritis: e.target.checked })}
+          />
+          <span>Artritis reumatoide</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.secondaryOsteoporosis}
+            onChange={(e) => setFormData({ ...formData, secondaryOsteoporosis: e.target.checked })}
+          />
+          <span>Osteoporosis secundaria</span>
+        </label>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={formData.alcohol3Plus}
+            onChange={(e) => setFormData({ ...formData, alcohol3Plus: e.target.checked })}
+          />
+          <span>Alcohol (3 o más unidades al día)</span>
+        </label>
+      </div>
+
+      <label className="input-label" style={{ marginTop: '1rem' }}>
+        Densidad mineral ósea (T-score cuello femoral)
+        {!isDoctor && <span style={{ color: '#f59e0b', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>
+          Este campo será completado por el reumatólogo/a
+        </span>}
+      </label>
+      <input
+        type="number"
+        className="input-field"
+        value={formData.boneDensity}
+        onChange={(e) => setFormData({ ...formData, boneDensity: e.target.value })}
+        step="0.1"
+        placeholder="Ejemplo: -2.5"
+        disabled={!isDoctor}
+        readOnly={!isDoctor}
+        style={!isDoctor ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+      />
+
+      <button className="btn-calculate" onClick={handleCalculate}>
+        Calcular FRAX+
       </button>
     </div>
   );
@@ -3717,7 +4214,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const [scores, setScores] = useState([]);
   const [historyFilter, setHistoryFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, sjogren: false, osteoporosis: false, calidad: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   // Sistema de navegación con historial
@@ -4081,6 +4578,35 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('osteoporosis')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Osteoporosis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.osteoporosis ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.osteoporosis && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FRAX'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">FRAX</span>
+                    <span className="calc-desc">Riesgo de fractura a 10 años</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa tus datos (el reumatólogo/a añadirá densidad ósea)</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FRAXplus'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">FRAX+</span>
+                    <span className="calc-desc">Riesgo de fractura mejorado</span>
+                    <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Completa tus datos y caídas (el reumatólogo/a añadirá densidad ósea)</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
@@ -4167,6 +4693,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'PSAQoL' && <PSAQoLCalculator onResult={handleResult} />}
             {selectedCalc === 'ESSPRI' && <ESSPRICalculator onResult={handleResult} />}
             {selectedCalc === 'SSDAI' && <SSDAICalculator onResult={handleResult} isDoctor={false} />}
+            {selectedCalc === 'FRAX' && <FRAXCalculator onResult={handleResult} isDoctor={false} />}
+            {selectedCalc === 'FRAXplus' && <FRAXplusCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'SCORE2' && <SCORE2Calculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'SCORE2-OP' && <SCORE2OPCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'QRISK3' && <QRISK3Calculator onResult={handleResult} isDoctor={false} />}
@@ -4216,6 +4744,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               'LupusPRO': 'LupusPRO',
               'ESSPRI': 'ESSPRI',
               'SSDAI': 'SSDAI',
+              'FRAX': 'FRAX',
+              'FRAXplus': 'FRAX+',
               'SCORE2': 'SCORE2 (40-69 años)',
               'SCORE2-OP': 'SCORE2-OP (+70 años)',
               'QRISK3': 'QRISK3'
@@ -4364,7 +4894,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
   const [result, setResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, calidad: false, sjogren: false, cardiovascular: false });
+  const [expandedSections, setExpandedSections] = useState({ espondilo: false, aps: false, ar: false, lupus: false, sjogren: false, osteoporosis: false, calidad: false, cardiovascular: false });
   const toggleSection = (s) => setExpandedSections(p => ({ ...p, [s]: !p[s] }));
   
   // Cargar información del hospital del usuario
@@ -4754,6 +5284,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 'LupusPRO': 'LupusPRO',
                 'ESSPRI': 'ESSPRI',
                 'SSDAI': 'SSDAI',
+                'FRAX': 'FRAX',
+                'FRAXplus': 'FRAX+',
                 'SCORE2': 'SCORE2',
                 'SCORE2-OP': 'SCORE2-OP',
                 'QRISK3': 'QRISK3'
@@ -5032,6 +5564,33 @@ const DoctorDashboard = ({ user, onLogout }) => {
             </div>
 
             <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
+              <button onClick={() => toggleSection('osteoporosis')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🦴</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Osteoporosis</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.5rem', transform: expandedSections.osteoporosis ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
+              </button>
+              {expandedSections.osteoporosis && (
+                <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FRAX'); setResult(null); }}>
+                    <span className="calc-icon">📊</span>
+                    <span className="calc-name">FRAX</span>
+                    <span className="calc-desc">Riesgo de fractura a 10 años</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('FRAXplus'); setResult(null); }}>
+                    <span className="calc-icon">📈</span>
+                    <span className="calc-name">FRAX+</span>
+                    <span className="calc-desc">Riesgo de fractura mejorado</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ border: '2px solid #e2e8f0', borderRadius: '0.75rem', overflow: 'hidden' }}>
               <button onClick={() => toggleSection('calidad')} style={{ width: '100%', padding: '1.25rem', backgroundColor: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
@@ -5110,6 +5669,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'PSAQoL' && <PSAQoLCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'ESSPRI' && <ESSPRICalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SSDAI' && <SSDAICalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'FRAX' && <FRAXCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'FRAXplus' && <FRAXplusCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SCORE2' && <SCORE2Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SCORE2-OP' && <SCORE2OPCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'QRISK3' && <QRISK3Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
