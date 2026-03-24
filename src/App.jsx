@@ -4679,8 +4679,8 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const lastScores = useMemo(() => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
                         'DAS28_CRP', 'DAS28_ESR',
-                        'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
-                        'ASQoL', 'ESSPRI', 'SSDAI', 'SCORE2', 'SCORE2-OP'];
+                        'SLEDAI', 'SLICC', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
+                        'ASQoL', 'ESSPRI', 'SSDAI', 'FRAX', 'FRAXplus', 'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
@@ -5366,6 +5366,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                         'SLEDAI', 'SLICC',
                         'FACIT', 'SF36', 'LupusPRO',
                         'ESSPRI', 'SSDAI',
+                        'FRAX', 'FRAXplus',
                         'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
       const last = patientScores.find(s => s.instrument === inst);
