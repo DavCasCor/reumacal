@@ -2805,12 +2805,22 @@ const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
       else if (tScore < -1.0) boneMultiplier = 1.5;
     }
 
-    const majorFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1));
-    const hipFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1));
+    const majorFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1)));
+    const hipFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1)));
+
+    let interpretation = '';
+    if (majorFractureRisk >= 20 || hipFractureRisk >= 3) {
+      interpretation = 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico.';
+    } else if (majorFractureRisk >= 10 || hipFractureRisk >= 1) {
+      interpretation = 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos.';
+    } else {
+      interpretation = 'Riesgo bajo de fractura. Medidas preventivas y seguimiento.';
+    }
 
     const result = {
+      instrument: 'FRAX',
       score: majorFractureRisk,
-      interpretation: interpretFRAX(majorFractureRisk, hipFractureRisk),
+      interpretation: interpretation,
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
         hipFractureRisk: `${hipFractureRisk}%`,
@@ -2822,12 +2832,6 @@ const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
     };
 
     onResult(result);
-  };
-
-  const interpretFRAX = (major, hip) => {
-    if (major >= 20 || hip >= 3) return 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico.';
-    if (major >= 10 || hip >= 1) return 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos.';
-    return 'Riesgo bajo de fractura. Medidas preventivas y seguimiento.';
   };
 
   return (
@@ -3031,13 +3035,25 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
       else if (tScore < -1.0) boneMultiplier = 1.5;
     }
 
-    const majorFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1));
-    const hipFractureRisk = Math.min(99, (riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1));
-    const immediateFractureRisk = formData.recentFracture ? Math.min(99, (majorFractureRisk * 1.5).toFixed(1)) : majorFractureRisk;
+    const majorFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1)));
+    const hipFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1)));
+    const immediateFractureRisk = formData.recentFracture ? Math.min(99, parseFloat((majorFractureRisk * 1.5).toFixed(1))) : majorFractureRisk;
+
+    let interpretation = '';
+    if (formData.recentFracture) {
+      interpretation = 'Riesgo muy alto de fractura inminente. Se recomienda inicio urgente de tratamiento antiosteoporótico.';
+    } else if (immediateFractureRisk >= 20 || hipFractureRisk >= 3) {
+      interpretation = 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico y medidas preventivas intensivas.';
+    } else if (immediateFractureRisk >= 10 || hipFractureRisk >= 1) {
+      interpretation = 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos adicionales.';
+    } else {
+      interpretation = 'Riesgo bajo de fractura. Mantener medidas preventivas y seguimiento periódico.';
+    }
 
     const result = {
+      instrument: 'FRAXplus',
       score: immediateFractureRisk,
-      interpretation: interpretFRAXplus(immediateFractureRisk, hipFractureRisk, formData.recentFracture),
+      interpretation: interpretation,
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
         hipFractureRisk: `${hipFractureRisk}%`,
@@ -3051,19 +3067,6 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
     };
 
     onResult(result);
-  };
-
-  const interpretFRAXplus = (immediate, hip, recentFracture) => {
-    if (recentFracture) {
-      return 'Riesgo muy alto de fractura inminente. Se recomienda inicio urgente de tratamiento antiosteoporótico.';
-    }
-    if (immediate >= 20 || hip >= 3) {
-      return 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico y medidas preventivas intensivas.';
-    }
-    if (immediate >= 10 || hip >= 1) {
-      return 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos adicionales.';
-    }
-    return 'Riesgo bajo de fractura. Mantener medidas preventivas y seguimiento periódico.';
   };
 
   return (
