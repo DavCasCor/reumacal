@@ -4718,13 +4718,20 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
               else if (inst === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
               else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
+              else if (inst === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
+              else if (inst === 'SLICC') interpretation = interpretSLICC(score.total_score);
+              else if (inst === 'FRAX') interpretation = interpretFRAX(score.total_score);
+              else if (inst === 'FRAXplus') interpretation = interpretFRAXplus(score.total_score);
               else interpretation = { text: 'Sin datos', color: '#9ca3af' };
               
               return (
                 <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
-                  <div className="summary-inst">{inst.replace('_', '-')}</div>
+                  <div className="summary-inst">{inst === 'FRAXplus' ? 'FRAX+' : inst.replace('_', '-')}</div>
                   <div className="summary-score" style={{ color: interpretation.color }}>
-                    {score.total_score}
+                    {score.total_score}{(inst === 'FRAX' || inst === 'FRAXplus' || inst === 'SCORE2' || inst === 'SCORE2-OP' || inst === 'QRISK3') && '%'}
+                  </div>
+                  <div className="summary-interp" style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                    {interpretation.text}
                   </div>
                   <div className="summary-date">{formatShortDate(score.created_at)}</div>
                 </div>
