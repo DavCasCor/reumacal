@@ -5655,17 +5655,78 @@ const DoctorDashboard = ({ user, onLogout }) => {
             else if (inst.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
             else if (inst === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
             else if (inst === 'MDA') interpretation = interpretMDAScore(score.total_score);
+            else if (inst.startsWith('DAS28')) interpretation = interpretDAS28(score.total_score);
+            else if (inst === 'SLEDAI') interpretation = interpretSLEDAI(score.total_score);
+            else if (inst === 'SLICC') interpretation = interpretSLICC(score.total_score);
+            else if (inst === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
+            else if (inst === 'FACIT') interpretation = interpretFACIT(score.total_score);
+            else if (inst === 'SF36') interpretation = interpretSF36(score.total_score);
+            else if (inst === 'BASFI') interpretation = interpretBASFI(score.total_score);
+            else if (inst === 'ASASHI') interpretation = interpretASASHI(score.total_score);
+            else if (inst === 'ASQoL') interpretation = interpretASQoL(score.total_score);
+            else if (inst === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
+            else if (inst === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
+            else if (inst === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
+            else if (inst === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
+            else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
+            else if (inst === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
+            else if (inst === 'FRAX') {
+              const components = score.components_json || {};
+              let detailsText;
+              
+              if (components.majorFractureRisk && components.hipFractureRisk) {
+                detailsText = `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%`;
+              } else {
+                const majorRisk = parseFloat(score.total_score);
+                const hipRisk = (majorRisk * 0.27).toFixed(1);
+                detailsText = `Mayor: ${majorRisk}%, Cadera: ${hipRisk}%`;
+              }
+              
+              interpretation = {
+                ...interpretFRAX(score.total_score),
+                details: detailsText
+              };
+            }
+            else if (inst === 'FRAXplus') {
+              const components = score.components_json || {};
+              let detailsText;
+              
+              if (components.majorFractureRisk && components.hipFractureRisk && components.immediateFractureRisk) {
+                detailsText = `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%, Inmediato: ${components.immediateFractureRisk}%`;
+              } else {
+                const immediateRisk = parseFloat(score.total_score);
+                const majorRisk = (immediateRisk / 1.5).toFixed(1);
+                const hipRisk = (parseFloat(majorRisk) * 0.27).toFixed(1);
+                detailsText = `Mayor: ${majorRisk}%, Cadera: ${hipRisk}%, Inmediato: ${immediateRisk}%`;
+              }
+              
+              interpretation = {
+                ...interpretFRAXplus(score.total_score),
+                details: detailsText
+              };
+            }
             else interpretation = interpretDAS28(score.total_score);
             
             return (
               <div key={inst} className="summary-card" style={{ borderColor: interpretation.color }}>
-                <div className="summary-inst">{inst.replace('_', '-')}</div>
+                <div className="summary-inst">{inst === 'FRAXplus' ? 'FRAX+' : inst.replace('_', '-')}</div>
                 <div className="summary-score" style={{ color: interpretation.color }}>
-                  {score.total_score}
+                  {score.total_score}{(inst === 'FRAX' || inst === 'FRAXplus' || inst === 'SCORE2' || inst === 'SCORE2-OP' || inst === 'QRISK3') && '%'}
                 </div>
-                <div className="summary-status" style={{ backgroundColor: interpretation.color }}>
+                <div className="summary-interp" style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
                   {interpretation.text}
                 </div>
+                {interpretation.details && (
+                  <div className="summary-details" style={{ 
+                    fontSize: '0.7rem', 
+                    color: '#94a3b8', 
+                    marginTop: '0.15rem',
+                    lineHeight: '1.3',
+                    whiteSpace: 'pre-line'
+                  }}>
+                    {interpretation.details}
+                  </div>
+                )}
                 <div className="summary-date">{formatShortDate(score.created_at)}</div>
               </div>
             );
