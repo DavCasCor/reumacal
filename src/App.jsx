@@ -968,6 +968,129 @@ const SliderInput = ({ label, value, onChange, min = 0, max = 10, step = 0.1 }) 
   </div>
 );
 
+const FRAXResultCard = ({ result, onSave, saved, saving, isDoctor }) => {
+  const { score, interpretation, details, instrument } = result;
+  
+  return (
+    <div className="result-card">
+      <div className="result-header">
+        <h3>{instrument}</h3>
+        <div className="result-score" style={{ backgroundColor: interpretation.color }}>
+          {score}%
+        </div>
+      </div>
+      
+      <div className="result-interpretation" style={{ borderLeftColor: interpretation.color }}>
+        <strong>{interpretation.text}</strong>
+      </div>
+
+      {/* Riesgos desglosados */}
+      <div style={{ 
+        marginTop: '1rem', 
+        padding: '1rem', 
+        backgroundColor: '#f8fafc', 
+        borderRadius: '0.5rem',
+        border: '1px solid #e2e8f0'
+      }}>
+        <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#1e293b' }}>
+          📊 Riesgo de fractura a 10 años:
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Fractura osteoporótica mayor:</span>
+            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{details.majorFractureRisk}</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Fractura de cadera:</span>
+            <strong style={{ fontSize: '1.1rem', color: '#1e293b' }}>{details.hipFractureRisk}</strong>
+          </div>
+          {details.immediateFractureRisk && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginTop: '0.5rem',
+              paddingTop: '0.5rem',
+              borderTop: '1px solid #e2e8f0'
+            }}>
+              <span style={{ fontSize: '0.9rem', color: '#dc2626', fontWeight: '600' }}>Riesgo inmediato (FRAX+):</span>
+              <strong style={{ fontSize: '1.1rem', color: '#dc2626' }}>{details.immediateFractureRisk}</strong>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Interpretación para médico */}
+      {isDoctor && details.interpretationDoctor && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#eff6ff',
+          borderRadius: '0.5rem',
+          border: '1px solid #bfdbfe'
+        }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#1e40af', fontWeight: '600' }}>
+            👨‍⚕️ Interpretación clínica:
+          </h4>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b', lineHeight: '1.5' }}>
+            {details.interpretationDoctor}
+          </p>
+        </div>
+      )}
+
+      {/* Interpretación para paciente */}
+      {!isDoctor && details.interpretationPatient && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#f0fdf4',
+          borderRadius: '0.5rem',
+          border: '1px solid #bbf7d0'
+        }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#15803d', fontWeight: '600' }}>
+            💡 ¿Qué significa esto para ti?
+          </h4>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b', lineHeight: '1.5' }}>
+            {details.interpretationPatient}
+          </p>
+        </div>
+      )}
+
+      {/* Datos adicionales */}
+      <div style={{
+        marginTop: '1rem',
+        padding: '0.75rem',
+        backgroundColor: '#fafafa',
+        borderRadius: '0.5rem',
+        fontSize: '0.85rem',
+        color: '#64748b'
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <div><strong>Edad:</strong> {details.age} años</div>
+          <div><strong>Sexo:</strong> {details.sex}</div>
+          <div><strong>IMC:</strong> {details.bmi}</div>
+          <div><strong>DMO (T-score):</strong> {details.boneDensity}</div>
+          {details.falls && parseInt(details.falls) > 0 && (
+            <div style={{ gridColumn: '1 / -1' }}><strong>Caídas último año:</strong> {details.falls}</div>
+          )}
+        </div>
+      </div>
+
+      <p className="result-disclaimer">
+        ⚠️ Resultado orientativo. No sustituye la valoración médica profesional.
+      </p>
+      
+      {!saved ? (
+        <button className="btn-save" onClick={onSave} disabled={saving}>
+          {saving ? '⏳ Guardando...' : '💾 Guardar en histórico'}
+        </button>
+      ) : (
+        <div className="saved-badge">✓ Guardado correctamente</div>
+      )}
+    </div>
+  );
+};
+
 const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }) => (
   <div className="result-card">
     <div className="result-header">
@@ -2883,26 +3006,46 @@ const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
     majorFractureRisk = Math.min(99, parseFloat(majorFractureRisk.toFixed(1)));
     hipFractureRisk = Math.min(99, parseFloat(hipFractureRisk.toFixed(1)));
 
-    let interpretation = '';
+    // Determinar nivel de riesgo y color
+    let riskLevel = '';
+    let riskColor = '';
+    let interpretationDoctor = '';
+    let interpretationPatient = '';
+    
     if (majorFractureRisk >= 20 || hipFractureRisk >= 3) {
-      interpretation = 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico.';
+      riskLevel = 'alto';
+      riskColor = '#ef4444';
+      interpretationDoctor = `Riesgo alto de fractura osteoporótica. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%. Se recomienda iniciar tratamiento farmacológico con bisfosfonatos, denosumab o anabólicos según perfil del paciente. Optimizar ingesta de calcio (1200mg/día) y vitamina D (800-1000 UI/día). Ejercicio de carga y balance. Reevaluar en 1 año.`;
+      interpretationPatient = `Tu riesgo de sufrir una fractura importante en los próximos 10 años es alto (${majorFractureRisk}%). Esto significa que sin tratamiento, aproximadamente ${Math.round(majorFractureRisk)} de cada 100 personas con tu perfil sufrirán una fractura. Tu reumatólogo/a te recomendará medicación para fortalecer tus huesos, junto con calcio y vitamina D. Es importante seguir el tratamiento y hacer ejercicio regular.`;
     } else if (majorFractureRisk >= 10 || hipFractureRisk >= 1) {
-      interpretation = 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos.';
+      riskLevel = 'moderado';
+      riskColor = '#f59e0b';
+      interpretationDoctor = `Riesgo moderado de fractura osteoporótica. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%. Considerar tratamiento farmacológico según factores adicionales (edad, fragilidad, riesgo de caídas). Asegurar aporte adecuado de calcio y vitamina D. Promover ejercicio y medidas anticalidad. Reevaluar anualmente o si aparecen nuevos factores de riesgo.`;
+      interpretationPatient = `Tu riesgo de fractura en los próximos 10 años es moderado (${majorFractureRisk}%). Tu reumatólogo/a valorará si necesitas medicación según tu situación particular. Es muy importante tomar calcio y vitamina D, hacer ejercicio regular (caminar, bailar) y prevenir caídas en casa (buena iluminación, evitar alfombras sueltas). Mantén seguimiento con tu médico.`;
     } else {
-      interpretation = 'Riesgo bajo de fractura. Medidas preventivas y seguimiento.';
+      riskLevel = 'bajo';
+      riskColor = '#10b981';
+      interpretationDoctor = `Riesgo bajo de fractura osteoporótica. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%. No se indica tratamiento farmacológico en este momento. Mantener medidas generales: ingesta adecuada de calcio (1000-1200mg/día) y vitamina D (800 UI/día), ejercicio regular con carga, evitar tabaco y alcohol excesivo. Control periódico y reevaluar si aparecen nuevos factores de riesgo.`;
+      interpretationPatient = `Tu riesgo de fractura en los próximos 10 años es bajo (${majorFractureRisk}%). Esto es una buena noticia. Para mantenerlo así, es importante llevar una dieta rica en calcio (lácteos, pescado), tomar el sol 15 minutos al día para la vitamina D, hacer ejercicio regular y evitar el tabaco. Sigue con tus revisiones periódicas.`;
     }
 
     const result = {
       instrument: 'FRAX',
       score: majorFractureRisk,
-      interpretation: interpretation,
+      interpretation: {
+        text: `Riesgo ${riskLevel} de fractura`,
+        color: riskColor,
+        level: riskLevel
+      },
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
         hipFractureRisk: `${hipFractureRisk}%`,
         bmi: bmi.toFixed(1),
         age: formData.age,
         sex: formData.sex === 'female' ? 'Mujer' : 'Hombre',
-        boneDensity: formData.boneDensity || 'No disponible'
+        boneDensity: formData.boneDensity || 'No disponible',
+        interpretationDoctor: interpretationDoctor,
+        interpretationPatient: interpretationPatient
       }
     };
 
@@ -3205,21 +3348,44 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
     hipFractureRisk = Math.min(99, parseFloat(hipFractureRisk.toFixed(1)));
     immediateFractureRisk = Math.min(99, parseFloat(immediateFractureRisk.toFixed(1)));
 
-    let interpretation = '';
+    // Determinar nivel de riesgo y color
+    let riskLevel = '';
+    let riskColor = '';
+    let interpretationDoctor = '';
+    let interpretationPatient = '';
+    
     if (formData.recentFracture) {
-      interpretation = 'Riesgo muy alto de fractura inminente. Se recomienda inicio urgente de tratamiento antiosteoporótico.';
+      riskLevel = 'muy alto (inminente)';
+      riskColor = '#dc2626';
+      interpretationDoctor = `Riesgo muy alto de fractura inminente. Fractura reciente (<2 años) aumenta significativamente el riesgo inmediato: ${immediateFractureRisk}%. Fractura mayor a 10 años: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%. SE RECOMIENDA INICIO URGENTE de tratamiento anabólico (teriparatida, romosozumab) o denosumab. Valorar urgentemente riesgo de caídas. Optimizar calcio/vitamina D. Seguimiento estrecho mensual los primeros 3 meses.`;
+      interpretationPatient = `⚠️ IMPORTANTE: Has tenido una fractura recientemente, lo que aumenta mucho tu riesgo de tener otra fractura pronto (riesgo inmediato: ${immediateFractureRisk}%). Es fundamental que inicies tratamiento cuanto antes. Tu reumatólogo/a te prescribirá medicación específica para fortalecer rápidamente tus huesos. También es muy importante prevenir caídas: usa calzado seguro, mejora la iluminación en casa, retira obstáculos. Sigue estrictamente las indicaciones médicas.`;
     } else if (immediateFractureRisk >= 20 || hipFractureRisk >= 3) {
-      interpretation = 'Riesgo alto de fractura. Se recomienda tratamiento farmacológico y medidas preventivas intensivas.';
+      riskLevel = 'alto';
+      riskColor = '#ef4444';
+      const fallsText = formData.falls && parseInt(formData.falls) > 0 ? ` Historial de ${formData.falls} caída(s) en el último año aumenta el riesgo.` : '';
+      interpretationDoctor = `Riesgo alto de fractura. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%, Riesgo inmediato: ${immediateFractureRisk}%.${fallsText} Se recomienda tratamiento farmacológico (bisfosfonatos, denosumab o anabólicos según perfil). Intervención sobre factores de riesgo de caídas: valoración geriátrica, fisioterapia, revisión de fármacos. Calcio 1200mg/día y vitamina D 800-1000 UI/día. Ejercicio supervisado. Reevaluar en 6-12 meses.`;
+      interpretationPatient = `Tu riesgo de fractura es alto (${immediateFractureRisk}%). ${formData.falls && parseInt(formData.falls) > 0 ? `Las caídas que has tenido aumentan este riesgo. ` : ''}Tu reumatólogo/a te prescribirá medicación para fortalecer los huesos. Es muy importante: 1) Tomar la medicación según indicado, 2) Tomar calcio y vitamina D diariamente, 3) Hacer ejercicio (caminar 30 min/día), 4) Prevenir caídas en casa (quitar alfombras, buena luz, pasamanos), 5) Acudir a todas las revisiones.`;
     } else if (immediateFractureRisk >= 10 || hipFractureRisk >= 1) {
-      interpretation = 'Riesgo moderado de fractura. Considerar tratamiento según factores clínicos adicionales.';
+      riskLevel = 'moderado';
+      riskColor = '#f59e0b';
+      const fallsText = formData.falls && parseInt(formData.falls) > 0 ? ` Caídas recientes (${formData.falls}) son un factor de riesgo adicional importante.` : '';
+      interpretationDoctor = `Riesgo moderado de fractura. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%, Riesgo inmediato: ${immediateFractureRisk}%.${fallsText} Valorar tratamiento farmacológico según edad, expectativa de vida, comorbilidades y preferencias del paciente. Optimizar factores de riesgo modificables. Asegurar calcio y vitamina D adecuados. Ejercicio de fuerza y equilibrio. Prevención de caídas. Reevaluar anualmente o si aparecen nuevos factores.`;
+      interpretationPatient = `Tu riesgo de fractura es moderado (${immediateFractureRisk}%). ${formData.falls && parseInt(formData.falls) > 0 ? `Has tenido caídas recientemente, lo cual aumenta el riesgo. ` : ''}Tu reumatólogo/a decidirá si necesitas medicación. Mientras tanto es fundamental: tomar calcio y vitamina D, hacer ejercicio regular (especialmente ejercicios de equilibrio), ${formData.falls && parseInt(formData.falls) > 0 ? 'trabajar en prevención de caídas (fisioterapia, ejercicios de balance), ' : ''}mantener peso saludable y no fumar. Acude a tus revisiones.`;
     } else {
-      interpretation = 'Riesgo bajo de fractura. Mantener medidas preventivas y seguimiento periódico.';
+      riskLevel = 'bajo';
+      riskColor = '#10b981';
+      interpretationDoctor = `Riesgo bajo de fractura. Fractura mayor: ${majorFractureRisk}%, Cadera: ${hipFractureRisk}%, Riesgo inmediato: ${immediateFractureRisk}%. No se indica tratamiento farmacológico actualmente. Mantener medidas preventivas generales: calcio 1000-1200mg/día, vitamina D 800 UI/día, ejercicio regular con carga, evitar tabaco y alcohol excesivo. ${formData.falls && parseInt(formData.falls) > 0 ? 'Abordar factores de riesgo de caídas a pesar del bajo riesgo de fractura. ' : ''}Control periódico.`;
+      interpretationPatient = `Tu riesgo de fractura es bajo (${immediateFractureRisk}%). ¡Buenas noticias! Para mantenerlo así: toma alimentos ricos en calcio (lácteos, pescado azul), toma el sol 15 minutos al día, haz ejercicio regular (caminar, bailar, yoga), mantén peso saludable y no fumes. ${formData.falls && parseInt(formData.falls) > 0 ? 'Aunque tu riesgo de fractura es bajo, es importante trabajar en prevenir caídas. ' : ''}Sigue con revisiones periódicas.`;
     }
 
     const result = {
       instrument: 'FRAXplus',
       score: immediateFractureRisk,
-      interpretation: interpretation,
+      interpretation: {
+        text: `Riesgo ${riskLevel} de fractura`,
+        color: riskColor,
+        level: riskLevel
+      },
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
         hipFractureRisk: `${hipFractureRisk}%`,
@@ -3228,7 +3394,9 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
         age: formData.age,
         sex: formData.sex === 'female' ? 'Mujer' : 'Hombre',
         falls: formData.falls || '0',
-        boneDensity: formData.boneDensity || 'No disponible'
+        boneDensity: formData.boneDensity || 'No disponible',
+        interpretationDoctor: interpretationDoctor,
+        interpretationPatient: interpretationPatient
       }
     };
 
@@ -4870,14 +5038,24 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'SLICC' && <SLICCCalculator onResult={handleResult} isDoctor={false} />}
             
             {result && (
-              <ResultCard
-                score={result.score}
-                interpretation={result.interpretation}
-                instrument={result.instrument}
-                onSave={handleSave}
-                saved={saved}
-                saving={saving}
-              />
+              (result.instrument === 'FRAX' || result.instrument === 'FRAXplus') ? (
+                <FRAXResultCard
+                  result={result}
+                  onSave={handleSave}
+                  saved={saved}
+                  saving={saving}
+                  isDoctor={false}
+                />
+              ) : (
+                <ResultCard
+                  score={result.score}
+                  interpretation={result.interpretation}
+                  instrument={result.instrument}
+                  onSave={handleSave}
+                  saved={saved}
+                  saving={saving}
+                />
+              )
             )}
           </div>
         </>
@@ -5846,14 +6024,24 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'SLICC' && <SLICCCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           
           {result && (
-            <ResultCard
-              score={result.score}
-              interpretation={result.interpretation}
-              instrument={result.instrument}
-              onSave={handleSaveScore}
-              saved={saved}
-              saving={saving}
-            />
+            (result.instrument === 'FRAX' || result.instrument === 'FRAXplus') ? (
+              <FRAXResultCard
+                result={result}
+                onSave={handleSaveScore}
+                saved={saved}
+                saving={saving}
+                isDoctor={true}
+              />
+            ) : (
+              <ResultCard
+                score={result.score}
+                interpretation={result.interpretation}
+                instrument={result.instrument}
+                onSave={handleSaveScore}
+                saved={saved}
+                saving={saving}
+              />
+            )
           )}
         </>
       )}
