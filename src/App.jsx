@@ -2777,36 +2777,111 @@ const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
     // Calcular BMI
     const heightInMeters = parseFloat(formData.height) / 100;
     const bmi = parseFloat(formData.weight) / (heightInMeters * heightInMeters);
-
-    // Cálculo simplificado de riesgo FRAX (esto es una aproximación)
-    // En producción, se debería usar la API oficial de FRAX
-    let riskFactors = 0;
-    if (formData.previousFracture) riskFactors += 1.5;
-    if (formData.parentFracture) riskFactors += 1.2;
-    if (formData.currentSmoker) riskFactors += 1.3;
-    if (formData.glucocorticoids) riskFactors += 1.5;
-    if (formData.rheumatoidArthritis) riskFactors += 1.4;
-    if (formData.secondaryOsteoporosis) riskFactors += 1.6;
-    if (formData.alcohol3Plus) riskFactors += 1.2;
-    if (bmi < 20) riskFactors += 1.3;
-
-    // Ajuste por edad
     const age = parseInt(formData.age);
-    const ageMultiplier = age < 50 ? 0.5 : age < 60 ? 1.0 : age < 70 ? 1.5 : 2.0;
+    const isFemale = formData.sex === 'female';
 
-    // Ajuste por sexo
-    const sexMultiplier = formData.sex === 'female' ? 1.2 : 1.0;
-
-    // Ajuste por densidad ósea si está disponible
-    let boneMultiplier = 1.0;
-    if (formData.boneDensity) {
-      const tScore = parseFloat(formData.boneDensity);
-      if (tScore < -2.5) boneMultiplier = 2.0;
-      else if (tScore < -1.0) boneMultiplier = 1.5;
+    // Riesgo base según edad y sexo (aproximación basada en estudios epidemiológicos)
+    let baseRiskMajor = 0;
+    let baseRiskHip = 0;
+    
+    if (isFemale) {
+      if (age < 50) { baseRiskMajor = 1.5; baseRiskHip = 0.1; }
+      else if (age < 60) { baseRiskMajor = 3.5; baseRiskHip = 0.5; }
+      else if (age < 70) { baseRiskMajor = 8.0; baseRiskHip = 1.5; }
+      else if (age < 80) { baseRiskMajor = 15.0; baseRiskHip = 4.0; }
+      else { baseRiskMajor = 25.0; baseRiskHip = 8.0; }
+    } else {
+      if (age < 50) { baseRiskMajor = 1.0; baseRiskHip = 0.05; }
+      else if (age < 60) { baseRiskMajor = 2.5; baseRiskHip = 0.3; }
+      else if (age < 70) { baseRiskMajor = 5.5; baseRiskHip = 1.0; }
+      else if (age < 80) { baseRiskMajor = 11.0; baseRiskHip = 3.0; }
+      else { baseRiskMajor = 20.0; baseRiskHip = 6.5; }
     }
 
-    const majorFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1)));
-    const hipFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1)));
+    // Factores multiplicadores (Relative Risk)
+    let rrMajor = 1.0;
+    let rrHip = 1.0;
+
+    // Fractura previa (RR: 1.9 para fractura mayor, 2.3 para cadera)
+    if (formData.previousFracture) {
+      rrMajor *= 1.9;
+      rrHip *= 2.3;
+    }
+
+    // Fractura parental de cadera (RR: 1.7 para fractura mayor, 2.3 para cadera)
+    if (formData.parentFracture) {
+      rrMajor *= 1.7;
+      rrHip *= 2.3;
+    }
+
+    // Fumador actual (RR: 1.2 para fractura mayor, 1.6 para cadera)
+    if (formData.currentSmoker) {
+      rrMajor *= 1.2;
+      rrHip *= 1.6;
+    }
+
+    // Glucocorticoides (RR: 1.5 para fractura mayor, 2.0 para cadera)
+    if (formData.glucocorticoids) {
+      rrMajor *= 1.5;
+      rrHip *= 2.0;
+    }
+
+    // Artritis reumatoide (RR: 1.5 para fractura mayor, 1.9 para cadera)
+    if (formData.rheumatoidArthritis) {
+      rrMajor *= 1.5;
+      rrHip *= 1.9;
+    }
+
+    // Osteoporosis secundaria (RR: 1.8 para fractura mayor, 2.5 para cadera)
+    if (formData.secondaryOsteoporosis) {
+      rrMajor *= 1.8;
+      rrHip *= 2.5;
+    }
+
+    // Alcohol 3+ unidades/día (RR: 1.4 para fractura mayor, 1.7 para cadera)
+    if (formData.alcohol3Plus) {
+      rrMajor *= 1.4;
+      rrHip *= 1.7;
+    }
+
+    // Ajuste por BMI
+    if (bmi < 19) {
+      rrMajor *= 1.4;
+      rrHip *= 1.6;
+    } else if (bmi < 20) {
+      rrMajor *= 1.2;
+      rrHip *= 1.3;
+    } else if (bmi > 30) {
+      rrMajor *= 0.9;
+      rrHip *= 0.8;
+    }
+
+    // Ajuste por densidad ósea (T-score)
+    if (formData.boneDensity) {
+      const tScore = parseFloat(formData.boneDensity);
+      // Por cada desviación estándar: RR aproximado de 1.6-2.0
+      if (tScore < -2.5) {
+        rrMajor *= 2.5;
+        rrHip *= 3.0;
+      } else if (tScore < -2.0) {
+        rrMajor *= 2.0;
+        rrHip *= 2.4;
+      } else if (tScore < -1.5) {
+        rrMajor *= 1.6;
+        rrHip *= 1.9;
+      } else if (tScore < -1.0) {
+        rrMajor *= 1.3;
+        rrHip *= 1.5;
+      }
+    }
+
+    // Calcular riesgo final
+    let majorFractureRisk = baseRiskMajor * rrMajor;
+    let hipFractureRisk = baseRiskHip * rrHip;
+
+    // Limitar a 99%
+    majorFractureRisk = Math.min(99, parseFloat(majorFractureRisk.toFixed(1)));
+    hipFractureRisk = Math.min(99, parseFloat(hipFractureRisk.toFixed(1)));
 
     let interpretation = '';
     if (majorFractureRisk >= 20 || hipFractureRisk >= 3) {
@@ -3000,44 +3075,135 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
     // Calcular BMI
     const heightInMeters = parseFloat(formData.height) / 100;
     const bmi = parseFloat(formData.weight) / (heightInMeters * heightInMeters);
-
-    // Cálculo similar a FRAX pero con factores adicionales
-    let riskFactors = 0;
-    if (formData.previousFracture) riskFactors += 1.5;
-    if (formData.parentFracture) riskFactors += 1.2;
-    if (formData.currentSmoker) riskFactors += 1.3;
-    if (formData.glucocorticoids) riskFactors += 1.5;
-    if (formData.rheumatoidArthritis) riskFactors += 1.4;
-    if (formData.secondaryOsteoporosis) riskFactors += 1.6;
-    if (formData.alcohol3Plus) riskFactors += 1.2;
-    if (bmi < 20) riskFactors += 1.3;
-
-    // Factores adicionales de FRAX+
-    if (formData.falls) {
-      const fallsCount = parseInt(formData.falls);
-      if (fallsCount >= 2) riskFactors += 1.4;
-      else if (fallsCount === 1) riskFactors += 1.2;
-    }
-    if (formData.recentFracture) riskFactors += 1.8;
-
-    // Ajuste por edad
     const age = parseInt(formData.age);
-    const ageMultiplier = age < 50 ? 0.5 : age < 60 ? 1.0 : age < 70 ? 1.5 : 2.0;
+    const isFemale = formData.sex === 'female';
 
-    // Ajuste por sexo
-    const sexMultiplier = formData.sex === 'female' ? 1.2 : 1.0;
+    // Riesgo base según edad y sexo (aproximación basada en estudios epidemiológicos)
+    let baseRiskMajor = 0;
+    let baseRiskHip = 0;
+    
+    if (isFemale) {
+      if (age < 50) { baseRiskMajor = 1.5; baseRiskHip = 0.1; }
+      else if (age < 60) { baseRiskMajor = 3.5; baseRiskHip = 0.5; }
+      else if (age < 70) { baseRiskMajor = 8.0; baseRiskHip = 1.5; }
+      else if (age < 80) { baseRiskMajor = 15.0; baseRiskHip = 4.0; }
+      else { baseRiskMajor = 25.0; baseRiskHip = 8.0; }
+    } else {
+      if (age < 50) { baseRiskMajor = 1.0; baseRiskHip = 0.05; }
+      else if (age < 60) { baseRiskMajor = 2.5; baseRiskHip = 0.3; }
+      else if (age < 70) { baseRiskMajor = 5.5; baseRiskHip = 1.0; }
+      else if (age < 80) { baseRiskMajor = 11.0; baseRiskHip = 3.0; }
+      else { baseRiskMajor = 20.0; baseRiskHip = 6.5; }
+    }
 
-    // Ajuste por densidad ósea
-    let boneMultiplier = 1.0;
+    // Factores multiplicadores (Relative Risk)
+    let rrMajor = 1.0;
+    let rrHip = 1.0;
+
+    // Fractura previa
+    if (formData.previousFracture) {
+      rrMajor *= 1.9;
+      rrHip *= 2.3;
+    }
+
+    // Fractura parental de cadera
+    if (formData.parentFracture) {
+      rrMajor *= 1.7;
+      rrHip *= 2.3;
+    }
+
+    // Fumador actual
+    if (formData.currentSmoker) {
+      rrMajor *= 1.2;
+      rrHip *= 1.6;
+    }
+
+    // Glucocorticoides
+    if (formData.glucocorticoids) {
+      rrMajor *= 1.5;
+      rrHip *= 2.0;
+    }
+
+    // Artritis reumatoide
+    if (formData.rheumatoidArthritis) {
+      rrMajor *= 1.5;
+      rrHip *= 1.9;
+    }
+
+    // Osteoporosis secundaria
+    if (formData.secondaryOsteoporosis) {
+      rrMajor *= 1.8;
+      rrHip *= 2.5;
+    }
+
+    // Alcohol 3+ unidades/día
+    if (formData.alcohol3Plus) {
+      rrMajor *= 1.4;
+      rrHip *= 1.7;
+    }
+
+    // Ajuste por BMI
+    if (bmi < 19) {
+      rrMajor *= 1.4;
+      rrHip *= 1.6;
+    } else if (bmi < 20) {
+      rrMajor *= 1.2;
+      rrHip *= 1.3;
+    } else if (bmi > 30) {
+      rrMajor *= 0.9;
+      rrHip *= 0.8;
+    }
+
+    // Ajuste por densidad ósea (T-score)
     if (formData.boneDensity) {
       const tScore = parseFloat(formData.boneDensity);
-      if (tScore < -2.5) boneMultiplier = 2.0;
-      else if (tScore < -1.0) boneMultiplier = 1.5;
+      if (tScore < -2.5) {
+        rrMajor *= 2.5;
+        rrHip *= 3.0;
+      } else if (tScore < -2.0) {
+        rrMajor *= 2.0;
+        rrHip *= 2.4;
+      } else if (tScore < -1.5) {
+        rrMajor *= 1.6;
+        rrHip *= 1.9;
+      } else if (tScore < -1.0) {
+        rrMajor *= 1.3;
+        rrHip *= 1.5;
+      }
     }
 
-    const majorFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 2.5).toFixed(1)));
-    const hipFractureRisk = Math.min(99, parseFloat((riskFactors * ageMultiplier * sexMultiplier * boneMultiplier * 1.5).toFixed(1)));
-    const immediateFractureRisk = formData.recentFracture ? Math.min(99, parseFloat((majorFractureRisk * 1.5).toFixed(1))) : majorFractureRisk;
+    // Factores adicionales de FRAX+: Caídas
+    if (formData.falls) {
+      const fallsCount = parseInt(formData.falls);
+      if (fallsCount >= 2) {
+        rrMajor *= 1.4;
+        rrHip *= 1.5;
+      } else if (fallsCount === 1) {
+        rrMajor *= 1.2;
+        rrHip *= 1.3;
+      }
+    }
+
+    // Factor adicional: Fractura reciente (últimos 2 años)
+    if (formData.recentFracture) {
+      rrMajor *= 1.8;
+      rrHip *= 2.0;
+    }
+
+    // Calcular riesgo final
+    let majorFractureRisk = baseRiskMajor * rrMajor;
+    let hipFractureRisk = baseRiskHip * rrHip;
+    
+    // Para FRAX+, si hay fractura reciente, calcular riesgo inmediato aumentado
+    let immediateFractureRisk = majorFractureRisk;
+    if (formData.recentFracture) {
+      immediateFractureRisk = majorFractureRisk * 1.5;
+    }
+
+    // Limitar a 99%
+    majorFractureRisk = Math.min(99, parseFloat(majorFractureRisk.toFixed(1)));
+    hipFractureRisk = Math.min(99, parseFloat(hipFractureRisk.toFixed(1)));
+    immediateFractureRisk = Math.min(99, parseFloat(immediateFractureRisk.toFixed(1)));
 
     let interpretation = '';
     if (formData.recentFracture) {
