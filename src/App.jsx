@@ -3037,6 +3037,13 @@ const FRAXCalculator = ({ onResult, isDoctor = false, initialData = null }) => {
         color: riskColor,
         level: riskLevel
       },
+      components: {
+        majorFractureRisk: majorFractureRisk,
+        hipFractureRisk: hipFractureRisk,
+        age: formData.age,
+        sex: formData.sex,
+        bmi: bmi.toFixed(1)
+      },
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
         hipFractureRisk: `${hipFractureRisk}%`,
@@ -3385,6 +3392,15 @@ const FRAXplusCalculator = ({ onResult, isDoctor = false, initialData = null }) 
         text: `Riesgo ${riskLevel} de fractura`,
         color: riskColor,
         level: riskLevel
+      },
+      components: {
+        majorFractureRisk: majorFractureRisk,
+        hipFractureRisk: hipFractureRisk,
+        immediateFractureRisk: immediateFractureRisk,
+        age: formData.age,
+        sex: formData.sex,
+        bmi: bmi.toFixed(1),
+        falls: formData.falls || '0'
       },
       details: {
         majorFractureRisk: `${majorFractureRisk}%`,
@@ -4720,8 +4736,20 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
               else if (inst === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
               else if (inst === 'SLICC') interpretation = interpretSLICC(score.total_score);
-              else if (inst === 'FRAX') interpretation = interpretFRAX(score.total_score);
-              else if (inst === 'FRAXplus') interpretation = interpretFRAXplus(score.total_score);
+              else if (inst === 'FRAX') {
+                const components = score.components_json || {};
+                interpretation = {
+                  ...interpretFRAX(score.total_score),
+                  details: components.hipFractureRisk ? `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%` : null
+                };
+              }
+              else if (inst === 'FRAXplus') {
+                const components = score.components_json || {};
+                interpretation = {
+                  ...interpretFRAXplus(score.total_score),
+                  details: components.hipFractureRisk ? `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%, Inmediato: ${components.immediateFractureRisk}%` : null
+                };
+              }
               else interpretation = { text: 'Sin datos', color: '#9ca3af' };
               
               return (
@@ -4733,6 +4761,11 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                   <div className="summary-interp" style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
                     {interpretation.text}
                   </div>
+                  {interpretation.details && (
+                    <div className="summary-details" style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.15rem' }}>
+                      {interpretation.details}
+                    </div>
+                  )}
                   <div className="summary-date">{formatShortDate(score.created_at)}</div>
                 </div>
               );
