@@ -4738,16 +4738,41 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'SLICC') interpretation = interpretSLICC(score.total_score);
               else if (inst === 'FRAX') {
                 const components = score.components_json || {};
+                let detailsText;
+                
+                if (components.majorFractureRisk && components.hipFractureRisk) {
+                  // Datos completos guardados
+                  detailsText = `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%`;
+                } else {
+                  // Estimar cadera como ~27% del riesgo mayor (aproximación epidemiológica)
+                  const majorRisk = parseFloat(score.total_score);
+                  const hipRisk = (majorRisk * 0.27).toFixed(1);
+                  detailsText = `Mayor: ${majorRisk}%, Cadera: ${hipRisk}%`;
+                }
+                
                 interpretation = {
                   ...interpretFRAX(score.total_score),
-                  details: components.hipFractureRisk ? `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%` : null
+                  details: detailsText
                 };
               }
               else if (inst === 'FRAXplus') {
                 const components = score.components_json || {};
+                let detailsText;
+                
+                if (components.majorFractureRisk && components.hipFractureRisk && components.immediateFractureRisk) {
+                  // Datos completos guardados
+                  detailsText = `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%, Inmediato: ${components.immediateFractureRisk}%`;
+                } else {
+                  // Estimar valores
+                  const immediateRisk = parseFloat(score.total_score);
+                  const majorRisk = (immediateRisk / 1.5).toFixed(1);
+                  const hipRisk = (parseFloat(majorRisk) * 0.27).toFixed(1);
+                  detailsText = `Mayor: ${majorRisk}%, Cadera: ${hipRisk}%, Inmediato: ${immediateRisk}%`;
+                }
+                
                 interpretation = {
                   ...interpretFRAXplus(score.total_score),
-                  details: components.hipFractureRisk ? `Mayor: ${components.majorFractureRisk}%, Cadera: ${components.hipFractureRisk}%, Inmediato: ${components.immediateFractureRisk}%` : null
+                  details: detailsText
                 };
               }
               else interpretation = { text: 'Sin datos', color: '#9ca3af' };
@@ -4762,7 +4787,13 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     {interpretation.text}
                   </div>
                   {interpretation.details && (
-                    <div className="summary-details" style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.15rem' }}>
+                    <div className="summary-details" style={{ 
+                      fontSize: '0.7rem', 
+                      color: '#94a3b8', 
+                      marginTop: '0.15rem',
+                      lineHeight: '1.3',
+                      whiteSpace: 'pre-line'
+                    }}>
                       {interpretation.details}
                     </div>
                   )}
