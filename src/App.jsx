@@ -5836,28 +5836,28 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   
                   if (score.instrument === 'FRAX' || score.instrument === 'FRAXplus') {
                     const components = score.components_json || {};
-                    text = `${displayName}. Riesgo a 10 años:\n`;
+                    text = displayName + '. Riesgo a 10 años:\n';
                     
                     if (components.majorFractureRisk && components.hipFractureRisk) {
-                      text += `• Fractura osteoporótica mayor: ${components.majorFractureRisk}%\n`;
-                      text += `• Fractura de cadera: ${components.hipFractureRisk}%\n`;
+                      text += '• Fractura osteoporótica mayor: ' + components.majorFractureRisk + '%\n';
+                      text += '• Fractura de cadera: ' + components.hipFractureRisk + '%\n';
                       if (components.immediateFractureRisk) {
-                        text += `• Riesgo inmediato: ${components.immediateFractureRisk}%`;
+                        text += '• Riesgo inmediato: ' + components.immediateFractureRisk + '%';
                       }
                     } else {
                       const majorRisk = parseFloat(score.total_score);
                       const hipRisk = (majorRisk * 0.27).toFixed(1);
-                      text += `• Fractura osteoporótica mayor: ${majorRisk}%\n`;
-                      text += `• Fractura de cadera: ${hipRisk}%`;
+                      text += '• Fractura osteoporótica mayor: ' + majorRisk + '%\n';
+                      text += '• Fractura de cadera: ' + hipRisk + '%';
                       if (score.instrument === 'FRAXplus') {
-                        text += `\n• Riesgo inmediato: ${majorRisk}%`;
+                        text += '\n• Riesgo inmediato: ' + majorRisk + '%';
                       }
                     }
                   } else {
                     const scoreValue = (score.instrument === 'SCORE2' || score.instrument === 'SCORE2-OP' || score.instrument === 'QRISK3') 
-                      ? `${score.total_score}%` 
+                      ? score.total_score + '%' 
                       : score.total_score;
-                    text = `${displayName} ${scoreValue} - ${interpretation.text}`;
+                    text = displayName + ' ' + scoreValue + ' - ' + interpretation.text;
                   }
                   
                   navigator.clipboard.writeText(text).then(() => {
