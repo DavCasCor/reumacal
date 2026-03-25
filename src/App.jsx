@@ -971,57 +971,12 @@ const SliderInput = ({ label, value, onChange, min = 0, max = 10, step = 0.1 }) 
 const FRAXResultCard = ({ result, onSave, saved, saving, isDoctor }) => {
   const { score, interpretation, details, instrument } = result;
   
-  const copyToClipboard = () => {
-    let text = `${instrument}. Riesgo a 10 años:\n`;
-    text += `• Fractura osteoporótica mayor: ${details.majorFractureRisk}\n`;
-    text += `• Fractura de cadera: ${details.hipFractureRisk}\n`;
-    
-    if (details.immediateFractureRisk) {
-      text += `• Riesgo inmediato: ${details.immediateFractureRisk}\n`;
-    }
-    
-    if (isDoctor && details.interpretationDoctor) {
-      text += `\n${details.interpretationDoctor}`;
-    }
-    
-    navigator.clipboard.writeText(text).then(() => {
-      alert('✅ Resultado copiado al portapapeles');
-    }).catch(err => {
-      console.error('Error al copiar:', err);
-      alert('❌ Error al copiar al portapapeles');
-    });
-  };
-  
   return (
     <div className="result-card">
       <div className="result-header">
         <h3>{instrument}</h3>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {isDoctor && (
-            <button 
-              onClick={copyToClipboard}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#8b5cf6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
-            >
-              📋 Copiar
-            </button>
-          )}
-          <div className="result-score" style={{ backgroundColor: interpretation.color }}>
-            {score}%
-          </div>
+        <div className="result-score" style={{ backgroundColor: interpretation.color }}>
+          {score}%
         </div>
       </div>
       
@@ -1136,66 +1091,29 @@ const FRAXResultCard = ({ result, onSave, saved, saving, isDoctor }) => {
   );
 };
 
-const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving, isDoctor = false, result = null }) => {
-  const copyToClipboard = () => {
-    let text = `${instrument} ${score} - ${interpretation.text}`;
-    
-    navigator.clipboard.writeText(text).then(() => {
-      alert('✅ Resultado copiado al portapapeles');
-    }).catch(err => {
-      console.error('Error al copiar:', err);
-      alert('❌ Error al copiar al portapapeles');
-    });
-  };
-  
-  return (
-    <div className="result-card">
-      <div className="result-header">
-        <h3>{instrument}</h3>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {isDoctor && (
-            <button 
-              onClick={copyToClipboard}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#8b5cf6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
-            >
-              📋 Copiar
-            </button>
-          )}
-          <div className="result-score" style={{ backgroundColor: interpretation.color }}>
-            {score}
-          </div>
-        </div>
+const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }) => (
+  <div className="result-card">
+    <div className="result-header">
+      <h3>{instrument}</h3>
+      <div className="result-score" style={{ backgroundColor: interpretation.color }}>
+        {score}
       </div>
-      <div className="result-interpretation" style={{ borderLeftColor: interpretation.color }}>
-        <strong>{interpretation.text}</strong>
-      </div>
-      <p className="result-disclaimer">
-        ⚠️ Resultado orientativo. No sustituye la valoración médica profesional.
-      </p>
-      {!saved ? (
-        <button className="btn-save" onClick={onSave} disabled={saving}>
-          {saving ? '⏳ Guardando...' : '💾 Guardar en histórico'}
-        </button>
-      ) : (
-        <div className="saved-badge">✓ Guardado correctamente</div>
-      )}
     </div>
-  );
-};
+    <div className="result-interpretation" style={{ borderLeftColor: interpretation.color }}>
+      <strong>{interpretation.text}</strong>
+    </div>
+    <p className="result-disclaimer">
+      ⚠️ Resultado orientativo. No sustituye la valoración médica profesional.
+    </p>
+    {!saved ? (
+      <button className="btn-save" onClick={onSave} disabled={saving}>
+        {saving ? '⏳ Guardando...' : '💾 Guardar en histórico'}
+      </button>
+    ) : (
+      <div className="saved-badge">✓ Guardado correctamente</div>
+    )}
+  </div>
+);
 
 // ============================================
 // CALCULATOR COMPONENTS
@@ -5893,14 +5811,72 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 else if (score.instrument.startsWith('ASDAS')) interpretation = interpretASDAS(score.total_score);
                 else if (score.instrument === 'DAPSA') interpretation = interpretDAPSA(score.total_score);
                 else if (score.instrument === 'MDA') interpretation = interpretMDAScore(score.total_score);
+                else if (score.instrument.startsWith('DAS28')) interpretation = interpretDAS28(score.total_score);
+                else if (score.instrument === 'SLEDAI') interpretation = interpretSLEDAI(score.total_score);
+                else if (score.instrument === 'SLICC') interpretation = interpretSLICC(score.total_score);
+                else if (score.instrument === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
+                else if (score.instrument === 'FACIT') interpretation = interpretFACIT(score.total_score);
+                else if (score.instrument === 'SF36') interpretation = interpretSF36(score.total_score);
+                else if (score.instrument === 'BASFI') interpretation = interpretBASFI(score.total_score);
+                else if (score.instrument === 'ASASHI') interpretation = interpretASASHI(score.total_score);
+                else if (score.instrument === 'ASQoL') interpretation = interpretASQoL(score.total_score);
+                else if (score.instrument === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
+                else if (score.instrument === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
+                else if (score.instrument === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
+                else if (score.instrument === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
+                else if (score.instrument === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
+                else if (score.instrument === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
+                else if (score.instrument === 'FRAX') interpretation = interpretFRAX(score.total_score);
+                else if (score.instrument === 'FRAXplus') interpretation = interpretFRAXplus(score.total_score);
                 else interpretation = interpretDAS28(score.total_score);
+                
+                const copyScoreToClipboard = () => {
+                  let text = '';
+                  const displayName = score.instrument === 'FRAXplus' ? 'FRAX+' : score.instrument.replace('_', '-');
+                  
+                  // Para FRAX y FRAX+
+                  if (score.instrument === 'FRAX' || score.instrument === 'FRAXplus') {
+                    const components = score.components_json || {};
+                    text = `${displayName}. Riesgo a 10 años:\n`;
+                    
+                    if (components.majorFractureRisk && components.hipFractureRisk) {
+                      text += `• Fractura osteoporótica mayor: ${components.majorFractureRisk}%\n`;
+                      text += `• Fractura de cadera: ${components.hipFractureRisk}%\n`;
+                      if (components.immediateFractureRisk) {
+                        text += `• Riesgo inmediato: ${components.immediateFractureRisk}%`;
+                      }
+                    } else {
+                      // Estimación si no hay components
+                      const majorRisk = parseFloat(score.total_score);
+                      const hipRisk = (majorRisk * 0.27).toFixed(1);
+                      text += `• Fractura osteoporótica mayor: ${majorRisk}%\n`;
+                      text += `• Fractura de cadera: ${hipRisk}%`;
+                      if (score.instrument === 'FRAXplus') {
+                        text += `\n• Riesgo inmediato: ${majorRisk}%`;
+                      }
+                    }
+                  } else {
+                    // Para todas las demás calculadoras
+                    const scoreValue = (score.instrument === 'SCORE2' || score.instrument === 'SCORE2-OP' || score.instrument === 'QRISK3') 
+                      ? `${score.total_score}%` 
+                      : score.total_score;
+                    text = `${displayName} ${scoreValue} - ${interpretation.text}`;
+                  }
+                  
+                  navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Resultado copiado al portapapeles');
+                  }).catch(err => {
+                    console.error('Error al copiar:', err);
+                    alert('❌ Error al copiar al portapapeles');
+                  });
+                };
                 
                 return (
                   <tr key={score.id}>
                     <td>{formatDate(score.created_at)}</td>
-                    <td>{score.instrument.replace('_', '-')}</td>
+                    <td>{score.instrument === 'FRAXplus' ? 'FRAX+' : score.instrument.replace('_', '-')}</td>
                     <td className="score-cell" style={{ color: interpretation.color }}>
-                      {score.total_score}
+                      {score.total_score}{(score.instrument === 'FRAX' || score.instrument === 'FRAXplus' || score.instrument === 'SCORE2' || score.instrument === 'SCORE2-OP' || score.instrument === 'QRISK3') && '%'}
                     </td>
                     <td>
                       <span className="status-badge" style={{ backgroundColor: interpretation.color }}>
@@ -5908,6 +5884,23 @@ const DoctorDashboard = ({ user, onLogout }) => {
                       </span>
                     </td>
                     <td>
+                      <button 
+                        className="btn-copy-score"
+                        onClick={copyScoreToClipboard}
+                        title="Copiar resultado"
+                        style={{
+                          marginRight: '0.5rem',
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor: '#8b5cf6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.25rem',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        📋
+                      </button>
                       <button 
                         className="btn-delete-score"
                         onClick={() => handleDeleteScore(score.id)}
@@ -6255,8 +6248,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 onSave={handleSaveScore}
                 saved={saved}
                 saving={saving}
-                isDoctor={true}
-                result={result}
               />
             )
           )}
@@ -7093,6 +7084,20 @@ export default function App() {
         .btn-delete-score:hover {
           background: #fecaca;
           border-color: #dc2626;
+        }
+        .btn-copy-score {
+          background: #ede9fe;
+          color: #7c3aed;
+          border: 1px solid #ddd6fe;
+          padding: 0.4rem 0.8rem;
+          border-radius: 6px;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-copy-score:hover {
+          background: #ddd6fe;
+          border-color: #7c3aed;
         }
         
         .calc-container {
