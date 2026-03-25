@@ -971,12 +971,57 @@ const SliderInput = ({ label, value, onChange, min = 0, max = 10, step = 0.1 }) 
 const FRAXResultCard = ({ result, onSave, saved, saving, isDoctor }) => {
   const { score, interpretation, details, instrument } = result;
   
+  const copyToClipboard = () => {
+    let text = `${instrument}. Riesgo a 10 años:\n`;
+    text += `• Fractura osteoporótica mayor: ${details.majorFractureRisk}\n`;
+    text += `• Fractura de cadera: ${details.hipFractureRisk}\n`;
+    
+    if (details.immediateFractureRisk) {
+      text += `• Riesgo inmediato: ${details.immediateFractureRisk}\n`;
+    }
+    
+    if (isDoctor && details.interpretationDoctor) {
+      text += `\n${details.interpretationDoctor}`;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+      alert('✅ Resultado copiado al portapapeles');
+    }).catch(err => {
+      console.error('Error al copiar:', err);
+      alert('❌ Error al copiar al portapapeles');
+    });
+  };
+  
   return (
     <div className="result-card">
       <div className="result-header">
         <h3>{instrument}</h3>
-        <div className="result-score" style={{ backgroundColor: interpretation.color }}>
-          {score}%
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {isDoctor && (
+            <button 
+              onClick={copyToClipboard}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+            >
+              📋 Copiar
+            </button>
+          )}
+          <div className="result-score" style={{ backgroundColor: interpretation.color }}>
+            {score}%
+          </div>
         </div>
       </div>
       
@@ -1091,29 +1136,66 @@ const FRAXResultCard = ({ result, onSave, saved, saving, isDoctor }) => {
   );
 };
 
-const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving }) => (
-  <div className="result-card">
-    <div className="result-header">
-      <h3>{instrument}</h3>
-      <div className="result-score" style={{ backgroundColor: interpretation.color }}>
-        {score}
+const ResultCard = ({ score, interpretation, instrument, onSave, saved, saving, isDoctor = false, result = null }) => {
+  const copyToClipboard = () => {
+    let text = `${instrument} ${score} - ${interpretation.text}`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+      alert('✅ Resultado copiado al portapapeles');
+    }).catch(err => {
+      console.error('Error al copiar:', err);
+      alert('❌ Error al copiar al portapapeles');
+    });
+  };
+  
+  return (
+    <div className="result-card">
+      <div className="result-header">
+        <h3>{instrument}</h3>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {isDoctor && (
+            <button 
+              onClick={copyToClipboard}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8b5cf6'}
+            >
+              📋 Copiar
+            </button>
+          )}
+          <div className="result-score" style={{ backgroundColor: interpretation.color }}>
+            {score}
+          </div>
+        </div>
       </div>
+      <div className="result-interpretation" style={{ borderLeftColor: interpretation.color }}>
+        <strong>{interpretation.text}</strong>
+      </div>
+      <p className="result-disclaimer">
+        ⚠️ Resultado orientativo. No sustituye la valoración médica profesional.
+      </p>
+      {!saved ? (
+        <button className="btn-save" onClick={onSave} disabled={saving}>
+          {saving ? '⏳ Guardando...' : '💾 Guardar en histórico'}
+        </button>
+      ) : (
+        <div className="saved-badge">✓ Guardado correctamente</div>
+      )}
     </div>
-    <div className="result-interpretation" style={{ borderLeftColor: interpretation.color }}>
-      <strong>{interpretation.text}</strong>
-    </div>
-    <p className="result-disclaimer">
-      ⚠️ Resultado orientativo. No sustituye la valoración médica profesional.
-    </p>
-    {!saved ? (
-      <button className="btn-save" onClick={onSave} disabled={saving}>
-        {saving ? '⏳ Guardando...' : '💾 Guardar en histórico'}
-      </button>
-    ) : (
-      <div className="saved-badge">✓ Guardado correctamente</div>
-    )}
-  </div>
-);
+  );
+};
 
 // ============================================
 // CALCULATOR COMPONENTS
@@ -6173,6 +6255,8 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 onSave={handleSaveScore}
                 saved={saved}
                 saving={saving}
+                isDoctor={true}
+                result={result}
               />
             )
           )}
