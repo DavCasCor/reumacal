@@ -5834,7 +5834,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   let text = '';
                   const displayName = score.instrument === 'FRAXplus' ? 'FRAX+' : score.instrument.replace('_', '-');
                   
-                  // Para FRAX y FRAX+
                   if (score.instrument === 'FRAX' || score.instrument === 'FRAXplus') {
                     const components = score.components_json || {};
                     text = `${displayName}. Riesgo a 10 años:\n`;
@@ -5846,7 +5845,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                         text += `• Riesgo inmediato: ${components.immediateFractureRisk}%`;
                       }
                     } else {
-                      // Estimación si no hay components
                       const majorRisk = parseFloat(score.total_score);
                       const hipRisk = (majorRisk * 0.27).toFixed(1);
                       text += `• Fractura osteoporótica mayor: ${majorRisk}%\n`;
@@ -5856,7 +5854,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                       }
                     }
                   } else {
-                    // Para todas las demás calculadoras
                     const scoreValue = (score.instrument === 'SCORE2' || score.instrument === 'SCORE2-OP' || score.instrument === 'QRISK3') 
                       ? `${score.total_score}%` 
                       : score.total_score;
@@ -5888,16 +5885,6 @@ const DoctorDashboard = ({ user, onLogout }) => {
                         className="btn-copy-score"
                         onClick={copyScoreToClipboard}
                         title="Copiar resultado"
-                        style={{
-                          marginRight: '0.5rem',
-                          padding: '0.25rem 0.5rem',
-                          backgroundColor: '#8b5cf6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '0.25rem',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem'
-                        }}
                       >
                         📋
                       </button>
@@ -7094,6 +7081,7 @@ export default function App() {
           font-size: 1rem;
           cursor: pointer;
           transition: all 0.2s;
+          margin-right: 0.5rem;
         }
         .btn-copy-score:hover {
           background: #ddd6fe;
