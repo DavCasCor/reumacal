@@ -329,55 +329,46 @@ const interpretESSPRI = (score) => {
   return { text: 'Síntomas significativos', color: '#ef4444', level: 'significant' };
 };
 
-// ESSDAI - EULAR Sjögren's Syndrome Disease Activity Index
-const calculateESSDAI = (components) => {
+// SSDAI - Sjögren's Syndrome Disease Activity Index (Vitali 2007)
+const calculateSSDAI = (components) => {
   let total = 0;
-  
-  // Cada dominio tiene niveles: 0 (sin actividad), 1 (bajo), 2 (moderado), 3 (alto)
-  // Constitucional (peso: ×1)
-  total += parseInt(components.constitutional || 0) * 1;
-  
-  // Linfadenopatía (peso: ×1)
-  total += parseInt(components.lymphadenopathy || 0) * 1;
-  
-  // Glandular (peso: ×1)
-  total += parseInt(components.glandular || 0) * 1;
-  
-  // Articular (peso: ×1)
-  total += parseInt(components.articular || 0) * 1;
-  
-  // Cutáneo (peso: ×3)
-  total += parseInt(components.cutaneous || 0) * 3;
-  
-  // Pulmonar (peso: ×5)
-  total += parseInt(components.pulmonary || 0) * 5;
-  
-  // Renal (peso: ×5)
-  total += parseInt(components.renal || 0) * 5;
-  
-  // Muscular (peso: ×6)
-  total += parseInt(components.muscular || 0) * 6;
-  
-  // Sistema nervioso periférico (peso: ×5)
-  total += parseInt(components.peripheral_nervous || 0) * 5;
-  
-  // Sistema nervioso central (peso: ×5)
-  total += parseInt(components.central_nervous || 0) * 5;
-  
-  // Hematológico (peso: ×2)
-  total += parseInt(components.hematological || 0) * 2;
-  
-  // Biológico (peso: ×1)
-  total += parseInt(components.biological || 0) * 1;
-  
+  // Constitucional (máx 7)
+  if (components.fever) total += 1;
+  if (components.lymphadenopathy) total += 2;
+  // Linfático (máx 3)
+  if (components.lymphadenopathyBiopsy) total += 3;
+  // Glandular (máx 2)
+  if (components.glandularSwelling) total += 2;
+  // Articular (máx 6)
+  if (components.arthralgia) total += 2;
+  if (components.arthritis) total += 4;
+  // Cutáneo (máx 9)
+  if (components.vasculitis) total += 3;
+  if (components.purpura) total += 6;
+  // Pulmonar (máx 9)
+  if (components.pulmonary) total += 9;
+  // Renal (máx 9)
+  if (components.renal) total += 9;
+  // Muscular (máx 6)
+  if (components.myositis) total += 6;
+  // SNC (máx 9)
+  if (components.cns) total += 9;
+  // PNS (máx 9)
+  if (components.pns) total += 9;
+  // Hematológico (máx 3)
+  if (components.leukopenia) total += 1;
+  if (components.thrombocytopenia) total += 2;
+  // Biológico (máx 3)
+  if (components.hypergammaglobulinemia) total += 1;
+  if (components.hypocomplementemia) total += 2;
   return total;
 };
 
-const interpretESSDAI = (score) => {
+const interpretSSDAI = (score) => {
   if (score === 0) return { text: 'Inactiva', color: '#10b981', level: 'inactive' };
-  if (score <= 4) return { text: 'Actividad baja (1-4)', color: '#84cc16', level: 'low' };
-  if (score <= 13) return { text: 'Actividad moderada (5-13)', color: '#f59e0b', level: 'moderate' };
-  return { text: 'Actividad alta (≥14)', color: '#ef4444', level: 'high' };
+  if (score <= 5) return { text: 'Actividad baja', color: '#84cc16', level: 'low' };
+  if (score <= 13) return { text: 'Actividad moderada', color: '#f59e0b', level: 'moderate' };
+  return { text: 'Actividad alta', color: '#ef4444', level: 'high' };
 };
 
 // ============================================
@@ -397,7 +388,7 @@ const interpretScore = (instrument, score) => {
   if (instrument === 'ASQoL') return interpretASQoL(score);
   if (instrument === 'PSAQoL') return interpretPSAQoL(score);
   if (instrument === 'ESSPRI') return interpretESSPRI(score);
-  if (instrument === 'ESSDAI') return interpretESSDAI(score);
+  if (instrument === 'SSDAI') return interpretSSDAI(score);
   return { text: 'Sin datos', color: '#9ca3af' };
 };
 
@@ -405,7 +396,7 @@ const interpretScore = (instrument, score) => {
 const ALL_INSTRUMENTS = [
   'BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
   'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
-  'ASQoL', 'PSAQoL', 'ESSPRI', 'ESSDAI'
+  'ASQoL', 'PSAQoL', 'ESSPRI', 'SSDAI'
 ];
 
 // SCORE2 - Cardiovascular Risk Calculator (40-69 years)
@@ -636,19 +627,11 @@ const COLLABORATIVE_CALCULATORS = {
     patientLabel: 'SLICC',
     patientDesc: 'Esta calculadora la completará el reumatólogo/a en consulta',
     doctorLabel: 'SLICC - Índice de daño en lupus'
-  },
-  'ESSDAI': {
-    collaborative: true,
-    patientFields: [],
-    doctorFields: ['constitutional', 'lymphadenopathy', 'glandular', 'articular', 'cutaneous', 'pulmonary', 'renal', 'muscular', 'peripheral_nervous', 'central_nervous', 'hematological', 'biological'],
-    patientLabel: 'ESSDAI',
-    patientDesc: 'Esta calculadora la completará el reumatólogo/a en consulta',
-    doctorLabel: 'ESSDAI - Actividad de enfermedad'
   }
 };
 
 // Calculadoras que solo puede hacer el médico
-const DOCTOR_ONLY_CALCULATORS = ['SLEDAI', 'ESSDAI', 'SLICC'];
+const DOCTOR_ONLY_CALCULATORS = ['SLEDAI', 'SSDAI', 'SLICC'];
 
 // Verificar si una calculadora es colaborativa
 const isCollaborative = (instrument) => {
@@ -2198,52 +2181,40 @@ const ESSPRICalculator = ({ onResult }) => {
   );
 };
 
-const ESSDAICalculator = ({ onResult, isDoctor = false }) => {
+const SSDAICalculator = ({ onResult, isDoctor = false }) => {
   const [components, setComponents] = useState({
-    constitutional: 0,
-    lymphadenopathy: 0,
-    glandular: 0,
-    articular: 0,
-    cutaneous: 0,
-    pulmonary: 0,
-    renal: 0,
-    muscular: 0,
-    peripheral_nervous: 0,
-    central_nervous: 0,
-    hematological: 0,
-    biological: 0
+    fever: false, lymphadenopathy: false, lymphadenopathyBiopsy: false,
+    glandularSwelling: false, arthralgia: false, arthritis: false,
+    vasculitis: false, purpura: false, pulmonary: false, renal: false,
+    myositis: false, cns: false, pns: false, leukopenia: false,
+    thrombocytopenia: false, hypergammaglobulinemia: false, hypocomplementemia: false
   });
 
   const handleCalculate = () => {
-    const score = calculateESSDAI(components);
-    const interpretation = interpretESSDAI(score);
-    onResult({ score, interpretation, components, instrument: 'ESSDAI' });
+    const score = calculateSSDAI(components);
+    const interpretation = interpretSSDAI(score);
+    onResult({ score, interpretation, components, instrument: 'SSDAI' });
   };
 
-  const DomainSelect = ({ domain, label, weight }) => (
-    <div style={{ marginBottom: '1rem' }}>
-      <label className="input-label">{label} (peso ×{weight})</label>
-      <select
-        className="input-field"
-        value={components[domain]}
-        onChange={(e) => setComponents(prev => ({ ...prev, [domain]: parseInt(e.target.value) }))}
-        disabled={!isDoctor}
-      >
-        <option value="0">0 - Sin actividad</option>
-        <option value="1">1 - Actividad baja</option>
-        <option value="2">2 - Actividad moderada</option>
-        <option value="3">3 - Actividad alta</option>
-      </select>
+  const CheckboxGroup = ({ items }) => (
+    <div style={{ display: 'grid', gap: '0.5rem' }}>
+      {items.map(({ key, label, points }) => (
+        <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={components[key]}
+            onChange={(e) => setComponents(prev => ({ ...prev, [key]: e.target.checked }))}
+          />
+          <span>{label} ({points}pts)</span>
+        </label>
+      ))}
     </div>
   );
 
   return (
     <div className="calculator-form">
-      <h3>ESSDAI</h3>
-      <p className="calc-description">EULAR Sjögren's Syndrome Disease Activity Index</p>
-      <p className="calc-description" style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#64748b' }}>
-        Actividad de enfermedad en síndrome de Sjögren (0-123 puntos)
-      </p>
+      <h3>SSDAI</h3>
+      <p className="calc-description">Sjögren's Syndrome Disease Activity Index (Vitali 2007)</p>
       
       {!isDoctor && (
         <div style={{ 
@@ -2259,32 +2230,57 @@ const ESSDAICalculator = ({ onResult, isDoctor = false }) => {
         </div>
       )}
       
-      <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-        <DomainSelect domain="constitutional" label="Constitucional" weight="1" />
-        <DomainSelect domain="lymphadenopathy" label="Linfadenopatía" weight="1" />
-        <DomainSelect domain="glandular" label="Glandular" weight="1" />
-        <DomainSelect domain="articular" label="Articular" weight="1" />
-        <DomainSelect domain="cutaneous" label="Cutáneo" weight="3" />
-        <DomainSelect domain="pulmonary" label="Pulmonar" weight="5" />
-        <DomainSelect domain="renal" label="Renal" weight="5" />
-        <DomainSelect domain="muscular" label="Muscular" weight="6" />
-        <DomainSelect domain="peripheral_nervous" label="Sistema nervioso periférico" weight="5" />
-        <DomainSelect domain="central_nervous" label="Sistema nervioso central" weight="5" />
-        <DomainSelect domain="hematological" label="Hematológico" weight="2" />
-        <DomainSelect domain="biological" label="Biológico" weight="1" />
+      <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Constitucional</h4>
+          <CheckboxGroup items={[
+            { key: 'fever', label: 'Fiebre', points: 1 },
+            { key: 'lymphadenopathy', label: 'Linfadenopatía', points: 2 },
+            { key: 'lymphadenopathyBiopsy', label: 'Linfadenopatía (biopsia+)', points: 3 }
+          ]} />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Glandular/Articular</h4>
+          <CheckboxGroup items={[
+            { key: 'glandularSwelling', label: 'Inflamación glandular', points: 2 },
+            { key: 'arthralgia', label: 'Artralgia', points: 2 },
+            { key: 'arthritis', label: 'Artritis', points: 4 }
+          ]} />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Cutáneo</h4>
+          <CheckboxGroup items={[
+            { key: 'vasculitis', label: 'Vasculitis', points: 3 },
+            { key: 'purpura', label: 'Púrpura', points: 6 }
+          ]} />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Órgano mayor</h4>
+          <CheckboxGroup items={[
+            { key: 'pulmonary', label: 'Afectación pulmonar', points: 9 },
+            { key: 'renal', label: 'Afectación renal', points: 9 },
+            { key: 'myositis', label: 'Miositis', points: 6 },
+            { key: 'cns', label: 'SNC', points: 9 },
+            { key: 'pns', label: 'SNP', points: 9 }
+          ]} />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Hematológico/Inmunológico</h4>
+          <CheckboxGroup items={[
+            { key: 'leukopenia', label: 'Leucopenia', points: 1 },
+            { key: 'thrombocytopenia', label: 'Trombocitopenia', points: 2 },
+            { key: 'hypergammaglobulinemia', label: 'Hipergammaglobulinemia', points: 1 },
+            { key: 'hypocomplementemia', label: 'Hipocomplementemia', points: 2 }
+          ]} />
+        </div>
       </div>
       
-      <button 
-        className="btn-calculate" 
-        onClick={handleCalculate}
-        disabled={!isDoctor}
-        style={{ marginTop: '1rem' }}
-      >
-        Calcular ESSDAI
-      </button>
-    </div>
-  );
-};
+      <button className="btn-calculate" onClick={handleCalculate} style={{ marginTop: '1rem' }}>
+        Calcular SSDAI
       </button>
     </div>
   );
@@ -2373,7 +2369,7 @@ const LandingPage = ({ onNavigate }) => (
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💧</span><span>ESSPRI</span></div>
-            <div className="feature"><span className="feature-icon">🔬</span><span>ESSDAI</span></div>
+            <div className="feature"><span className="feature-icon">🔬</span><span>SSDAI</span></div>
           </div>
         </div>
         
@@ -4700,7 +4696,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
                         'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'SLICC', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
-                        'ASQoL', 'ESSPRI', 'ESSDAI', 'FRAX', 'FRAXplus', 'SCORE2', 'SCORE2-OP', 'QRISK3'];
+                        'ASQoL', 'ESSPRI', 'SSDAI', 'FRAX', 'FRAXplus', 'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
       if (last) acc[inst] = last;
@@ -4735,7 +4731,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'ASQoL') interpretation = interpretASQoL(score.total_score);
               else if (inst === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
               else if (inst === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
-              else if (inst === 'ESSDAI') interpretation = interpretSSDAI(score.total_score);
+              else if (inst === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
               else if (inst === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
               else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
               else if (inst === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
@@ -4979,9 +4975,9 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-name">ESSPRI</span>
                     <span className="calc-desc">Síntomas Sjögren</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ESSDAI'); setResult(null); }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
                     <span className="calc-icon">🔬</span>
-                    <span className="calc-name">ESSDAI</span>
+                    <span className="calc-name">SSDAI</span>
                     <span className="calc-desc">Actividad Sjögren</span>
                     <span className="calc-desc" style={{ color: '#f59e0b', fontWeight: '600', marginTop: '0.25rem', fontSize: '0.85rem' }}>Esta calculadora la completará el reumatólogo/a en consulta</span>
                   </button>
@@ -5104,7 +5100,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'ASQoL' && <ASQoLCalculator onResult={handleResult} />}
             {selectedCalc === 'PSAQoL' && <PSAQoLCalculator onResult={handleResult} />}
             {selectedCalc === 'ESSPRI' && <ESSPRICalculator onResult={handleResult} />}
-            {selectedCalc === 'ESSDAI' && <ESSDAICalculator onResult={handleResult} isDoctor={false} />}
+            {selectedCalc === 'SSDAI' && <SSDAICalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'FRAX' && <FRAXCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'FRAXplus' && <FRAXplusCalculator onResult={handleResult} isDoctor={false} />}
             {selectedCalc === 'SCORE2' && <SCORE2Calculator onResult={handleResult} isDoctor={false} />}
@@ -5165,7 +5161,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               'SF36': 'SF-36',
               'LupusPRO': 'LupusPRO',
               'ESSPRI': 'ESSPRI',
-              'ESSDAI': 'ESSDAI',
+              'SSDAI': 'SSDAI',
               'FRAX': 'FRAX',
               'FRAXplus': 'FRAX+',
               'SCORE2': 'SCORE2 (40-69 años)',
@@ -5433,7 +5429,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                         'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'SLICC',
                         'FACIT', 'SF36', 'LupusPRO',
-                        'ESSPRI', 'ESSDAI',
+                        'ESSPRI', 'SSDAI',
                         'FRAX', 'FRAXplus',
                         'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
@@ -5670,7 +5666,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
             else if (inst === 'ASQoL') interpretation = interpretASQoL(score.total_score);
             else if (inst === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
             else if (inst === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
-            else if (inst === 'ESSDAI') interpretation = interpretSSDAI(score.total_score);
+            else if (inst === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
             else if (inst === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
             else if (inst === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
             else if (inst === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
@@ -5767,7 +5763,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 'SF36': 'SF-36',
                 'LupusPRO': 'LupusPRO',
                 'ESSPRI': 'ESSPRI',
-                'ESSDAI': 'ESSDAI',
+                'SSDAI': 'SSDAI',
                 'FRAX': 'FRAX',
                 'FRAXplus': 'FRAX+',
                 'SCORE2': 'SCORE2',
@@ -5826,7 +5822,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 else if (score.instrument === 'ASQoL') interpretation = interpretASQoL(score.total_score);
                 else if (score.instrument === 'PSAQoL') interpretation = interpretPSAQoL(score.total_score);
                 else if (score.instrument === 'ESSPRI') interpretation = interpretESSPRI(score.total_score);
-                else if (score.instrument === 'ESSDAI') interpretation = interpretSSDAI(score.total_score);
+                else if (score.instrument === 'SSDAI') interpretation = interpretSSDAI(score.total_score);
                 else if (score.instrument === 'SCORE2') interpretation = interpretSCORE2(score.total_score);
                 else if (score.instrument === 'SCORE2-OP') interpretation = interpretSCORE2OP(score.total_score);
                 else if (score.instrument === 'QRISK3') interpretation = interpretQRISK3(score.total_score);
@@ -6100,9 +6096,9 @@ const DoctorDashboard = ({ user, onLogout }) => {
                     <span className="calc-name">ESSPRI</span>
                     <span className="calc-desc">Síntomas Sjögren</span>
                   </button>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('ESSDAI'); setResult(null); }}>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('SSDAI'); setResult(null); }}>
                     <span className="calc-icon">🔬</span>
-                    <span className="calc-name">ESSDAI</span>
+                    <span className="calc-name">SSDAI</span>
                     <span className="calc-desc">Actividad Sjögren</span>
                   </button>
                 </div>
@@ -6214,7 +6210,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'ASQoL' && <ASQoLCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'PSAQoL' && <PSAQoLCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'ESSPRI' && <ESSPRICalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
-          {selectedCalc === 'ESSDAI' && <ESSDAICalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'SSDAI' && <SSDAICalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'FRAX' && <FRAXCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'FRAXplus' && <FRAXplusCalculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SCORE2' && <SCORE2Calculator onResult={handleResult} isDoctor={true} initialData={selectedPending?.patient_data} />}
