@@ -212,19 +212,53 @@ const interpretLupusPRO = (score) => {
 
 // FACIT-General
 const calculateFACIT = (components) => {
-  // 27 items, escala 0-4, rango total 0-108
+  // FACIT-F: 40 ítems, escala 0-4
+  // Total range: 0-160
   let total = 0;
-  for (let i = 1; i <= 27; i++) {
-    total += parseFloat(components[`q${i}`] || 0);
+  
+  // Bienestar físico (7 ítems): GP1-GP7
+  for (let i = 1; i <= 7; i++) {
+    total += parseFloat(components[`gp${i}`] || 0);
   }
+  
+  // Bienestar social/familiar (7 ítems): GS1-GS7
+  for (let i = 1; i <= 7; i++) {
+    total += parseFloat(components[`gs${i}`] || 0);
+  }
+  
+  // Bienestar emocional (6 ítems): GE1-GE6
+  for (let i = 1; i <= 6; i++) {
+    total += parseFloat(components[`ge${i}`] || 0);
+  }
+  
+  // Bienestar funcional (7 ítems): GF1-GF7
+  for (let i = 1; i <= 7; i++) {
+    total += parseFloat(components[`gf${i}`] || 0);
+  }
+  
+  // Fatiga adicional (13 ítems): HI7, HI12, An1-An16
+  total += parseFloat(components.hi7 || 0);
+  total += parseFloat(components.hi12 || 0);
+  total += parseFloat(components.an1 || 0);
+  total += parseFloat(components.an2 || 0);
+  total += parseFloat(components.an3 || 0);
+  total += parseFloat(components.an4 || 0);
+  total += parseFloat(components.an5 || 0);
+  total += parseFloat(components.an7 || 0);
+  total += parseFloat(components.an8 || 0);
+  total += parseFloat(components.an12 || 0);
+  total += parseFloat(components.an14 || 0);
+  total += parseFloat(components.an15 || 0);
+  total += parseFloat(components.an16 || 0);
+  
   return total;
 };
 
 const interpretFACIT = (score) => {
-  // Mayor puntuación = mejor calidad de vida
-  if (score >= 80) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
-  if (score >= 60) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
-  if (score >= 40) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
+  // Mayor puntuación = mejor calidad de vida y menos fatiga
+  if (score >= 120) return { text: 'Muy buena calidad de vida', color: '#10b981', level: 'excellent' };
+  if (score >= 90) return { text: 'Buena calidad de vida', color: '#84cc16', level: 'good' };
+  if (score >= 60) return { text: 'Calidad de vida moderada', color: '#f59e0b', level: 'moderate' };
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
@@ -1832,10 +1866,12 @@ const LupusPROCalculator = ({ onResult }) => {
 
 const FACITCalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
-    q1: 2, q2: 2, q3: 2, q4: 2, q5: 2, q6: 2, q7: 2, q8: 2, q9: 2,
-    q10: 2, q11: 2, q12: 2, q13: 2, q14: 2, q15: 2, q16: 2, q17: 2,
-    q18: 2, q19: 2, q20: 2, q21: 2, q22: 2, q23: 2, q24: 2, q25: 2,
-    q26: 2, q27: 2
+    gp1: 2, gp2: 2, gp3: 2, gp4: 2, gp5: 2, gp6: 2, gp7: 2,
+    gs1: 2, gs2: 2, gs3: 2, gs4: 2, gs5: 2, gs6: 2, gs7: 2,
+    ge1: 2, ge2: 2, ge3: 2, ge4: 2, ge5: 2, ge6: 2,
+    gf1: 2, gf2: 2, gf3: 2, gf4: 2, gf5: 2, gf6: 2, gf7: 2,
+    hi7: 2, hi12: 2, an1: 2, an2: 2, an3: 2, an4: 2, an5: 2,
+    an7: 2, an8: 2, an12: 2, an14: 2, an15: 2, an16: 2
   });
 
   const handleCalculate = () => {
@@ -1844,42 +1880,105 @@ const FACITCalculator = ({ onResult }) => {
     onResult({ score, interpretation, components, instrument: 'FACIT' });
   };
 
-  const questions = [
-    'Me falta energía', 'Tengo náuseas', 'Debido a mi condición física, tengo dificultad para atender las necesidades de mi familia',
-    'Tengo dolor', 'Me molestan los efectos secundarios del tratamiento', 'Me siento enfermo/a',
-    'Tengo que pasar tiempo en la cama', 'Me siento cercano/a a mis amigos', 'Recibo apoyo emocional de mi familia',
-    'Recibo apoyo de mis amigos', 'Mi familia ha aceptado mi enfermedad', 'Estoy satisfecho/a con la comunicación familiar sobre mi enfermedad',
-    'Me siento cercano/a a mi pareja (o la persona que es mi principal apoyo)', 'Me siento triste', 'Estoy satisfecho/a con cómo enfrento mi enfermedad',
-    'Estoy perdiendo la esperanza en la lucha contra mi enfermedad', 'Me siento nervioso/a', 'Me preocupa morirme',
-    'Me preocupa que mi condición empeore', 'Soy capaz de disfrutar de la vida', 'Duermo bien',
-    'Disfruto de mis pasatiempos habituales', 'Estoy contento/a con la calidad de mi vida actualmente', 'Puedo trabajar (incluye trabajo en casa)',
-    'Mi trabajo me satisface (incluye trabajo en casa)', 'Puedo disfrutar de la vida', 'He aceptado mi enfermedad'
+  const sections = [
+    {
+      title: 'Bienestar físico',
+      items: [
+        { key: 'gp1', text: 'Me falta energía' },
+        { key: 'gp2', text: 'Tengo náuseas' },
+        { key: 'gp3', text: 'Debido a mi condición física, tengo dificultad para atender las necesidades de mi familia' },
+        { key: 'gp4', text: 'Tengo dolor' },
+        { key: 'gp5', text: 'Me molestan los efectos secundarios del tratamiento' },
+        { key: 'gp6', text: 'Me siento enfermo/a' },
+        { key: 'gp7', text: 'Me veo obligado/a a pasar tiempo en la cama' }
+      ]
+    },
+    {
+      title: 'Bienestar social/familiar',
+      items: [
+        { key: 'gs1', text: 'Me siento cercano/a a mis amigos' },
+        { key: 'gs2', text: 'Recibo apoyo emocional de mi familia' },
+        { key: 'gs3', text: 'Recibo apoyo de mis amigos' },
+        { key: 'gs4', text: 'Mi familia ha aceptado mi enfermedad' },
+        { key: 'gs5', text: 'Estoy satisfecho/a con la comunicación familiar sobre mi enfermedad' },
+        { key: 'gs6', text: 'Me siento cercano/a a mi pareja (o la persona que es mi principal apoyo)' },
+        { key: 'gs7', text: 'Estoy satisfecho/a con mi vida sexual' }
+      ]
+    },
+    {
+      title: 'Bienestar emocional',
+      items: [
+        { key: 'ge1', text: 'Me siento triste' },
+        { key: 'ge2', text: 'Estoy satisfecho/a con cómo enfrento mi enfermedad' },
+        { key: 'ge3', text: 'Estoy perdiendo la esperanza en la lucha contra mi enfermedad' },
+        { key: 'ge4', text: 'Me siento nervioso/a' },
+        { key: 'ge5', text: 'Me preocupa morirme' },
+        { key: 'ge6', text: 'Me preocupa que mi condición empeore' }
+      ]
+    },
+    {
+      title: 'Bienestar funcional',
+      items: [
+        { key: 'gf1', text: 'Puedo trabajar (incluye trabajo en casa)' },
+        { key: 'gf2', text: 'Mi trabajo (incluye trabajo en casa) es satisfactorio' },
+        { key: 'gf3', text: 'Soy capaz de disfrutar de la vida' },
+        { key: 'gf4', text: 'He aceptado mi enfermedad' },
+        { key: 'gf5', text: 'Duermo bien' },
+        { key: 'gf6', text: 'Disfruto de mis pasatiempos habituales' },
+        { key: 'gf7', text: 'Estoy contento/a con la calidad de mi vida actualmente' }
+      ]
+    },
+    {
+      title: 'Preocupaciones adicionales - Fatiga',
+      items: [
+        { key: 'hi7', text: 'Me siento fatigado/a' },
+        { key: 'hi12', text: 'Me siento débil en todo el cuerpo' },
+        { key: 'an1', text: 'Me siento apático/a ("sin fuerzas")' },
+        { key: 'an2', text: 'Me siento cansado/a' },
+        { key: 'an3', text: 'Tengo dificultad para empezar cosas porque estoy cansado/a' },
+        { key: 'an4', text: 'Tengo dificultad para terminar cosas porque estoy cansado/a' },
+        { key: 'an5', text: 'Tengo energía' },
+        { key: 'an7', text: 'Puedo realizar mis actividades habituales' },
+        { key: 'an8', text: 'Necesito dormir durante el día' },
+        { key: 'an12', text: 'Estoy demasiado cansado/a para comer' },
+        { key: 'an14', text: 'Necesito ayuda para hacer mis actividades habituales' },
+        { key: 'an15', text: 'Me siento frustrado/a por estar demasiado cansado/a para hacer las cosas que quiero' },
+        { key: 'an16', text: 'Tengo que limitar mi actividad social porque estoy cansado/a' }
+      ]
+    }
   ];
 
   return (
     <div className="calculator-form">
-      <h3>FACIT-General</h3>
-      <p className="calc-description">Functional Assessment of Chronic Illness Therapy</p>
+      <h3>FACIT-F</h3>
+      <p className="calc-description">Evaluación Funcional del Tratamiento de Enfermedades Crónicas - Fatiga</p>
       <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
-        Escala: 0=Nada, 1=Un poco, 2=Algo, 3=Mucho, 4=Muchísimo
+        Últimos 7 días. Escala: 0=Nada, 1=Un poco, 2=Algo, 3=Bastante, 4=Mucho
       </p>
       
-      <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-        {questions.map((question, idx) => (
-          <SliderInput
-            key={`q${idx + 1}`}
-            label={`${idx + 1}. ${question}`}
-            value={components[`q${idx + 1}`]}
-            onChange={(val) => setComponents(prev => ({ ...prev, [`q${idx + 1}`]: val }))}
-            min={0}
-            max={4}
-            step={0.5}
-          />
+      <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+        {sections.map((section, sIdx) => (
+          <div key={sIdx} style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0891b2', marginBottom: '0.75rem' }}>
+              {section.title}
+            </h4>
+            {section.items.map((item) => (
+              <SliderInput
+                key={item.key}
+                label={item.text}
+                value={components[item.key]}
+                onChange={(val) => setComponents(prev => ({ ...prev, [item.key]: val }))}
+                min={0}
+                max={4}
+                step={1}
+              />
+            ))}
+          </div>
         ))}
       </div>
       
       <button className="btn-calculate" onClick={handleCalculate}>
-        Calcular FACIT
+        Calcular FACIT-F
       </button>
     </div>
   );
@@ -2390,7 +2489,7 @@ const LandingPage = ({ onNavigate }) => (
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', color: '#1e293b' }}>Calidad de vida general</h3>
           </div>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <div className="feature"><span className="feature-icon">💪</span><span>FACIT</span></div>
+            <div className="feature"><span className="feature-icon">💪</span><span>FACIT-F</span></div>
             <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
           </div>
         </div>
@@ -5029,7 +5128,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                 <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
                   <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
                     <span className="calc-icon">💪</span>
-                    <span className="calc-name">FACIT</span>
+                    <span className="calc-name">FACIT-F</span>
                     <span className="calc-desc">Fatiga</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
@@ -6147,7 +6246,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 <div className="calc-grid" style={{ padding: '1rem', backgroundColor: 'white' }}>
                   <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
                     <span className="calc-icon">💪</span>
-                    <span className="calc-name">FACIT</span>
+                    <span className="calc-name">FACIT-F</span>
                     <span className="calc-desc">Fatiga</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
