@@ -6481,17 +6481,17 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
                     <span className="calc-icon">💪</span>
                     <span className="calc-name">FACIT-F</span>
-                  <button className="calc-card" onClick={() => { setSelectedCalc('HAQ'); setResult(null); }}>
-                    <span className="calc-icon">📋</span>
-                    <span className="calc-name">HAQ</span>
-                    <span className="calc-desc">Capacidad funcional</span>
-                  </button>
                     <span className="calc-desc">Fatiga</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
                     <span className="calc-icon">🏥</span>
                     <span className="calc-name">SF-36</span>
                     <span className="calc-desc">Encuesta de salud</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('HAQ'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">HAQ</span>
+                    <span className="calc-desc">Capacidad funcional</span>
                   </button>
                 </div>
               )}
