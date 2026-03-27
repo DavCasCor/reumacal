@@ -290,6 +290,59 @@ const interpretSF36 = (score) => {
   return { text: 'Calidad de vida afectada', color: '#ef4444', level: 'poor' };
 };
 
+// HAQ - Health Assessment Questionnaire
+const calculateHAQ = (components) => {
+  // 8 áreas con 2-3 preguntas cada una
+  const areas = {
+    vestirse: Math.max(components.q1 || 0, components.q2 || 0),
+    levantarse: Math.max(components.q3 || 0, components.q4 || 0),
+    comer: Math.max(components.q5 || 0, components.q6 || 0, components.q7 || 0),
+    caminar: Math.max(components.q8 || 0, components.q9 || 0),
+    higiene: Math.max(components.q10 || 0, components.q11 || 0, components.q12 || 0),
+    alcanzar: Math.max(components.q13 || 0, components.q14 || 0),
+    prension: Math.max(components.q15 || 0, components.q16 || 0, components.q17 || 0),
+    otras: Math.max(components.q18 || 0, components.q19 || 0, components.q20 || 0)
+  };
+  
+  // Aplicar correcciones por ayudas/utensilios
+  if ((components.ayuda_vestirse || components.utensilio_cubiertos) && areas.vestirse < 2) {
+    areas.vestirse = 2;
+  }
+  if (components.ayuda_levantarse && areas.levantarse < 2) {
+    areas.levantarse = 2;
+  }
+  if (components.ayuda_comer && areas.comer < 2) {
+    areas.comer = 2;
+  }
+  if ((components.ayuda_caminar || components.utensilio_baston) && areas.caminar < 2) {
+    areas.caminar = 2;
+  }
+  if ((components.ayuda_higiene || components.utensilio_bano) && areas.higiene < 2) {
+    areas.higiene = 2;
+  }
+  if (components.ayuda_alcanzar && areas.alcanzar < 2) {
+    areas.alcanzar = 2;
+  }
+  if ((components.ayuda_prension || components.utensilio_abridor) && areas.prension < 2) {
+    areas.prension = 2;
+  }
+  if (components.ayuda_otras && areas.otras < 2) {
+    areas.otras = 2;
+  }
+  
+  // Calcular media
+  const sum = Object.values(areas).reduce((a, b) => a + b, 0);
+  return Math.round((sum / 8) * 1000) / 1000;
+};
+
+const interpretHAQ = (score) => {
+  // Puntuación 0-3, menor = mejor función
+  if (score === 0) return { text: 'Sin discapacidad', color: '#10b981', level: 'none' };
+  if (score < 1) return { text: 'Discapacidad leve-moderada', color: '#84cc16', level: 'mild' };
+  if (score < 2) return { text: 'Discapacidad moderada-grave', color: '#f59e0b', level: 'moderate' };
+  return { text: 'Discapacidad grave-muy grave', color: '#ef4444', level: 'severe' };
+};
+
 // BASFI - Bath Ankylosing Spondylitis Functional Index
 const calculateBASFI = (components) => {
   let sum = 0;
@@ -426,6 +479,7 @@ const interpretScore = (instrument, score) => {
   if (instrument === 'LupusPRO') return interpretLupusPRO(score);
   if (instrument === 'FACIT') return interpretFACIT(score);
   if (instrument === 'SF36') return interpretSF36(score);
+  if (instrument === 'HAQ') return interpretHAQ(score);
   if (instrument === 'BASFI') return interpretBASFI(score);
   if (instrument === 'ASASHI') return interpretASASHI(score);
   if (instrument === 'ASQoL') return interpretASQoL(score);
@@ -438,7 +492,7 @@ const interpretScore = (instrument, score) => {
 // All instrument keys
 const ALL_INSTRUMENTS = [
   'BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'DAS28_CRP', 'DAS28_ESR',
-  'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI',
+  'SLEDAI', 'LupusPRO', 'FACIT', 'SF36', 'HAQ', 'BASFI', 'ASASHI',
   'ASQoL', 'PSAQoL', 'ESSPRI', 'ESSDAI'
 ];
 
@@ -2034,6 +2088,175 @@ const SF36Calculator = ({ onResult }) => {
   );
 };
 
+const HAQCalculator = ({ onResult }) => {
+  const [components, setComponents] = useState({
+    q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0, q8: 0, q9: 0, q10: 0,
+    q11: 0, q12: 0, q13: 0, q14: 0, q15: 0, q16: 0, q17: 0, q18: 0, q19: 0, q20: 0,
+    ayuda_vestirse: false, ayuda_levantarse: false, ayuda_comer: false, ayuda_caminar: false,
+    ayuda_higiene: false, ayuda_alcanzar: false, ayuda_prension: false, ayuda_otras: false,
+    utensilio_cubiertos: false, utensilio_baston: false, utensilio_bano: false,
+    utensilio_retrete: false, utensilio_abridor: false
+  });
+
+  const handleCalculate = () => {
+    const score = calculateHAQ(components);
+    const interpretation = interpretHAQ(score);
+    onResult({ score, interpretation, components, instrument: 'HAQ' });
+  };
+
+  const sections = [
+    {
+      title: 'Vestirse y asearse',
+      questions: [
+        { key: 'q1', text: 'Vestirse solo, incluyendo abrocharse los botones y atarse los cordones de los zapatos' },
+        { key: 'q2', text: 'Enjabonarse la cabeza' }
+      ]
+    },
+    {
+      title: 'Levantarse',
+      questions: [
+        { key: 'q3', text: 'Levantarse de una silla sin brazos' },
+        { key: 'q4', text: 'Acostarse y levantarse de la cama' }
+      ]
+    },
+    {
+      title: 'Comer',
+      questions: [
+        { key: 'q5', text: 'Cortar un filete de carne' },
+        { key: 'q6', text: 'Abrir un cartón de leche nuevo' },
+        { key: 'q7', text: 'Servirse la bebida' }
+      ]
+    },
+    {
+      title: 'Caminar',
+      questions: [
+        { key: 'q8', text: 'Caminar fuera de casa por un terreno llano' },
+        { key: 'q9', text: 'Subir cinco escalones' }
+      ]
+    },
+    {
+      title: 'Higiene',
+      questions: [
+        { key: 'q10', text: 'Lavarse y secarse todo el cuerpo' },
+        { key: 'q11', text: 'Sentarse y levantarse del retrete' },
+        { key: 'q12', text: 'Ducharse' }
+      ]
+    },
+    {
+      title: 'Alcanzar',
+      questions: [
+        { key: 'q13', text: 'Coger un paquete de 1 Kg de una estantería colocada por encima de su cabeza' },
+        { key: 'q14', text: 'Agacharse y recoger ropa del suelo' }
+      ]
+    },
+    {
+      title: 'Prensión',
+      questions: [
+        { key: 'q15', text: 'Abrir la puerta de un coche' },
+        { key: 'q16', text: 'Abrir tarros cerrados que ya antes habían sido abiertos' },
+        { key: 'q17', text: 'Abrir y cerrar los grifos' }
+      ]
+    },
+    {
+      title: 'Otras actividades',
+      questions: [
+        { key: 'q18', text: 'Hacer los recados y las compras' },
+        { key: 'q19', text: 'Entrar y salir de un coche' },
+        { key: 'q20', text: 'Hacer tareas de casa como barrer o lavar los platos' }
+      ]
+    }
+  ];
+
+  return (
+    <div className="calculator-form">
+      <h3>HAQ</h3>
+      <p className="calc-description">Health Assessment Questionnaire - Cuestionario de Evaluación de Salud</p>
+      <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+        Durante la última semana, ¿ha sido usted capaz de...?<br/>
+        0=Sin dificultad, 1=Con alguna dificultad, 2=Con mucha dificultad, 3=Incapaz de hacerlo
+      </p>
+      
+      <div style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+        {sections.map((section, idx) => (
+          <div key={idx} style={{ marginBottom: '1.5rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0891b2', marginBottom: '0.75rem' }}>
+              {section.title}
+            </h4>
+            {section.questions.map((q) => (
+              <div key={q.key} style={{ marginBottom: '1rem' }}>
+                <label className="input-label">{q.text}</label>
+                <select
+                  className="input-field"
+                  value={components[q.key]}
+                  onChange={(e) => setComponents(prev => ({ ...prev, [q.key]: parseInt(e.target.value) }))}
+                >
+                  <option value="0">Sin dificultad</option>
+                  <option value="1">Con alguna dificultad</option>
+                  <option value="2">Con mucha dificultad</option>
+                  <option value="3">Incapaz de hacerlo</option>
+                </select>
+              </div>
+            ))}
+          </div>
+        ))}
+        
+        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '0.5rem' }}>
+          <h4 style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.75rem' }}>
+            ¿Necesita ayuda de otra persona para estas actividades?
+          </h4>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            {[
+              { key: 'ayuda_vestirse', label: 'Vestirse, asearse' },
+              { key: 'ayuda_levantarse', label: 'Levantarse' },
+              { key: 'ayuda_comer', label: 'Comer' },
+              { key: 'ayuda_caminar', label: 'Caminar, pasear' },
+              { key: 'ayuda_higiene', label: 'Higiene personal' },
+              { key: 'ayuda_alcanzar', label: 'Alcanzar' },
+              { key: 'ayuda_prension', label: 'Abrir y cerrar cosas' },
+              { key: 'ayuda_otras', label: 'Recados y tareas de casa' }
+            ].map(item => (
+              <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                <input
+                  type="checkbox"
+                  checked={components[item.key]}
+                  onChange={(e) => setComponents(prev => ({ ...prev, [item.key]: e.target.checked }))}
+                />
+                {item.label}
+              </label>
+            ))}
+          </div>
+          
+          <h4 style={{ fontSize: '0.9rem', fontWeight: '600', marginTop: '1rem', marginBottom: '0.75rem' }}>
+            ¿Utiliza alguno de estos utensilios habitualmente?
+          </h4>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            {[
+              { key: 'utensilio_cubiertos', label: 'Cubiertos de mango ancho' },
+              { key: 'utensilio_baston', label: 'Bastón, muletas, andador o silla de ruedas' },
+              { key: 'utensilio_bano', label: 'Asiento o barra especial para el baño' },
+              { key: 'utensilio_retrete', label: 'Asiento alto para el retrete' },
+              { key: 'utensilio_abridor', label: 'Abridor para tarros previamente abiertos' }
+            ].map(item => (
+              <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                <input
+                  type="checkbox"
+                  checked={components[item.key]}
+                  onChange={(e) => setComponents(prev => ({ ...prev, [item.key]: e.target.checked }))}
+                />
+                {item.label}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <button className="btn-calculate" onClick={handleCalculate}>
+        Calcular HAQ
+      </button>
+    </div>
+  );
+};
+
 const BASFICalculator = ({ onResult }) => {
   const [components, setComponents] = useState({
     q1: 5, q2: 5, q3: 5, q4: 5, q5: 5, q6: 5, q7: 5, q8: 5, q9: 5, q10: 5
@@ -2491,6 +2714,7 @@ const LandingPage = ({ onNavigate }) => (
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <div className="feature"><span className="feature-icon">💪</span><span>FACIT-F</span></div>
             <div className="feature"><span className="feature-icon">🏥</span><span>SF-36</span></div>
+            <div className="feature"><span className="feature-icon">📋</span><span>HAQ</span></div>
           </div>
         </div>
         
@@ -4794,7 +5018,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
   const lastScores = useMemo(() => {
     const instruments = ['BASDAI', 'ASDAS_CRP', 'ASDAS_ESR', 'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
                         'DAS28_CRP', 'DAS28_ESR',
-                        'SLEDAI', 'SLICC', 'LupusPRO', 'FACIT', 'SF36', 'BASFI', 'ASASHI', 
+                        'SLEDAI', 'SLICC', 'LupusPRO', 'FACIT', 'SF36', 'HAQ', 'BASFI', 'ASASHI', 
                         'ASQoL', 'ESSPRI', 'ESSDAI', 'FRAX', 'FRAXplus', 'SCORE2', 'SCORE2-OP', 'QRISK3'];
     return instruments.reduce((acc, inst) => {
       const last = scores.find(s => s.instrument === inst);
@@ -4825,6 +5049,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               else if (inst === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
               else if (inst === 'FACIT') interpretation = interpretFACIT(score.total_score);
               else if (inst === 'SF36') interpretation = interpretSF36(score.total_score);
+              else if (inst === 'HAQ') interpretation = interpretHAQ(score.total_score);
               else if (inst === 'BASFI') interpretation = interpretBASFI(score.total_score);
               else if (inst === 'ASASHI') interpretation = interpretASASHI(score.total_score);
               else if (inst === 'ASQoL') interpretation = interpretASQoL(score.total_score);
@@ -5119,7 +5344,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -5135,6 +5360,11 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
                     <span className="calc-icon">🏥</span>
                     <span className="calc-name">SF-36</span>
                     <span className="calc-desc">Encuesta de salud</span>
+                  </button>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('HAQ'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">HAQ</span>
+                    <span className="calc-desc">Capacidad funcional</span>
                   </button>
                 </div>
               )}
@@ -5194,6 +5424,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
             {selectedCalc === 'LupusPRO' && <LupusPROCalculator onResult={handleResult} />}
             {selectedCalc === 'FACIT' && <FACITCalculator onResult={handleResult} />}
             {selectedCalc === 'SF36' && <SF36Calculator onResult={handleResult} />}
+            {selectedCalc === 'HAQ' && <HAQCalculator onResult={handleResult} />}
             {selectedCalc === 'BASFI' && <BASFICalculator onResult={handleResult} />}
             {selectedCalc === 'ASASHI' && <ASASHICalculator onResult={handleResult} />}
             {selectedCalc === 'ASQoL' && <ASQoLCalculator onResult={handleResult} />}
@@ -5258,6 +5489,7 @@ const PatientDashboard = ({ user, patient, onLogout }) => {
               'SLICC': 'SLICC',
               'FACIT': 'FACIT',
               'SF36': 'SF-36',
+              'HAQ': 'HAQ',
               'LupusPRO': 'LupusPRO',
               'ESSPRI': 'ESSPRI',
               'ESSDAI': 'ESSDAI',
@@ -5527,7 +5759,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                         'DAPSA', 'MDA', 'DAS28_PCR_APS', 'PSAQoL',
                         'DAS28_CRP', 'DAS28_ESR',
                         'SLEDAI', 'SLICC',
-                        'FACIT', 'SF36', 'LupusPRO',
+                        'FACIT', 'SF36', 'HAQ', 'LupusPRO',
                         'ESSPRI', 'ESSDAI',
                         'FRAX', 'FRAXplus',
                         'SCORE2', 'SCORE2-OP', 'QRISK3'];
@@ -5759,6 +5991,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
             else if (inst === 'SLICC') interpretation = interpretSLICC(score.total_score);
             else if (inst === 'LupusPRO') interpretation = interpretLupusPRO(score.total_score);
             else if (inst === 'FACIT') interpretation = interpretFACIT(score.total_score);
+            else if (inst === 'HAQ') interpretation = interpretHAQ(score.total_score);
             else if (inst === 'SF36') interpretation = interpretSF36(score.total_score);
             else if (inst === 'BASFI') interpretation = interpretBASFI(score.total_score);
             else if (inst === 'ASASHI') interpretation = interpretASASHI(score.total_score);
@@ -5859,6 +6092,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                 'SLEDAI': 'SLEDAI',
                 'SLICC': 'SLICC',
                 'FACIT': 'FACIT',
+                'HAQ': 'HAQ',
                 'SF36': 'SF-36',
                 'LupusPRO': 'LupusPRO',
                 'ESSPRI': 'ESSPRI',
@@ -6237,7 +6471,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   <span style={{ fontSize: '1.5rem' }}>💚</span>
                   <div style={{ textAlign: 'left' }}>
                     <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e293b' }}>Calidad de vida general</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>2 calculadoras</div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }}>3 calculadoras</div>
                   </div>
                 </div>
                 <span style={{ fontSize: '1.5rem', transform: expandedSections.calidad ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
@@ -6247,6 +6481,11 @@ const DoctorDashboard = ({ user, onLogout }) => {
                   <button className="calc-card" onClick={() => { setSelectedCalc('FACIT'); setResult(null); }}>
                     <span className="calc-icon">💪</span>
                     <span className="calc-name">FACIT-F</span>
+                  <button className="calc-card" onClick={() => { setSelectedCalc('HAQ'); setResult(null); }}>
+                    <span className="calc-icon">📋</span>
+                    <span className="calc-name">HAQ</span>
+                    <span className="calc-desc">Capacidad funcional</span>
+                  </button>
                     <span className="calc-desc">Fatiga</span>
                   </button>
                   <button className="calc-card" onClick={() => { setSelectedCalc('SF36'); setResult(null); }}>
@@ -6304,6 +6543,7 @@ const DoctorDashboard = ({ user, onLogout }) => {
           {selectedCalc === 'LupusPRO' && <LupusPROCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'FACIT' && <FACITCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'SF36' && <SF36Calculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
+          {selectedCalc === 'HAQ' && <HAQCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'BASFI' && <BASFICalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'ASASHI' && <ASASHICalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
           {selectedCalc === 'ASQoL' && <ASQoLCalculator onResult={handleResult} initialData={selectedPending?.patient_data} />}
